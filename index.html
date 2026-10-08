@@ -55,6 +55,26 @@ body.pv #gMenu{bottom:calc(128px + env(safe-area-inset-bottom))}
 #sheet .bk{position:absolute;inset:0;background:#0007}
 #sheet .pn{position:absolute;left:0;right:0;bottom:0;max-height:88vh;overflow-y:auto;background:var(--card);color:var(--ink);border-radius:22px 22px 0 0;padding:6px 14px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -6px 24px #0004;overscroll-behavior:contain}
 #sheet .grip{width:44px;height:5px;border-radius:3px;background:var(--line);margin:6px auto 4px}
+.qhead{display:flex;align-items:center;justify-content:space-between;margin:8px 6px 8px}
+.qhead b{font-size:13px;letter-spacing:.04em;color:var(--acc2)}
+.qhead button{min-height:34px;padding:4px 10px;font-size:13px}
+details.cat{border:1px solid var(--line);border-radius:14px;margin:6px 0;background:var(--card);overflow:hidden}
+details.cat summary{list-style:none;display:flex;align-items:center;gap:12px;padding:10px 12px;cursor:pointer}
+details.cat summary::-webkit-details-marker{display:none}
+details.cat .ci{font-size:20px;width:30px;text-align:center;font-weight:800}
+details.cat .ct{flex:1;display:flex;flex-direction:column}
+details.cat .ct b{font-size:15px}
+details.cat .ct small{font-size:12px;color:var(--soft)}
+details.cat .cv{font-size:22px;color:var(--soft);transition:transform .2s}
+details.cat[open] .cv{transform:rotate(90deg)}
+details.cat[open]{border-color:var(--acc2)}
+details.cat[open]>*:not(summary){margin-left:6px;margin-right:6px}
+details.cat[open]>:last-child{margin-bottom:8px}
+#qGrid .star{position:absolute;top:-6px;left:-6px;width:26px;height:26px;min-height:0;padding:0;border-radius:50%;font-size:13px;background:var(--card);border:1px solid var(--line);box-shadow:0 1px 3px #0003;filter:grayscale(1);opacity:.55;display:grid;place-items:center}
+#qGrid .qt.fav .star{filter:none;opacity:1;background:#FDD117;border-color:var(--acc2)}
+#qGrid .pin{display:grid;place-items:center}
+#qGrid:not(.edit) .star,#qGrid:not(.edit) .pin{display:none}
+#qGrid:not(.edit) .qt.in{border-color:var(--line);background:var(--bg)}
 #sheet h3{font-size:12px;letter-spacing:.06em;text-transform:none;color:var(--acc2);margin:16px 4px 6px;font-weight:800}
 .mi{display:flex;width:100%;justify-content:flex-start;align-items:center;gap:12px;background:transparent;border:0;border-radius:14px;padding:10px 8px;color:var(--ink);text-align:left;font-weight:500}
 .mi:active{background:var(--line)}
@@ -66,7 +86,8 @@ body.pv #gMenu{bottom:calc(128px + env(safe-area-inset-bottom))}
 .mi .sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0004;transition:left .2s}
 .mi.on .sw{background:#EF9F02}.mi.on .sw::after{left:21px}
 .opt{display:flex;align-items:center;gap:8px;padding:6px 8px}
-.opt>span{flex:0 0 108px;font-size:14px;color:var(--soft)}
+.opt>span{flex:0 0 84px;font-size:13px;color:var(--soft)}
+.seg button{white-space:nowrap}
 .seg{display:flex;flex:1;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
 .seg button{flex:1;min-height:38px;padding:4px 6px;border-radius:9px;background:transparent;color:var(--ink);font-weight:600;font-size:13.5px}
 .seg button.on{background:#FDD117;color:#1d1d1b}
@@ -351,43 +372,49 @@ details summary{cursor:pointer;font-weight:600}
   <div class="bk"></div>
   <div class="pn">
     <div class="grip"></div>
-    <h3>ΓΡΗΓΟΡΑ ΚΟΥΜΠΙΑ</h3>
-    <p class="muted" style="margin:0 6px 6px;font-size:12.5px">Πάτα ένα κουμπί για να γίνει. Πάτα το 📌 στη γωνία για να μπει ή να βγει από την πάνω μπάρα.</p>
+    <div class="qhead"><b>Τα κουμπιά μου</b><button class="sec" id="qEdit">✏️ Προσαρμογή</button></div>
+    <p class="muted hidden" id="qEditHelp" style="margin:0 6px 8px;font-size:12.5px">⭐ = να φαίνεται εδώ, στα «Κουμπιά μου» · 📌 = να φαίνεται στην πάνω μπάρα. Αποθηκεύεται αμέσως.</p>
     <div id="qGrid"></div>
-    <h3>ΠΡΟΒΟΛΗ</h3>
+    <details class="cat" data-cat="view"><summary><span class="ci">👁</span><span class="ct"><b>Προβολή</b><small>Κείμενο ή σελίδα, αναζήτηση, μετάβαση</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mView"><span class="ic">📄</span><span class="tx"><b id="mViewT">Πρωτότυπο σελίδας</b><small id="mViewS">Δες το PDF όπως είναι και γράψε πάνω του</small></span></button>
     <button class="mi" id="mFind"><span class="ic">🔍</span><span class="tx"><b>Αναζήτηση στο κείμενο</b><small>Βρες λέξεις, ακόμη και χωρίς τόνους</small></span></button>
     <button class="mi" id="mGo"><span class="ic">🔢</span><span class="tx"><b>Μετάβαση σε σελίδα</b><small>Πήγαινε κατευθείαν σε μια σελίδα</small></span></button>
     <button class="mi" id="mFull"><span class="ic">⛶</span><span class="tx"><b>Πλήρης οθόνη</b><small>Κρύβει και τη γραμμή ειδοποιήσεων</small></span></button>
-    <button class="mi" id="mAwake"><span class="ic">☀️</span><span class="tx"><b>Να μη σβήνει η οθόνη</b><small>Όσο διαβάζεις</small></span><span class="sw"></span></button>
-    <button class="mi" id="mPin"><span class="ic">📌</span><span class="tx"><b>Σταθερή μπάρα πάνω</b><small>Τα κουμπιά που θέλεις, πάντα ορατά</small></span><span class="sw"></span></button>
-    <button class="mi" id="mGpos"><span class="ic">↘️</span><span class="tx"><b>Επαναφορά θέσης του G</b><small>Το κουμπί μενού γυρίζει κάτω δεξιά</small></span></button>
-    <h3>ΕΜΦΑΝΙΣΗ ΚΕΙΜΕΝΟΥ</h3>
+    </details>
+    <details class="cat" data-cat="look"><summary><span class="ci">Aa</span><span class="ct"><b>Εμφάνιση κειμένου</b><small>Μέγεθος, θέμα, γραμματοσειρά, διάστιχο</small></span><span class="cv">›</span></summary>
     <div class="opt"><span>Μέγεθος</span><div class="seg"><button id="fsMinus">Α−</button><button id="fsVal" disabled>19</button><button id="fsPlus">Α+</button></div></div>
     <div class="opt"><span>Θέμα</span><div class="seg" data-k="th"><button data-v="light">☀️ Φωτεινό</button><button data-v="sepia">📜 Σέπια</button><button data-v="night">🌙 Νύχτα</button></div></div>
     <div class="opt"><span>Γραμματοσειρά</span><div class="seg" data-k="ff"><button data-v="s">Απλή</button><button data-v="r" style="font-family:Georgia,serif">Κλασική</button><button data-v="e">Ευανάγνωστη</button></div></div>
     <div class="opt"><span>Διάστιχο</span><div class="seg" data-k="lh"><button data-v="1.4">Πυκνό</button><button data-v="1.65">Κανονικό</button><button data-v="2">Αραιό</button></div></div>
     <div class="opt"><span>Περιθώρια</span><div class="seg" data-k="mg"><button data-v="10">Στενά</button><button data-v="18">Κανονικά</button><button data-v="34">Φαρδιά</button></div></div>
-    <h3>ΑΚΡΟΑΣΗ</h3>
+    </details>
+    <details class="cat" data-cat="lang"><summary><span class="ci">🌐</span><span class="ct"><b>Ακρόαση και μετάφραση</b><small>Ανάγνωση φωναχτά, ταχύτητα, μετάφραση</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mSpeak"><span class="ic" id="mSpeakI">🔊</span><span class="tx"><b id="mSpeakT">Ανάγνωση φωναχτά</b><small>Διαβάζει το κείμενο (ή όσο έχεις επιλέξει)</small></span></button>
     <div class="opt"><span>Ταχύτητα</span><div class="seg" data-k="rate"><button data-v="0.75">0,75×</button><button data-v="1">1×</button><button data-v="1.25">1,25×</button><button data-v="1.5">1,5×</button></div></div>
-    <h3>ΜΕΤΑΦΡΑΣΗ</h3>
     <button class="mi" id="mTr"><span class="ic">🌐</span><span class="tx"><b>Μετάφραση</b><small>Του κειμένου που επιλέγεις ή όλου του εγγράφου</small></span></button>
-    <h3>ΣΕΛΙΔΟΔΕΙΚΤΕΣ</h3>
+    </details>
+    <details class="cat" data-cat="bm"><summary><span class="ci">🔖</span><span class="ct"><b>Σελιδοδείκτες</b><small>Σημάδια για να γυρνάς εύκολα</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mBm"><span class="ic">🔖</span><span class="tx"><b>Βάλε σελιδοδείκτη εδώ</b><small>Για να γυρίσεις αργότερα σε αυτό το σημείο</small></span></button>
     <div id="bmList"></div>
-    <h3>ΣΗΜΕΙΩΣΕΙΣ ΚΑΙ ΔΙΟΡΘΩΣΗ</h3>
+    </details>
+    <details class="cat" data-cat="note"><summary><span class="ci">🖊️</span><span class="ct"><b>Σημειώσεις και υπογραφή</b><small>Γράψε, υπογραφή, διόρθωση κειμένου</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mDraw"><span class="ic">🖊️</span><span class="tx"><b>Γράψε πάνω στη σελίδα</b><small>Στυλό, μαρκαδόρος, κείμενο, σχήματα, υπογραφή</small></span></button>
     <button class="mi" id="mSig"><span class="ic">✍️</span><span class="tx"><b>Η υπογραφή μου</b><small id="mSigS">Φτιάξε ή άλλαξε την υπογραφή σου</small></span></button>
     <button class="mi" id="mEdit"><span class="ic">✏️</span><span class="tx"><b id="mEditT">Διόρθωση κειμένου</b><small>Διόρθωσε λάθη της αναγνώρισης</small></span></button>
     <button class="mi" id="mClear"><span class="ic">🗑️</span><span class="tx"><b>Σβήσε όλες τις σημειώσεις</b><small>Καθαρίζει ό,τι έγραψες πάνω στις σελίδες</small></span></button>
-    <h3>ΑΡΧΕΙΟ</h3>
+    </details>
+    <details class="cat" data-cat="file"><summary><span class="ci">📁</span><span class="ct"><b>Αρχείο</b><small>Αποθήκευση, αποστολή, αντιγραφή, όνομα</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mAnnPdf"><span class="ic">📑</span><span class="tx"><b>Αποθήκευση PDF με τις σημειώσεις</b><small>Για να το στείλεις ή να το κρατήσεις</small></span></button>
     <button class="mi" id="mShare"><span class="ic">📤</span><span class="tx"><b>Αποστολή κειμένου</b><small>Σε μήνυμα, ταχυδρομείο κ.λπ.</small></span></button>
     <button class="mi" id="mCopy"><span class="ic">📋</span><span class="tx"><b>Αντιγραφή κειμένου</b><small>Όλου, ή μόνο όσου έχεις επιλέξει</small></span></button>
-    <button class="mi" id="mTxt"><span class="ic">💾</span><span class="tx"><b>Αποθήκευση ως κείμενο</b><small>Αρχείο .txt στις Λήψεις</small></span></button>
+    <button class="mi" id="mTxt"><span class="ic">💾</span><span class="tx"><b>Αποθήκευση ως κείμενο</b><small>Αρχείο .txt στο GlenApps › GlenRead › Έγγραφα</small></span></button>
     <button class="mi" id="mRename"><span class="ic">🏷️</span><span class="tx"><b>Μετονομασία</b><small id="mRenameS"></small></span></button>
-    <h3>ΒΟΗΘΕΙΑ</h3>
+    </details>
+    <details class="cat" data-cat="set"><summary><span class="ci">⚙️</span><span class="ct"><b>Ρυθμίσεις</b><small>Οθόνη, πάνω μπάρα, θέση του G</small></span><span class="cv">›</span></summary>
+    <button class="mi" id="mAwake"><span class="ic">☀️</span><span class="tx"><b>Να μη σβήνει η οθόνη</b><small>Όσο διαβάζεις</small></span><span class="sw"></span></button>
+    <button class="mi" id="mPin"><span class="ic">📌</span><span class="tx"><b>Σταθερή μπάρα πάνω</b><small>Τα κουμπιά που θέλεις, πάντα ορατά</small></span><span class="sw"></span></button>
+    <button class="mi" id="mGpos"><span class="ic">↘️</span><span class="tx"><b>Επαναφορά θέσης του G</b><small>Το κουμπί μενού γυρίζει κάτω δεξιά</small></span></button>
+    </details>
     <button class="mi" id="mHelp"><span class="ic">❓</span><span class="tx"><b>Οδηγός χρήσης</b><small>Τι κάνει κάθε κουμπί</small></span></button>
     <button class="mi" id="mHome"><span class="ic">🏠</span><span class="tx"><b>Πίσω στην αρχική</b><small>Τα πάντα έχουν αποθηκευτεί</small></span></button>
   </div>
@@ -417,7 +444,7 @@ details summary{cursor:pointer;font-weight:600}
 <script src="antigrafa.js"></script>
 <script src="efarmoges-mas.js"></script>
 <script>
-const VERSION='2.11';
+const VERSION='2.12';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -774,10 +801,7 @@ async function makePdf(){
   }
   const name='Σάρωση-'+new Date().toISOString().slice(0,10)+'.pdf';
   const blob=pdf.output('blob');
-  if(navigator.canShare&&navigator.canShare({files:[new File([blob],name,{type:'application/pdf'})]})){
-    try{await navigator.share({files:[new File([blob],name,{type:'application/pdf'})],title:name});return}catch(e){if(e.name==='AbortError')return}
-  }
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();toast('Το PDF αποθηκεύτηκε (χωρίς υδατογράφημα)');
+  shareOrSave(blob,name);
 }
 
 // ---------- Ζωντανή κάμερα μέσα στην εφαρμογή ----------
@@ -899,7 +923,7 @@ $('#fsMinus').onclick=()=>{fs=Math.max(13,fs-2);setFs()};$('#fsPlus').onclick=()
 const fullText=()=>doc.pages.map(p=>p.text).join('\n\n');
 $('#mCopy').onclick=async()=>{const sel=getSelection().toString();closeSheet();try{await navigator.clipboard.writeText(sel||fullText());toast(sel?'Αντιγράφηκε η επιλογή':'Αντιγράφηκε όλο το κείμενο')}catch(e){toast('Δεν επιτράπηκε η αντιγραφή')}};
 $('#mShare').onclick=async()=>{closeSheet();if(navigator.share){try{await navigator.share({title:doc.name,text:fullText()})}catch(e){}}else $('#mCopy').onclick()};
-$('#mTxt').onclick=()=>{closeSheet();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([fullText()],{type:'text/plain;charset=utf-8'}));a.download=doc.name+'.txt';a.click();toast('Αποθηκεύτηκε στις Λήψεις')};
+$('#mTxt').onclick=()=>{closeSheet();saveToFolder(new Blob([fullText()],{type:'text/plain;charset=utf-8'}),doc.name+'.txt')};
 let editing=false,editT=null;
 $('#reader').addEventListener('input',()=>{if(!editing)return;clearTimeout(editT);editT=setTimeout(()=>{doc.pages=[{text:$('#reader').innerText,conf:100,ocr:false}];saveDoc(doc)},800)});
 function toggleEdit(){
@@ -1249,10 +1273,37 @@ $('#mAnnPdf').onclick=async()=>{
     }catch(e2){console.error(e2);toast('Δεν έγινε το PDF')}
   }
 };
+// Αποθήκευση αρχείων στον φάκελο της εφαρμογής: GlenApps › GlenRead › Έγγραφα (ίδια λογική με τα αντίγραφα)
+const safeName=n=>n.replace(/[\\/:*?"<>|]+/g,'-').trim()||'αρχείο';
+async function saveToFolder(blob,name){
+  name=safeName(name);
+  let dir=await appDir(true).catch(()=>null);
+  if(!dir&&'showDirectoryPicker' in window){
+    const ok=await new Promise(res=>{dlgOpen('Πού να αποθηκεύονται τα αρχεία;','<p style="margin:0">Διάλεξε έναν φάκελο στο κινητό (π.χ. «Έγγραφα» ή «Λήψεις»). Μέσα του θα φτιαχτεί <b>GlenApps › GlenRead › Έγγραφα</b> και εκεί θα μπαίνουν όλα τα αρχεία σου — μαζί με τα αντίγραφα ασφαλείας. Αυτό γίνεται μόνο μία φορά.</p>',()=>res(true));$('#dlgOk').textContent='Διάλεξε φάκελο';dlgCancel=()=>res(false)});
+    if(ok){try{const h=await showDirectoryPicker({id:BK.key,mode:'readwrite',startIn:'documents'});await hset(h);bkUI();dir=await appDir(true)}catch(e){}}
+  }
+  if(dir){
+    try{
+      const sub=await dir.getDirectoryHandle('Έγγραφα',{create:true});
+      // δεν σβήνουμε ποτέ υπάρχον αρχείο: «όνομα (2).pdf», «όνομα (3).pdf» …
+      const m=name.match(/^(.*?)(\.[^.]+)?$/);let final=name,k=2;
+      while(true){try{await sub.getFileHandle(final);final=`${m[1]} (${k++})${m[2]||''}`}catch(e){break}}
+      const fh=await sub.getFileHandle(final,{create:true});const w=await fh.createWritable();await w.write(blob);await w.close();
+      toast('Αποθηκεύτηκε: GlenApps › GlenRead › Έγγραφα › '+final);return true;
+    }catch(e){console.warn(e)}
+  }
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();toast('Αποθηκεύτηκε στις Λήψεις: '+name);return true;
+}
+async function shareFile(blob,name){
+  const f=new File([blob],safeName(name),{type:blob.type});
+  if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:f.name});return true}catch(e){if(e.name==='AbortError')return false}}
+  return saveToFolder(blob,name);
+}
+// μετά τη δημιουργία: αποθήκευση στον φάκελο, με δυνατότητα αποστολής
 async function shareOrSave(blob,name){
-  const f=new File([blob],name,{type:blob.type});
-  if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:name});return}catch(e){if(e.name==='AbortError')return}}
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();toast('Το PDF αποθηκεύτηκε');
+  await saveToFolder(blob,name);
+  dlgOpen('Έτοιμο','<p style="margin:0">Το αρχείο <b>'+esc(safeName(name))+'</b> αποθηκεύτηκε. Θέλεις να το στείλεις και κάπου (μήνυμα, ταχυδρομείο κ.λπ.);</p>',()=>shareFile(blob,name));
+  $('#dlgOk').textContent='📤 Αποστολή';$('#dlgNo').textContent='Όχι, ευχαριστώ';
 }
 
 // ---------- Πρόσφατα ----------
@@ -1309,19 +1360,32 @@ const QB_ACT={find:()=>openFind(),view:()=>toggleView(),tr:()=>openTranslate(),s
   bm:()=>$('#mBm').onclick(),draw:()=>$('#mDraw').onclick(),share:()=>$('#mShare').onclick(),copy:()=>$('#mCopy').onclick(),save:()=>$('#mAnnPdf').onclick(),full:()=>$('#mFull').onclick(),menu:()=>openSheet()};
 document.querySelectorAll('#qbar [data-q]').forEach(b=>{if(QB_ACT[b.dataset.q])b.onclick=QB_ACT[b.dataset.q]});
 // πλέγμα «Γρήγορα κουμπιά» στην κορυφή του μενού: πάτημα = ενέργεια, 📌 = μπαίνει/βγαίνει από την πάνω μπάρα (αποθηκεύεται αμέσως)
+const FAV_DEF=['find','view','tr','speak','fsm','fsp','theme','draw','save','share'];
+let FAV=FAV_DEF.slice();try{const v=JSON.parse(localStorage.getItem('glenread-fav')||'null');if(Array.isArray(v))FAV=v}catch(e){}
+let qEditing=false;
 function drawQGrid(){
-  $('#qGrid').innerHTML=QB_ALL.filter(([k])=>k!=='menu').map(([k,l,i])=>`<button class="qt${QB.includes(k)?' in':''}" data-k="${k}"><span>${i}</span><small>${l}</small><span class="pin" data-pin="${k}" role="button" aria-label="Πάνω μπάρα">📌</span></button>`).join('');
+  const g=$('#qGrid');g.classList.toggle('edit',qEditing);$('#qEditHelp').classList.toggle('hidden',!qEditing);$('#qEdit').textContent=qEditing?'✓ Τέλος':'✏️ Προσαρμογή';
+  const list=QB_ALL.filter(([k])=>k!=='menu'&&(qEditing||FAV.includes(k)));
+  g.innerHTML=list.map(([k,l,i])=>`<button class="qt${QB.includes(k)?' in':''}${FAV.includes(k)?' fav':''}" data-k="${k}"><span>${i}</span><small>${l}</small><span class="star" data-star="${k}" role="button" aria-label="Στα κουμπιά μου">⭐</span><span class="pin" data-pin="${k}" role="button" aria-label="Στην πάνω μπάρα">📌</span></button>`).join('')
+    +(!qEditing&&!list.length?'<p class="muted" style="grid-column:1/-1;margin:4px">Δεν έχεις διαλέξει κουμπιά. Πάτα «✏️ Προσαρμογή».</p>':'');
 }
+$('#qEdit').onclick=()=>{qEditing=!qEditing;drawQGrid()};
 $('#qGrid').onclick=e=>{
-  const pin=e.target.closest('[data-pin]');
+  const star=e.target.closest('[data-star]'),pin=e.target.closest('[data-pin]');
+  const name=k=>(QB_ALL.find(x=>x[0]===k)||[])[1];
+  if(star){e.stopPropagation();const k=star.dataset.star;FAV=FAV.includes(k)?FAV.filter(x=>x!==k):[...FAV,k];FAV=QB_ALL.map(x=>x[0]).filter(x=>FAV.includes(x));
+    try{localStorage.setItem('glenread-fav',JSON.stringify(FAV))}catch(x){}drawQGrid();toast(FAV.includes(k)?'«'+name(k)+'» μπήκε στα κουμπιά μου':'«'+name(k)+'» βγήκε από τα κουμπιά μου');return}
   if(pin){e.stopPropagation();const k=pin.dataset.pin;
     if(QB.includes(k)){if(k==='back')return toast('Το «Πίσω» μένει πάντα στην πάνω μπάρα');QB=QB.filter(x=>x!==k)}else QB.push(k);
     QB=QB_ALL.map(x=>x[0]).filter(x=>QB.includes(x));try{localStorage.setItem('glenread-qb',JSON.stringify(QB))}catch(x){}qbApply();drawQGrid();
     if(QB.includes(k)&&!pinned){pinned=true;try{localStorage.setItem('glenread-pin','1')}catch(x){}pinApply()}
-    const name=(QB_ALL.find(x=>x[0]===k)||[])[1];toast(QB.includes(k)?'«'+name+'» μπήκε στην πάνω μπάρα':'«'+name+'» βγήκε από την πάνω μπάρα');return}
+    toast(QB.includes(k)?'«'+name(k)+'» μπήκε στην πάνω μπάρα':'«'+name(k)+'» βγήκε από την πάνω μπάρα');return}
+  if(qEditing)return;
   const t=e.target.closest('[data-k]');if(!t)return;const k=t.dataset.k;closeSheet();
   if(k==='back')return goHome();setTimeout(()=>QB_ACT[k]&&QB_ACT[k](),60);
 };
+// μόνο μία κατηγορία ανοιχτή τη φορά
+document.querySelectorAll('#sheet details.cat').forEach(d=>d.addEventListener('toggle',()=>{if(d.open){document.querySelectorAll('#sheet details.cat').forEach(o=>{if(o!==d)o.open=false});setTimeout(()=>d.scrollIntoView({block:'nearest',behavior:'smooth'}),60)}}));
 $('#mGpos').onclick=()=>{try{localStorage.removeItem('glenread-gpos')}catch(e){}$('#gMenu').classList.remove('custom');closeSheet();toast('Το κουμπί G γύρισε κάτω δεξιά')};
 
 // ---------- Κάτω μπάρα: σύρσιμο κάτω = μαζεύει, πάνω ή πάτημα = ανοίγει ----------
@@ -1378,7 +1442,7 @@ $('#mSig').onclick=()=>{closeSheet();sigDialog(true)};
 // ---------- Μενού επιλογών (κουμπί G) ----------
 function openSheet(){
   if(editing){toggleEdit()}
-  $('#mRenameS').textContent=doc?doc.name:'';sigPreview();drawQGrid();drawBm();rdApply();viewLabels();speakUI();
+  $('#mRenameS').textContent=doc?doc.name:'';sigPreview();qEditing=false;drawQGrid();drawBm();rdApply();viewLabels();speakUI();
   $('#mPin').classList.toggle('on',pinned);
   $('#sheet').classList.remove('hidden');$('#inkPop').classList.add('hidden');
   if(history.state&&history.state.v!=='sheet')history.pushState({v:'sheet'},'');
@@ -1462,16 +1526,17 @@ $('#mHelp').onclick=()=>{closeSheet();dlgOpen('Οδηγός χρήσης',`<ul c
 <li><b>Σχήμα</b>: γραμμή, βέλος, ορθογώνιο, κύκλος — σύρε από γωνία σε γωνία.</li>
 <li><b>Υπογραφή</b>: τη φτιάχνεις ή την αλλάζεις από Μενού → «Η υπογραφή μου» και τη βάζεις με «✍️ Υπογραφή» στη σελίδα.</li>
 <li><b>Μετάφραση (🌐)</b>: επίλεξε κείμενο ή μετάφρασε όλο το έγγραφο. Στο κινητό ανοίγει στη Μετάφραση Google.</li>
-<li><b>Πάνω μπάρα</b>: στο Μενού, «Γρήγορα κουμπιά» → πάτα το 📌 σε όποιο κουμπί θέλεις να φαίνεται πάνω. <b>Κάτω μπάρα</b>: σύρε τη κάτω για να μαζέψει.</li>
+<li><b>Τα κουμπιά μου</b>: στην κορυφή του μενού. Με «✏️ Προσαρμογή» πατάς ⭐ για να φαίνεται ένα κουμπί εκεί και 📌 για να φαίνεται στην πάνω μπάρα. <b>Κάτω μπάρα</b>: σύρε τη κάτω για να μαζέψει.</li>
 <li><b>Μετακίνηση</b>: πατάς μια σημείωση (υπογραφή, κείμενο, σχήμα) για να τη σύρεις ή να τη μεγαλώσεις/μικρύνεις με ➕ ➖. <b>Γόμα</b>: σβήνει ό,τι αγγίξεις.</li>
 <li><b>↶ ↷</b>: αναίρεση και επανάληψη. Όλα αποθηκεύονται μόνα τους.</li>
-<li><b>Αποθήκευση PDF με τις σημειώσεις</b>: φτιάχνει νέο PDF για αποστολή — το πρωτότυπο δεν αλλάζει.</li></ul>`,null,true)};
+<li><b>Αποθήκευση PDF με τις σημειώσεις</b>: φτιάχνει νέο PDF — το πρωτότυπο δεν αλλάζει. Όλα τα αρχεία μπαίνουν στον φάκελο <b>GlenApps › GlenRead › Έγγραφα</b> του κινητού.</li></ul>`,null,true)};
 // παράθυρο διαλόγου
 let dlgCb=null;
 let dlgAt=0;
-function dlgOpen(title,body,cb,infoOnly){dlgAt=Date.now();$('#dlgOk').textContent='Εντάξει';$('#dlgNo').textContent='Ακύρωση';$('#dlgT').textContent=title;$('#dlgB').innerHTML=body;dlgCb=cb;$('#dlgNo').classList.toggle('hidden',!!infoOnly);$('#dlg').classList.remove('hidden')}
-const dlgClose=()=>{$('#dlg').classList.add('hidden');$('#dlgB').innerHTML='';dlgCb=null};
-$('#dlgOk').onclick=()=>{const cb=dlgCb;try{cb&&cb()}finally{dlgClose()}};
+let dlgCancel=null;
+function dlgOpen(title,body,cb,infoOnly){dlgAt=Date.now();dlgCancel=null;$('#dlgOk').textContent='Εντάξει';$('#dlgNo').textContent='Ακύρωση';$('#dlgT').textContent=title;$('#dlgB').innerHTML=body;dlgCb=cb;$('#dlgNo').classList.toggle('hidden',!!infoOnly);$('#dlg').classList.remove('hidden')}
+const dlgClose=()=>{$('#dlg').classList.add('hidden');$('#dlgB').innerHTML='';dlgCb=null;const c=dlgCancel;dlgCancel=null;c&&c()};
+$('#dlgOk').onclick=()=>{const cb=dlgCb;dlgCancel=null;try{cb&&cb()}finally{dlgClose()}};
 $('#dlgNo').onclick=dlgClose;$('#dlg').onclick=e=>{if(e.target.id==='dlg'&&Date.now()-dlgAt>600)dlgClose()};
 
 // ---------- Εγκατάσταση στο κινητό ----------
