@@ -331,12 +331,9 @@ details summary{cursor:pointer;font-weight:600}
     <button class="sec lb" data-q="fsp"><span>Α+</span><small>Μεγαλύτερα</small></button>
     <button class="sec lb" data-q="theme"><span>🌓</span><small>Θέμα</small></button>
     <button class="sec lb" data-q="bm"><span>🔖</span><small>Σελιδοδείκτης</small></button>
-    <button class="sec lb" data-q="draw"><span>🖊️</span><small>Γράψε</small></button>
     <button class="sec lb" data-q="share"><span>📤</span><small>Αποστολή</small></button>
     <button class="sec lb" data-q="copy"><span>📋</span><small>Αντιγραφή</small></button>
-    <button class="sec lb" data-q="save"><span>📑</span><small>PDF</small></button>
     <button class="sec lb" data-q="full"><span>⛶</span><small>Οθόνη</small></button>
-    <button class="sec lb" data-q="menu"><span>☰</span><small>Μενού</small></button>
   </div>
   <div id="findBar" class="hidden">
     <div class="row">
@@ -381,7 +378,7 @@ details summary{cursor:pointer;font-weight:600}
   <div class="pn">
     <div class="grip"></div>
     <div class="qhead"><b>Τα κουμπιά μου</b><button class="sec" id="qEdit">✏️ Προσαρμογή</button></div>
-    <p class="muted hidden" id="qEditHelp" style="margin:0 6px 8px;font-size:12.5px">⭐ = να φαίνεται εδώ, στα «Κουμπιά μου» · 📌 = να φαίνεται στην πάνω μπάρα (όσα υπάρχουν ήδη στην κάτω μπάρα δεν έχουν 📌, για να μην είναι διπλά). Αποθηκεύεται αμέσως. Τη σειρά στις μπάρες την αλλάζεις κρατώντας πατημένο ένα κουμπί και σέρνοντάς το.</p>
+    <p class="muted hidden" id="qEditHelp" style="margin:0 6px 8px;font-size:12.5px">⭐ = να φαίνεται εδώ, στα «Κουμπιά μου» · 📌 = να φαίνεται στην πάνω μπάρα (όσα υπάρχουν ήδη στην κάτω μπάρα, όπως «Γράψε» και «PDF», δεν εμφανίζονται εδώ, για να μην είναι διπλά). Αποθηκεύεται αμέσως. Τη σειρά στις μπάρες την αλλάζεις κρατώντας πατημένο ένα κουμπί και σέρνοντάς το.</p>
     <div id="qGrid"></div>
     <details class="cat" data-cat="view"><summary><span class="ci">👁</span><span class="ct"><b>Προβολή</b><small>Κείμενο ή σελίδα, αναζήτηση, μετάβαση</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mView"><span class="ic">📄</span><span class="tx"><b id="mViewT">Πρωτότυπο σελίδας</b><small id="mViewS">Δες το PDF όπως είναι και γράψε πάνω του</small></span></button>
@@ -454,7 +451,7 @@ details summary{cursor:pointer;font-weight:600}
 <script src="antigrafa.js"></script>
 <script src="efarmoges-mas.js"></script>
 <script>
-const VERSION='2.14';
+const VERSION='2.15';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -1372,12 +1369,13 @@ const QB_ACT={find:()=>openFind(),view:()=>toggleView(),tr:()=>openTranslate(),s
   bm:()=>$('#mBm').onclick(),draw:()=>$('#mDraw').onclick(),share:()=>$('#mShare').onclick(),copy:()=>$('#mCopy').onclick(),save:()=>$('#mAnnPdf').onclick(),full:()=>$('#mFull').onclick(),menu:()=>openSheet()};
 document.querySelectorAll('#qbar [data-q]').forEach(b=>{if(QB_ACT[b.dataset.q])b.onclick=QB_ACT[b.dataset.q]});
 // πλέγμα «Γρήγορα κουμπιά» στην κορυφή του μενού: πάτημα = ενέργεια, 📌 = μπαίνει/βγαίνει από την πάνω μπάρα (αποθηκεύεται αμέσως)
-const FAV_DEF=['find','view','tr','speak','fsm','fsp','theme','draw','save','share'];
+const FAV_DEF=['find','view','tr','speak','fsm','fsp','theme','bm','share','copy'];
 let FAV=FAV_DEF.slice();try{const v=JSON.parse(localStorage.getItem('glenread-fav')||'null');if(Array.isArray(v))FAV=v}catch(e){}
+FAV=FAV.filter(k=>!NOPIN.includes(k));
 let qEditing=false;
 function drawQGrid(){
   const g=$('#qGrid');g.classList.toggle('edit',qEditing);$('#qEditHelp').classList.toggle('hidden',!qEditing);$('#qEdit').textContent=qEditing?'✓ Τέλος':'✏️ Προσαρμογή';
-  const list=QB_ALL.filter(([k])=>k!=='menu'&&(qEditing||FAV.includes(k)));
+  const list=QB_ALL.filter(([k])=>qEditing||FAV.includes(k));
   g.innerHTML=list.map(([k,l,i])=>`<button class="qt${QB.includes(k)?' in':''}${FAV.includes(k)?' fav':''}" data-k="${k}"><span>${i}</span><small>${l}</small><span class="star" data-star="${k}" role="button" aria-label="Στα κουμπιά μου">⭐</span>${NOPIN.includes(k)?'':`<span class="pin" data-pin="${k}" role="button" aria-label="Στην πάνω μπάρα">📌</span>`}</button>`).join('')
     +(!qEditing&&!list.length?'<p class="muted" style="grid-column:1/-1;margin:4px">Δεν έχεις διαλέξει κουμπιά. Πάτα «✏️ Προσαρμογή».</p>':'');
 }
@@ -1388,7 +1386,7 @@ $('#qGrid').onclick=e=>{
   if(star){e.stopPropagation();const k=star.dataset.star;FAV=FAV.includes(k)?FAV.filter(x=>x!==k):[...FAV,k];FAV=QB_ALL.map(x=>x[0]).filter(x=>FAV.includes(x));
     try{localStorage.setItem('glenread-fav',JSON.stringify(FAV))}catch(x){}drawQGrid();toast(FAV.includes(k)?'«'+name(k)+'» μπήκε στα κουμπιά μου':'«'+name(k)+'» βγήκε από τα κουμπιά μου');return}
   if(pin){e.stopPropagation();const k=pin.dataset.pin;
-    if(QB.includes(k)){if(k==='back')return toast('Το «Πίσω» μένει πάντα στην πάνω μπάρα');QB=QB.filter(x=>x!==k)}else QB.push(k);
+    if(QB.includes(k))QB=QB.filter(x=>x!==k);else QB.push(k);
     try{localStorage.setItem('glenread-qb',JSON.stringify(QB))}catch(x){}qbApply();drawQGrid();
     if(QB.includes(k)&&!pinned){pinned=true;try{localStorage.setItem('glenread-pin','1')}catch(x){}pinApply()}
     toast(QB.includes(k)?'«'+name(k)+'» μπήκε στην πάνω μπάρα':'«'+name(k)+'» βγήκε από την πάνω μπάρα');return}
