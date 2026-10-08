@@ -407,7 +407,7 @@ details summary{cursor:pointer;font-weight:600}
 <script src="antigrafa.js"></script>
 <script src="efarmoges-mas.js"></script>
 <script>
-const VERSION='2.9';
+const VERSION='2.10';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -1187,8 +1187,8 @@ function sigDialog(fromMenu){
 function placeSig(i,p,ok){
   const sig=getSig();if(!sig)return sigDialog();
   // αν υπάρχει ήδη υπογραφή στο έγγραφο, ρωτάμε πριν βάλουμε δεύτερη
-  const has=Object.values(doc.ann||{}).some(L=>L.some(o=>o.sig));
-  if(has&&!ok){dlgOpen('Δεύτερη υπογραφή;','<p style="margin:0">Το έγγραφο έχει ήδη υπογραφή. Θέλεις να βάλεις και δεύτερη σε αυτό το σημείο;</p>',()=>placeSig(i,p,true));$('#dlgOk').textContent='Ναι, βάλε δεύτερη';$('#dlgNo').textContent='Όχι';return}
+  const n=new Set(Object.values(doc.ann||{}).flatMap(L=>L.filter(o=>o.sig).map(o=>o.g))).size;
+  if(n&&!ok&&!doc.sigNoAsk){dlgOpen('Κι άλλη υπογραφή;',`<p style="margin:0 0 10px">Το έγγραφο έχει ήδη ${n===1?'1 υπογραφή':n+' υπογραφές'}. Να μπει κι άλλη σε αυτό το σημείο;</p><label style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="sigNoAsk" style="width:22px;height:22px"> Να μη με ξαναρωτάει σε αυτό το έγγραφο</label>`,()=>{if($('#sigNoAsk').checked){doc.sigNoAsk=true;saveDoc(doc)}placeSig(i,p,true)});$('#dlgOk').textContent='Ναι, βάλε κι άλλη';$('#dlgNo').textContent='Όχι';return}
   const asp=pv.pages[i].h/pv.pages[i].w,w=.3,h=w*sig.r/asp,x0=p[0]-w/2,y0=p[1]-h/2,g=newG(),c=PEN_COLORS[pv.pen];
   const st=sig.s.map(s=>({t:'pen',c,w:.004,g,sig:1,pts:s.map(q=>[+(x0+q[0]*w).toFixed(4),+(y0+q[1]*h).toFixed(4)])}));
   (doc.ann[i]=doc.ann[i]||[]).push(...st);pushAct({i,add:st});pvTool('mv',true);selShow(i,st);toast('Μπήκε η υπογραφή. Μεγάλωσέ τη ή μίκρυνέ τη με τα κουμπιά, ή σύρε τη για να τη μετακινήσεις.');
