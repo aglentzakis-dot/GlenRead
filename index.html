@@ -62,6 +62,19 @@ details summary{cursor:pointer;font-weight:600}
 
 <!-- ΑΡΧΙΚΗ -->
 <section id="home">
+  <div class="card hidden" id="instBox" style="border:2px solid var(--acc2)">
+    <div class="row" style="flex-wrap:nowrap;align-items:flex-start">
+      <img src="icon-192.png" alt="" style="width:52px;height:52px;border-radius:12px;flex:0 0 auto">
+      <div style="flex:1">
+        <strong>Βάλε το GlenRead στο κινητό σου</strong>
+        <div class="muted" id="instTxt">Ανοίγει σαν κανονική εφαρμογή από την αρχική οθόνη, σε πλήρη οθόνη, και δουλεύει και χωρίς ίντερνετ.</div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button id="instYes">📲 Εγκατάσταση</button>
+      <button class="sec" id="instNo">Όχι τώρα</button>
+    </div>
+  </div>
   <div class="card">
     <div class="big">
       <button class="tile" id="bPdf"><span>📂</span>Άνοιγμα PDF</button>
@@ -191,7 +204,7 @@ details summary{cursor:pointer;font-weight:600}
 <script src="antigrafa.js"></script>
 <script src="efarmoges-mas.js"></script>
 <script>
-const VERSION='1.4';
+const VERSION='1.5';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -490,6 +503,25 @@ $('#bCancel').onclick=()=>{cancelled=true;prog(0,'Ακύρωση μετά την
 
 // άνοιγμα PDF που «μοιράστηκε» προς την εφαρμογή
 if('launchQueue' in window)launchQueue.setConsumer(async p=>{if(p.files&&p.files[0])openPdf(await p.files[0].getFile())});
+
+// ---------- Εγκατάσταση στο κινητό ----------
+let instEvt=null;
+const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const instSnoozed=()=>{try{return Date.now()<+(localStorage.getItem('glenread-inst-later')||0)}catch(e){return false}};
+function instShow(){if(isStandalone()||instSnoozed())return;$('#instBox').classList.remove('hidden')}
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEvt=e;instShow()});
+addEventListener('appinstalled',()=>{$('#instBox').classList.add('hidden');instEvt=null;toast('Το GlenRead μπήκε στην αρχική οθόνη 🎉')});
+if(isIOS&&!isStandalone()){
+  $('#instTxt').innerHTML='Στο iPhone: πάτα το κουμπί <b>Κοινοποίηση</b> (το τετράγωνο με το βέλος προς τα πάνω) και μετά <b>«Προσθήκη στην οθόνη Αφετηρίας»</b>.';
+  $('#instYes').classList.add('hidden');instShow();
+}
+$('#instYes').onclick=async()=>{
+  if(!instEvt){toast('Από το μενού ⋮ του Χρώμιου πάτα «Εγκατάσταση εφαρμογής»');return}
+  instEvt.prompt();const r=await instEvt.userChoice.catch(()=>({}));instEvt=null;
+  if(r.outcome==='accepted')$('#instBox').classList.add('hidden');
+};
+$('#instNo').onclick=()=>{try{localStorage.setItem('glenread-inst-later',Date.now()+7*864e5)}catch(e){}$('#instBox').classList.add('hidden')};
 
 // ---------- Αναβάθμιση ----------
 if('serviceWorker' in navigator){
