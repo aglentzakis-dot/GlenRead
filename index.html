@@ -183,6 +183,18 @@ body.selon #gMenu{display:none}
 #efmPage .efm-tg::after{content:'✕';font-size:12px}
 #efmPage .efm-off .efm-tg::after{content:'↺'}
 #efmPage .efm-note{font-size:11.5px;margin:4px 2px}
+.trws,.trhow{display:flex;flex-direction:column;gap:4px;margin:0 0 10px}
+.trhow{margin-top:10px}
+.trw{display:flex;gap:10px;align-items:flex-start;padding:8px;border:1px solid var(--line);border-radius:12px}
+.trw input{width:20px;height:20px;margin-top:2px;flex:none}
+.trw span{display:flex;flex-direction:column}
+.trw small{font-size:12px;color:var(--soft)}
+.trw:has(input:checked){border-color:var(--acc2);background:#FDD11722}
+#reader .tp{margin:0 0 10px;padding:6px 8px;border-radius:10px;border:1px dashed var(--line);white-space:pre-wrap;cursor:pointer}
+#reader .tp.on{background:#FDD117;color:#1d1d1b;border-color:#EF9F02}
+#tapBar{position:fixed;left:8px;right:8px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:12;background:var(--card);color:var(--ink);border:2px solid var(--acc2);border-radius:16px;padding:10px;box-shadow:0 6px 20px #0004;display:flex;flex-direction:column;gap:8px}
+#tapBar .row{justify-content:flex-end}
+body:has(#tapBar:not(.hidden)) #gMenu{display:none}
 #zoomHint{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9;background:#000b;color:#fff;border-radius:12px;padding:4px 10px;font-size:13px;pointer-events:none}
 main{max-width:760px;margin:0 auto;padding:16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
@@ -486,7 +498,7 @@ details summary{cursor:pointer;font-weight:600}
 <script src="antigrafa.js"></script>
 <script src="efarmoges-mas.js"></script>
 <script>
-const VERSION='2.16';
+const VERSION='2.17';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -990,7 +1002,7 @@ $('#mSpeak').onclick=()=>{
 };
 function goHome(){
   const st=history.state&&history.state.v;$('#sheet').classList.add('hidden');pvClose();closeFind();stopSpeak();awake(false);
-  if(editing)toggleEdit();
+  if(editing)toggleEdit();if(tapMode)tapEnd();
   if(!$('#work').classList.contains('hidden'))cancelled=true;
   show('home');drawLast();
   if(st==='sheet')history.go(-2);else if(st==='view')history.back();
@@ -1489,18 +1501,56 @@ makeSortable($('#inkBar'),'#inkBar > button',inkKey,order=>{INK=order;try{localS
 const LANGS=[['el','Ελληνικά'],['en','Αγγλικά'],['de','Γερμανικά'],['fr','Γαλλικά'],['it','Ιταλικά'],['es','Ισπανικά'],['sq','Αλβανικά'],['bg','Βουλγαρικά'],['ro','Ρουμανικά'],['ru','Ρωσικά'],['uk','Ουκρανικά'],['tr','Τουρκικά'],['ar','Αραβικά'],['zh','Κινέζικα'],['pl','Πολωνικά'],['nl','Ολλανδικά'],['pt','Πορτογαλικά']];
 const guessLang=t=>{const g=(t.match(/[Ͱ-Ͽἀ-῿]/g)||[]).length,l=(t.match(/[A-Za-z]/g)||[]).length;return g>l?'el':'en'};
 let trOrig=null;
+// θυμόμαστε την τελευταία επιλογή κειμένου, γιατί στο κινητό σβήνει μόλις πατήσεις κουμπί
+let lastSel='',lastSelAt=0;
+document.addEventListener('selectionchange',()=>{const t=String(getSelection()||'').trim();if(t&&document.body.classList.contains('reading')){lastSel=t;lastSelAt=Date.now()}});
+function curPageText(){
+  if(doc.pages.length<2)return fullText();
+  let k=0;if(pv.on){const els=[...document.querySelectorAll('.pvp')];k=Math.max(0,els.findIndex(el=>el.getBoundingClientRect().bottom>80))}
+  else{const pgs=[...document.querySelectorAll('#reader .pg')];const i=pgs.findIndex(el=>el.getBoundingClientRect().top>innerHeight/2);k=Math.max(0,(i<0?pgs.length:i)-1)}
+  return(doc.pages[k]||doc.pages[0]).text;
+}
 function openTranslate(){
   closeSheet();if(!doc)return;
-  const sel=getSelection().toString().trim(),src=sel||fullText(),from=guessLang(src.slice(0,3000));
-  let to='';try{to=localStorage.getItem('glenread-trto')||''}catch(e){}if(!to||to===from)to=from==='el'?'en':'el';
+  const live=String(getSelection()||'').trim(),sel=live||(Date.now()-lastSelAt<120000?lastSel:'');
   const local='Translator' in self;
-  dlgOpen('🌐 Μετάφραση',`<p class="muted" style="margin:0 0 8px">${sel?'Θα μεταφραστεί το κείμενο που επέλεξες ('+sel.length+' χαρακτήρες).':'Θα μεταφραστεί όλο το έγγραφο. Για ένα κομμάτι μόνο, επίλεξέ το πρώτα με το δάχτυλο.'}</p>
+  let to='';try{to=localStorage.getItem('glenread-trto')||''}catch(e){}
+  const from0=guessLang((sel||fullText()).slice(0,3000));if(!to||to===from0)to=from0==='el'?'en':'el';
+  const R=(v,t,sub,ck)=>`<label class="trw"><input type="radio" name="trW" value="${v}" ${ck?'checked':''}><span><b>${t}</b>${sub?`<small>${sub}</small>`:''}</span></label>`;
+  dlgOpen('🌐 Μετάφραση',`<div class="trws">
+      ${sel?R('sel','Το κείμενο που επέλεξα','«'+esc(sel.slice(0,60))+(sel.length>60?'…':'')+'»',true):''}
+      ${R('tap','Πατάω παραγράφους','Πατάς όσες θέλεις και γίνονται κίτρινες',!sel)}
+      ${doc.pages.length>1?R('page','Αυτή τη σελίδα',''):''}
+      ${R('all','Όλο το έγγραφο','')}
+    </div>
     <label>Μετάφραση σε<br><select id="trTo" style="width:100%;margin-top:4px">${LANGS.map(([c,n])=>`<option value="${c}" ${c===to?'selected':''}>${n}</option>`).join('')}</select></label>
-    <p class="muted" style="margin:10px 0 0">${local?'✅ Η μετάφραση γίνεται μέσα στη συσκευή — το κείμενο δεν φεύγει από εδώ.':'⚠️ Στο κινητό σου δεν υπάρχει ακόμη μεταφραστής χωρίς ίντερνετ. Το κείμενο θα ανοίξει στη <b>Μετάφραση Google</b>, δηλαδή θα σταλεί στην Google.'+(src.length>5000?' Η Google δέχεται έως 5.000 χαρακτήρες τη φορά — θα σταλεί η αρχή.':'')}</p>`,
-    ()=>{const t=$('#trTo').value;try{localStorage.setItem('glenread-trto',t)}catch(e){}doTranslate(src,from,t,!!sel)});
-  $('#dlgOk').textContent=local?'Μετάφραση':'Άνοιγμα στη Μετάφραση Google';
+    ${local?'<p class="muted" style="margin:10px 0 0">✅ Η μετάφραση γίνεται μέσα στη συσκευή.</p>':
+    `<div class="trhow"><label class="trw"><input type="radio" name="trH" value="app" checked><span><b>📲 Στην εφαρμογή Μετάφραση Google</b><small>Δουλεύει και <b>χωρίς ίντερνετ</b>, αν έχεις κατεβάσει τις γλώσσες μέσα στην εφαρμογή.</small></span></label>
+     <label class="trw"><input type="radio" name="trH" value="web"><span><b>🌐 Στη σελίδα Μετάφραση Google</b><small>Χρειάζεται ίντερνετ· έως 5.000 χαρακτήρες.</small></span></label>
+     <p class="muted" style="margin:6px 0 0;font-size:12.5px">⚠️ Στο κινητό σου δεν υπάρχει ακόμη ενσωματωμένος μεταφραστής, οπότε το κείμενο πηγαίνει στη Μετάφραση Google.</p></div>`}`,
+    ()=>{const t=$('#trTo').value,w=(document.querySelector('input[name=trW]:checked')||{}).value||'all',h=(document.querySelector('input[name=trH]:checked')||{}).value||'web';
+      try{localStorage.setItem('glenread-trto',t)}catch(e){}
+      if(w==='tap')return tapPick(t,h);
+      const text=w==='sel'?sel:w==='page'?curPageText():fullText();
+      doTranslate(text,guessLang(text.slice(0,3000)),t,w!=='all',h)});
+  $('#dlgOk').textContent='Συνέχεια';
 }
-async function doTranslate(text,from,to,isSel){
+// επιλογή παραγράφων με πάτημα (πιο εύκολο από το σύρσιμο στο κινητό)
+let tapMode=null;
+function tapPick(to,how){
+  if(pv.on)viewText();if(editing)toggleEdit();
+  const paras=fullText().split(/\n\s*\n|\n(?=\S)/).map(x=>x.trim()).filter(Boolean);
+  $('#reader').innerHTML=paras.map((p,i)=>`<p class="tp" data-i="${i}">${esc(p)}</p>`).join('');
+  tapMode={to,how,paras,sel:new Set()};
+  let bar=$('#tapBar');if(!bar){bar=document.createElement('div');bar.id='tapBar';document.body.appendChild(bar)}
+  const upd=()=>{bar.innerHTML=`<span>Πάτα τις παραγράφους για μετάφραση · <b>${tapMode.sel.size}</b> επιλεγμένες</span><div class="row"><button class="sec" id="tapNo">Άκυρο</button><button id="tapGo" ${tapMode.sel.size?'':'disabled'}>🌐 Μετάφραση</button></div>`;
+    $('#tapNo').onclick=tapEnd;$('#tapGo').onclick=()=>{const t=[...tapMode.sel].sort((a,b)=>a-b).map(i=>tapMode.paras[i]).join('\n\n'),m=tapMode;tapEnd();doTranslate(t,guessLang(t.slice(0,3000)),m.to,true,m.how)}};
+  upd();bar.classList.remove('hidden');tapMode.upd=upd;
+  $('#reader').onclick=e=>{if(!tapMode)return;const p=e.target.closest('.tp');if(!p)return;const i=+p.dataset.i;tapMode.sel.has(i)?tapMode.sel.delete(i):tapMode.sel.add(i);p.classList.toggle('on');upd()};
+  toast('Πάτα τις παραγράφους που θέλεις');
+}
+function tapEnd(){tapMode=null;$('#reader').onclick=null;const b=$('#tapBar');if(b)b.classList.add('hidden');render()}
+async function doTranslate(text,from,to,isSel,how){
   if('Translator' in self){
     try{
       const av=await Translator.availability({sourceLanguage:from,targetLanguage:to});if(av==='unavailable')throw new Error('na');
@@ -1510,6 +1560,8 @@ async function doTranslate(text,from,to,isSel){
       return showTranslation(out.join('\n\n'),to,isSel);
     }catch(e){if(!confirm('Η μετάφραση μέσα στη συσκευή δεν έγινε. Να ανοίξει στη Μετάφραση Google; (το κείμενο θα σταλεί στην Google)'))return}
   }
+  // στην εφαρμογή Μετάφραση Google (μέσω «Κοινοποίηση»): δουλεύει και χωρίς ίντερνετ με κατεβασμένες γλώσσες
+  if(how==='app'&&navigator.share){try{await navigator.share({text});toast('Διάλεξε «Μετάφραση» από τη λίστα');return}catch(e){if(e.name==='AbortError')return}}
   window.open('https://translate.google.com/?sl=auto&tl='+to+'&op=translate&text='+encodeURIComponent(text.slice(0,5000)),'_blank','noopener');
 }
 function showTranslation(t,to,isSel){
