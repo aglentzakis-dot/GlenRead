@@ -35,7 +35,9 @@ body.reading.ffr #reader{letter-spacing:.02em;word-spacing:.12em}
 #qbar{position:fixed;left:0;right:0;top:0;z-index:7;background:var(--bg);box-shadow:0 2px 10px #0002;display:none;align-items:center;gap:6px;padding:6px 10px;padding-top:calc(6px + env(safe-area-inset-top))}
 body.reading.pinned #qbar{display:flex}
 body.reading.pinned #read{padding-top:64px}
-#qbar .qt{flex:1;min-width:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px}
+#qbar{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}#qbar::-webkit-scrollbar{display:none}
+#qbar .lb{flex:0 0 auto}
+#qbar .lb.off{display:none}
 .lb{flex-direction:column;gap:0;padding:4px 8px;min-height:50px;min-width:54px;font-size:20px;line-height:1.1}
 .lb small{font-size:10.5px;font-weight:600;color:var(--soft)}
 /* αναζήτηση */
@@ -88,6 +90,14 @@ body.drawing .pvp .ink{touch-action:none}
 body:not(.drawing) .pvp .ink{pointer-events:none}
 .pvn{position:absolute;right:8px;bottom:6px;font-size:11px;color:#888;z-index:1}
 #inkBar{position:fixed;left:0;right:0;bottom:0;z-index:8;display:grid;grid-template-columns:repeat(6,1fr);gap:3px;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -2px 10px #0001;padding:5px 6px calc(5px + env(safe-area-inset-bottom))}
+#inkBar .ibgrip{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:0 0 2px;touch-action:none;cursor:grab}
+#inkBar .ibgrip span{width:44px;height:5px;border-radius:3px;background:var(--soft);opacity:.55}
+#inkBar .ibgrip small{font-size:10px;color:var(--soft)}
+#inkBar{transition:transform .25s}
+body.inkmin #inkBar{transform:translateY(calc(100% - 30px - env(safe-area-inset-bottom)))}
+body.inkmin #inkBar .ibgrip small{font-weight:700;color:var(--acc2)}
+body.pv.inkmin #gMenu{bottom:calc(44px + env(safe-area-inset-bottom))}
+body.inkmin #inkPop,body.inkmin #selBar{bottom:calc(40px + env(safe-area-inset-bottom))}
 #inkBar button{width:100%;height:50px;min-height:0;padding:2px 0;border-radius:12px;background:transparent;border:0;font-size:19px;color:var(--ink);flex-direction:column;gap:0;line-height:1.15}
 #inkBar button small{font-size:9.5px;font-weight:600;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 #inkBar button.on{background:#FDD11766;box-shadow:inset 0 0 0 2px var(--acc2)}
@@ -184,7 +194,7 @@ details summary{cursor:pointer;font-weight:600}
     <input type="file" id="fPdf" accept="application/pdf,.pdf,.docx,.dotx,.docm,.doc,.odt,.ott,.rtf,.txt,.text,.md,.markdown,.csv,.tsv,.log,.json,.xml,.html,.htm,.xhtml,.epub,.pptx,.srt,.vtt,.ini,text/*,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,application/rtf,application/epub+zip,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/json,application/xml" hidden>
     <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
     <input type="file" id="fImg" accept="image/*" multiple hidden>
-    <p class="muted" style="margin:12px 0 0">Χωρίς διαφημιστικές εταιρείες, χωρίς συνδρομή, χωρίς ανέβασμα: τα έγγραφά σου δεν φεύγουν ποτέ από το κινητό.</p>
+    <p class="muted" style="margin:12px 0 0">Χωρίς διαφημιστικές εταιρείες, χωρίς συνδρομή, χωρίς ανέβασμα: τα έγγραφά σου μένουν στο κινητό — φεύγουν μόνο αν το ζητήσεις εσύ (π.χ. μετάφραση Google ή αποστολή).</p>
   </div>
 
   <div class="card hidden" id="lastBox">
@@ -276,10 +286,21 @@ details summary{cursor:pointer;font-weight:600}
 <!-- ΑΝΑΓΝΩΣΗ -->
 <section id="read" class="hidden">
   <div id="qbar">
-    <button class="sec lb" id="bBack"><span>←</span><small>Πίσω</small></button>
-    <div class="qt" id="qTitle"></div>
-    <button class="sec lb" id="qFind"><span>🔍</span><small>Αναζήτηση</small></button>
-    <button class="sec lb" id="qView"><span>📄</span><small>Σελίδα</small></button>
+    <button class="sec lb" data-q="back" id="bBack"><span>←</span><small>Πίσω</small></button>
+    <button class="sec lb" data-q="find" id="qFind"><span>🔍</span><small>Αναζήτηση</small></button>
+    <button class="sec lb" data-q="view" id="qView"><span>📄</span><small>Σελίδα</small></button>
+    <button class="sec lb" data-q="tr"><span>🌐</span><small>Μετάφραση</small></button>
+    <button class="sec lb" data-q="speak"><span>🔊</span><small>Ακρόαση</small></button>
+    <button class="sec lb" data-q="fsm"><span>Α−</span><small>Μικρότερα</small></button>
+    <button class="sec lb" data-q="fsp"><span>Α+</span><small>Μεγαλύτερα</small></button>
+    <button class="sec lb" data-q="theme"><span>🌓</span><small>Θέμα</small></button>
+    <button class="sec lb" data-q="bm"><span>🔖</span><small>Σελιδοδείκτης</small></button>
+    <button class="sec lb" data-q="draw"><span>🖊️</span><small>Γράψε</small></button>
+    <button class="sec lb" data-q="share"><span>📤</span><small>Αποστολή</small></button>
+    <button class="sec lb" data-q="copy"><span>📋</span><small>Αντιγραφή</small></button>
+    <button class="sec lb" data-q="save"><span>📑</span><small>PDF</small></button>
+    <button class="sec lb" data-q="full"><span>⛶</span><small>Οθόνη</small></button>
+    <button class="sec lb" data-q="menu"><span>☰</span><small>Μενού</small></button>
   </div>
   <div id="findBar" class="hidden">
     <div class="row">
@@ -295,6 +316,7 @@ details summary{cursor:pointer;font-weight:600}
   </div>
   <div id="pagesView" class="hidden"></div>
   <div id="inkBar" class="hidden">
+    <div class="ibgrip" id="ibGrip"><span></span><small id="ibLbl">Σύρε κάτω για να μαζέψεις</small></div>
     <button data-tool="pan"><span>✋</span><small>Κύλιση</small></button>
     <button data-tool="pen"><span>🖊️</span><small>Στυλό</small></button>
     <button data-tool="hl"><span>🖍️</span><small>Μαρκαδόρος</small></button>
@@ -328,7 +350,8 @@ details summary{cursor:pointer;font-weight:600}
     <button class="mi" id="mGo"><span class="ic">🔢</span><span class="tx"><b>Μετάβαση σε σελίδα</b><small>Πήγαινε κατευθείαν σε μια σελίδα</small></span></button>
     <button class="mi" id="mFull"><span class="ic">⛶</span><span class="tx"><b>Πλήρης οθόνη</b><small>Κρύβει και τη γραμμή ειδοποιήσεων</small></span></button>
     <button class="mi" id="mAwake"><span class="ic">☀️</span><span class="tx"><b>Να μη σβήνει η οθόνη</b><small>Όσο διαβάζεις</small></span><span class="sw"></span></button>
-    <button class="mi" id="mPin"><span class="ic">📌</span><span class="tx"><b>Σταθερή μπάρα πάνω</b><small>Πίσω, αναζήτηση και σελίδα πάντα ορατά</small></span><span class="sw"></span></button>
+    <button class="mi" id="mPin"><span class="ic">📌</span><span class="tx"><b>Σταθερή μπάρα πάνω</b><small>Τα κουμπιά που θέλεις, πάντα ορατά</small></span><span class="sw"></span></button>
+    <button class="mi" id="mQb"><span class="ic">🧩</span><span class="tx"><b>Κουμπιά πάνω μπάρας</b><small>Διάλεξε ποια κουμπιά θα φαίνονται</small></span></button>
     <h3>ΕΜΦΑΝΙΣΗ ΚΕΙΜΕΝΟΥ</h3>
     <div class="opt"><span>Μέγεθος</span><div class="seg"><button id="fsMinus">Α−</button><button id="fsVal" disabled>19</button><button id="fsPlus">Α+</button></div></div>
     <div class="opt"><span>Θέμα</span><div class="seg" data-k="th"><button data-v="light">☀️ Φωτεινό</button><button data-v="sepia">📜 Σέπια</button><button data-v="night">🌙 Νύχτα</button></div></div>
@@ -338,11 +361,14 @@ details summary{cursor:pointer;font-weight:600}
     <h3>ΑΚΡΟΑΣΗ</h3>
     <button class="mi" id="mSpeak"><span class="ic" id="mSpeakI">🔊</span><span class="tx"><b id="mSpeakT">Ανάγνωση φωναχτά</b><small>Διαβάζει το κείμενο (ή όσο έχεις επιλέξει)</small></span></button>
     <div class="opt"><span>Ταχύτητα</span><div class="seg" data-k="rate"><button data-v="0.75">0,75×</button><button data-v="1">1×</button><button data-v="1.25">1,25×</button><button data-v="1.5">1,5×</button></div></div>
+    <h3>ΜΕΤΑΦΡΑΣΗ</h3>
+    <button class="mi" id="mTr"><span class="ic">🌐</span><span class="tx"><b>Μετάφραση</b><small>Του κειμένου που επιλέγεις ή όλου του εγγράφου</small></span></button>
     <h3>ΣΕΛΙΔΟΔΕΙΚΤΕΣ</h3>
     <button class="mi" id="mBm"><span class="ic">🔖</span><span class="tx"><b>Βάλε σελιδοδείκτη εδώ</b><small>Για να γυρίσεις αργότερα σε αυτό το σημείο</small></span></button>
     <div id="bmList"></div>
     <h3>ΣΗΜΕΙΩΣΕΙΣ ΚΑΙ ΔΙΟΡΘΩΣΗ</h3>
     <button class="mi" id="mDraw"><span class="ic">🖊️</span><span class="tx"><b>Γράψε πάνω στη σελίδα</b><small>Στυλό, μαρκαδόρος, κείμενο, σχήματα, υπογραφή</small></span></button>
+    <button class="mi" id="mSig"><span class="ic">✍️</span><span class="tx"><b>Η υπογραφή μου</b><small id="mSigS">Φτιάξε ή άλλαξε την υπογραφή σου</small></span></button>
     <button class="mi" id="mEdit"><span class="ic">✏️</span><span class="tx"><b id="mEditT">Διόρθωση κειμένου</b><small>Διόρθωσε λάθη της αναγνώρισης</small></span></button>
     <button class="mi" id="mClear"><span class="ic">🗑️</span><span class="tx"><b>Σβήσε όλες τις σημειώσεις</b><small>Καθαρίζει ό,τι έγραψες πάνω στις σελίδες</small></span></button>
     <h3>ΑΡΧΕΙΟ</h3>
@@ -381,7 +407,7 @@ details summary{cursor:pointer;font-weight:600}
 <script src="antigrafa.js"></script>
 <script src="efarmoges-mas.js"></script>
 <script>
-const VERSION='2.8';
+const VERSION='2.9';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -1138,13 +1164,14 @@ function textDialog(i,obj,p){
 }
 // υπογραφή: τη ζωγραφίζεις μία φορά και μετά τη βάζεις όπου θέλεις
 const getSig=()=>{try{return JSON.parse(localStorage.getItem('glenread-sig')||'null')}catch(e){return null}};
-function sigDialog(){
-  dlgOpen('Η υπογραφή σου','<canvas id="sigPad"></canvas><p class="muted" style="margin:6px 0 0">Υπόγραψε με το δάχτυλο. Θα αποθηκευτεί για να τη βάζεις με ένα πάτημα.</p><div class="row" style="justify-content:flex-start"><button class="sec" id="sigClr">Καθαρισμός</button></div>',()=>{
+function sigDialog(fromMenu){
+  const cur=getSig();
+  dlgOpen('Η υπογραφή σου',(cur?'<p class="muted" style="margin:0 0 6px">Η τωρινή σου υπογραφή φαίνεται παρακάτω. Ζωγράφισε νέα για να την αλλάξεις.</p>':'')+'<canvas id="sigPad"></canvas><p class="muted" style="margin:6px 0 0">Υπόγραψε με το δάχτυλο. Θα αποθηκευτεί για να τη βάζεις με ένα πάτημα.</p><div class="row" style="justify-content:flex-start"><button class="sec" id="sigClr">Καθαρισμός</button></div>',()=>{
     if(!strokes.length)return toast('Δεν ζωγράφισες υπογραφή');
     const all=strokes.flat(),x0=Math.min(...all.map(q=>q[0])),x1=Math.max(...all.map(q=>q[0])),y0=Math.min(...all.map(q=>q[1])),y1=Math.max(...all.map(q=>q[1])),w=Math.max(1,x1-x0),h=Math.max(1,y1-y0);
     const sig={r:h/w,s:strokes.map(st=>st.map(q=>[+((q[0]-x0)/w).toFixed(4),+((q[1]-y0)/h).toFixed(4)]))};
     try{localStorage.setItem('glenread-sig',JSON.stringify(sig))}catch(e){}
-    toast('Η υπογραφή αποθηκεύτηκε. Πάτα στη σελίδα όπου θέλεις να μπει.');pvTool('sig',true);
+    if(pv.on&&!fromMenu){toast('Η υπογραφή αποθηκεύτηκε. Πάτα στη σελίδα όπου θέλεις να μπει.');pvTool('sig',true)}else toast('Η υπογραφή αποθηκεύτηκε. Τη βάζεις με «✍️ Υπογραφή» στη σελίδα.');
   });
   const c=$('#sigPad');c.width=c.clientWidth*2;c.height=c.clientHeight*2;const x=c.getContext('2d');x.lineWidth=5;x.lineCap=x.lineJoin='round';x.strokeStyle='#1a237e';
   let strokes=[],st=null;
@@ -1152,6 +1179,10 @@ function sigDialog(){
   c.onpointermove=e=>{if(!st)return;const r=c.getBoundingClientRect(),q=[(e.clientX-r.left)*2,(e.clientY-r.top)*2];st.push(q);x.lineTo(q[0],q[1]);x.stroke()};
   c.onpointerup=c.onpointercancel=()=>{st=null};
   $('#sigClr').onclick=()=>{strokes=[];x.clearRect(0,0,c.width,c.height)};
+  // δείχνει την αποθηκευμένη υπογραφή αχνά, για να ξέρεις ποια έχεις
+  if(cur){x.save();x.globalAlpha=.35;const w=c.width*.7,h=Math.min(c.height*.7,w*cur.r),ox=(c.width-w)/2,oy=(c.height-h)/2;cur.s.forEach(st=>{x.beginPath();st.forEach((q,k)=>k?x.lineTo(ox+q[0]*w,oy+q[1]*h):x.moveTo(ox+q[0]*w,oy+q[1]*h));x.stroke()});x.restore();
+    const del=document.createElement('button');del.className='sec';del.textContent='🗑 Σβήσε την αποθηκευμένη';del.onclick=()=>{try{localStorage.removeItem('glenread-sig')}catch(e){}dlgClose();toast('Η υπογραφή σβήστηκε')};$('#sigClr').parentNode.appendChild(del);
+    $('#sigClr').onclick=()=>{strokes=[];x.clearRect(0,0,c.width,c.height)};c.addEventListener('pointerdown',()=>{if(!strokes.length)x.clearRect(0,0,c.width,c.height)},{once:true,capture:true})}
 }
 function placeSig(i,p,ok){
   const sig=getSig();if(!sig)return sigDialog();
@@ -1258,10 +1289,76 @@ if('launchQueue' in window)launchQueue.setConsumer(async p=>{if(p.files&&p.files
 const setHH=()=>document.documentElement.style.setProperty('--hh',(document.body.classList.contains('reading')?0:$('.hdr').offsetHeight)+'px');
 addEventListener('resize',setHH);setHH();setTimeout(setHH,500);
 
+// ---------- Πάνω μπάρα: ο χρήστης διαλέγει τα κουμπιά ----------
+const QB_ALL=[...document.querySelectorAll('#qbar [data-q]')].map(b=>[b.dataset.q,b.querySelector('small').textContent,b.querySelector('span').textContent]);
+let QB=['back','find','view','tr','speak','fsm','fsp'];try{const v=JSON.parse(localStorage.getItem('glenread-qb')||'null');if(Array.isArray(v))QB=v}catch(e){}
+function qbApply(){document.querySelectorAll('#qbar [data-q]').forEach(b=>b.classList.toggle('off',!QB.includes(b.dataset.q)))}
+qbApply();
+const QB_ACT={find:()=>openFind(),view:()=>toggleView(),tr:()=>openTranslate(),speak:()=>$('#mSpeak').onclick(),fsm:()=>$('#fsMinus').onclick(),fsp:()=>$('#fsPlus').onclick(),
+  theme:()=>{RD.th={light:'sepia',sepia:'night',night:'light'}[RD.th]||'light';rdApply();toast({light:'Φωτεινό θέμα',sepia:'Σέπια',night:'Νυχτερινό θέμα'}[RD.th])},
+  bm:()=>$('#mBm').onclick(),draw:()=>$('#mDraw').onclick(),share:()=>$('#mShare').onclick(),copy:()=>$('#mCopy').onclick(),save:()=>$('#mAnnPdf').onclick(),full:()=>$('#mFull').onclick(),menu:()=>openSheet()};
+document.querySelectorAll('#qbar [data-q]').forEach(b=>{if(QB_ACT[b.dataset.q])b.onclick=QB_ACT[b.dataset.q]});
+$('#mQb').onclick=()=>{closeSheet();
+  dlgOpen('Κουμπιά πάνω μπάρας','<p class="muted" style="margin:0 0 8px">Τσέκαρε όσα θέλεις. Αν είναι πολλά, η μπάρα κυλάει αριστερά-δεξιά.</p>'+QB_ALL.map(([k,l,i])=>`<label style="display:flex;align-items:center;gap:10px;padding:7px 2px;border-bottom:1px solid var(--line)"><input type="checkbox" data-k="${k}" ${QB.includes(k)?'checked':''} style="width:22px;height:22px"><span style="width:28px;text-align:center">${i}</span><span>${l}</span></label>`).join('')+'<div class="row" style="justify-content:flex-start"><button class="sec" id="qbReset">Προεπιλογή</button></div>',()=>{
+    QB=[...document.querySelectorAll('#dlgB input[data-k]')].filter(c=>c.checked).map(c=>c.dataset.k);if(!QB.includes('back'))QB.unshift('back');
+    try{localStorage.setItem('glenread-qb',JSON.stringify(QB))}catch(e){}qbApply();if(!pinned){pinned=true;try{localStorage.setItem('glenread-pin','1')}catch(e){}pinApply()}toast('Η πάνω μπάρα ενημερώθηκε')});
+  setTimeout(()=>{const r=$('#qbReset');if(r)r.onclick=()=>document.querySelectorAll('#dlgB input[data-k]').forEach(c=>c.checked=['back','find','view','tr','speak','fsm','fsp'].includes(c.dataset.k))},30)};
+
+// ---------- Κάτω μπάρα: σύρσιμο κάτω = μαζεύει, πάνω ή πάτημα = ανοίγει ----------
+(()=>{let min=false;try{min=localStorage.getItem('glenread-inkmin')==='1'}catch(e){}
+  const set=v=>{min=v;document.body.classList.toggle('inkmin',v);$('#ibLbl').textContent=v?'▲ Εργαλεία — πάτα ή σύρε πάνω':'Σύρε κάτω για να μαζέψεις';try{localStorage.setItem('glenread-inkmin',v?'1':'0')}catch(e){}if(v){$('#inkPop').classList.add('hidden')}};
+  set(min);let y0=null;const bar=$('#inkBar');
+  bar.addEventListener('touchstart',e=>{y0=e.touches[0].clientY},{passive:true});
+  bar.addEventListener('touchmove',e=>{if(y0==null)return;const dy=e.touches[0].clientY-y0;if(!min&&dy>35){y0=null;set(true)}else if(min&&dy<-20){y0=null;set(false)}},{passive:true});
+  bar.addEventListener('touchend',()=>{y0=null});
+  $('#ibGrip').onclick=()=>set(!min);
+  bar.addEventListener('click',e=>{if(min&&!e.target.closest('#ibGrip')){e.stopPropagation();e.preventDefault();set(false)}},true);
+})();
+
+// ---------- Μετάφραση ----------
+const LANGS=[['el','Ελληνικά'],['en','Αγγλικά'],['de','Γερμανικά'],['fr','Γαλλικά'],['it','Ιταλικά'],['es','Ισπανικά'],['sq','Αλβανικά'],['bg','Βουλγαρικά'],['ro','Ρουμανικά'],['ru','Ρωσικά'],['uk','Ουκρανικά'],['tr','Τουρκικά'],['ar','Αραβικά'],['zh','Κινέζικα'],['pl','Πολωνικά'],['nl','Ολλανδικά'],['pt','Πορτογαλικά']];
+const guessLang=t=>{const g=(t.match(/[Ͱ-Ͽἀ-῿]/g)||[]).length,l=(t.match(/[A-Za-z]/g)||[]).length;return g>l?'el':'en'};
+let trOrig=null;
+function openTranslate(){
+  closeSheet();if(!doc)return;
+  const sel=getSelection().toString().trim(),src=sel||fullText(),from=guessLang(src.slice(0,3000));
+  let to='';try{to=localStorage.getItem('glenread-trto')||''}catch(e){}if(!to||to===from)to=from==='el'?'en':'el';
+  const local='Translator' in self;
+  dlgOpen('🌐 Μετάφραση',`<p class="muted" style="margin:0 0 8px">${sel?'Θα μεταφραστεί το κείμενο που επέλεξες ('+sel.length+' χαρακτήρες).':'Θα μεταφραστεί όλο το έγγραφο. Για ένα κομμάτι μόνο, επίλεξέ το πρώτα με το δάχτυλο.'}</p>
+    <label>Μετάφραση σε<br><select id="trTo" style="width:100%;margin-top:4px">${LANGS.map(([c,n])=>`<option value="${c}" ${c===to?'selected':''}>${n}</option>`).join('')}</select></label>
+    <p class="muted" style="margin:10px 0 0">${local?'✅ Η μετάφραση γίνεται μέσα στη συσκευή — το κείμενο δεν φεύγει από εδώ.':'⚠️ Στο κινητό σου δεν υπάρχει ακόμη μεταφραστής χωρίς ίντερνετ. Το κείμενο θα ανοίξει στη <b>Μετάφραση Google</b>, δηλαδή θα σταλεί στην Google.'+(src.length>5000?' Η Google δέχεται έως 5.000 χαρακτήρες τη φορά — θα σταλεί η αρχή.':'')}</p>`,
+    ()=>{const t=$('#trTo').value;try{localStorage.setItem('glenread-trto',t)}catch(e){}doTranslate(src,from,t,!!sel)});
+  $('#dlgOk').textContent=local?'Μετάφραση':'Άνοιγμα στη Μετάφραση Google';
+}
+async function doTranslate(text,from,to,isSel){
+  if('Translator' in self){
+    try{
+      const av=await Translator.availability({sourceLanguage:from,targetLanguage:to});if(av==='unavailable')throw new Error('na');
+      toast(av==='available'?'Μεταφράζω…':'Κατεβαίνει το λεξικό μετάφρασης (μία φορά)…');
+      const tr=await Translator.create({sourceLanguage:from,targetLanguage:to});
+      const parts=text.split(/\n{2,}/);const out=[];for(const p of parts){out.push(p.trim()?await tr.translate(p):p)}
+      return showTranslation(out.join('\n\n'),to,isSel);
+    }catch(e){if(!confirm('Η μετάφραση μέσα στη συσκευή δεν έγινε. Να ανοίξει στη Μετάφραση Google; (το κείμενο θα σταλεί στην Google)'))return}
+  }
+  window.open('https://translate.google.com/?sl=auto&tl='+to+'&op=translate&text='+encodeURIComponent(text.slice(0,5000)),'_blank','noopener');
+}
+function showTranslation(t,to,isSel){
+  const name=(LANGS.find(l=>l[0]===to)||[,''])[1];
+  if(isSel){dlgOpen('Μετάφραση σε '+name,`<div style="white-space:pre-wrap;max-height:50vh;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:10px">${esc(t)}</div><div class="row" style="justify-content:flex-start"><button class="sec" id="trCopy">📋 Αντιγραφή</button></div>`,null,true);setTimeout(()=>{$('#trCopy').onclick=()=>navigator.clipboard.writeText(t).then(()=>toast('Αντιγράφηκε'))},30);return}
+  if(pv.on)viewText();trOrig=trOrig||doc.pages;doc.pages=[{text:t,conf:100,ocr:false}];render();
+  $('#lowConf').classList.remove('hidden');$('#lowConf').innerHTML=`🌐 Βλέπεις μετάφραση στα ${esc(name)}. <button class="sec" id="trBack" style="min-height:34px;margin-left:6px">Επιστροφή στο πρωτότυπο</button>`;
+  $('#trBack').onclick=()=>{doc.pages=trOrig;trOrig=null;render();$('#lowConf').classList.add('hidden')};scrollTo(0,0);
+}
+$('#mTr').onclick=openTranslate;
+
+// ---------- Η υπογραφή μου (από το μενού) ----------
+function sigPreview(){const sig=getSig();$('#mSigS').textContent=sig?'Έχεις αποθηκευμένη υπογραφή — πάτα για αλλαγή':'Δεν έχεις φτιάξει ακόμη υπογραφή'}
+$('#mSig').onclick=()=>{closeSheet();sigDialog(true)};
+
 // ---------- Μενού επιλογών (κουμπί G) ----------
 function openSheet(){
   if(editing){toggleEdit()}
-  $('#mRenameS').textContent=doc?doc.name:'';drawBm();rdApply();viewLabels();speakUI();
+  $('#mRenameS').textContent=doc?doc.name:'';sigPreview();drawBm();rdApply();viewLabels();speakUI();
   $('#mPin').classList.toggle('on',pinned);
   $('#sheet').classList.remove('hidden');$('#inkPop').classList.add('hidden');
   if(history.state&&history.state.v!=='sheet')history.pushState({v:'sheet'},'');
@@ -1292,7 +1389,6 @@ addEventListener('popstate',()=>{if(!$('#sheet').classList.contains('hidden'))cl
 function viewLabels(){
   const on=pv.on;$('#mViewT').textContent=on?'Μόνο κείμενο':'Πρωτότυπο σελίδας';$('#mViewS').textContent=on?'Καθαρό κείμενο που μεγαλώνει, χωρίς ζουμ':'Δες το PDF όπως είναι και γράψε πάνω του';
   $('#mView .ic').textContent=on?'📝':'📄';const q=$('#qView');q.querySelector('span').textContent=on?'📝':'📄';q.querySelector('small').textContent=on?'Κείμενο':'Σελίδα';
-  if(doc)$('#qTitle').textContent=doc.name;
 }
 function viewText(){pvClose();try{localStorage.setItem('glenread-view','text')}catch(e){}render()}
 const toggleView=()=>{closeSheet();if(pv.on)viewText();else pvOpen()};
@@ -1344,7 +1440,9 @@ $('#mHelp').onclick=()=>{closeSheet();dlgOpen('Οδηγός χρήσης',`<ul c
 <li><b>Στυλό / Μαρκαδόρος</b>: γράφεις ή υπογραμμίζεις. Πάτα ξανά το ίδιο εργαλείο για χρώμα και πάχος.</li>
 <li><b>Κείμενο (🔤)</b>: πάτα στη σελίδα και γράψε· πάτα σε υπάρχον κείμενο για αλλαγή ή σβήσιμο.</li>
 <li><b>Σχήμα</b>: γραμμή, βέλος, ορθογώνιο, κύκλος — σύρε από γωνία σε γωνία.</li>
-<li><b>Υπογραφή</b>: τη ζωγραφίζεις μία φορά και μετά τη βάζεις με ένα πάτημα.</li>
+<li><b>Υπογραφή</b>: τη φτιάχνεις ή την αλλάζεις από Μενού → «Η υπογραφή μου» και τη βάζεις με «✍️ Υπογραφή» στη σελίδα.</li>
+<li><b>Μετάφραση (🌐)</b>: επίλεξε κείμενο ή μετάφρασε όλο το έγγραφο. Στο κινητό ανοίγει στη Μετάφραση Google.</li>
+<li><b>Πάνω μπάρα</b>: Μενού → «Κουμπιά πάνω μπάρας» για να διαλέξεις τι φαίνεται. <b>Κάτω μπάρα</b>: σύρε τη κάτω για να μαζέψει.</li>
 <li><b>Μετακίνηση</b>: πατάς μια σημείωση (υπογραφή, κείμενο, σχήμα) για να τη σύρεις ή να τη μεγαλώσεις/μικρύνεις με ➕ ➖. <b>Γόμα</b>: σβήνει ό,τι αγγίξεις.</li>
 <li><b>↶ ↷</b>: αναίρεση και επανάληψη. Όλα αποθηκεύονται μόνα τους.</li>
 <li><b>Αποθήκευση PDF με τις σημειώσεις</b>: φτιάχνει νέο PDF για αποστολή — το πρωτότυπο δεν αλλάζει.</li></ul>`,null,true)};
