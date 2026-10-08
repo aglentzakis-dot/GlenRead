@@ -58,6 +58,9 @@ body.pv #gMenu{bottom:calc(128px + env(safe-area-inset-bottom))}
 .qhead{display:flex;align-items:center;justify-content:space-between;margin:8px 6px 8px}
 .qhead b{font-size:13px;letter-spacing:.04em;color:var(--acc2)}
 .qhead button{min-height:34px;padding:4px 10px;font-size:13px}
+.lifting{transform:scale(1.15);box-shadow:0 6px 18px #0005!important;background:#FDD117!important;z-index:2;position:relative}
+.sorting{outline:2px dashed var(--acc2);outline-offset:2px}
+#qbar [data-q],#inkBar>button{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .ordi{display:flex;align-items:center;gap:8px;padding:5px 2px;border-bottom:1px solid var(--line)}
 .ordi .oi{width:30px;text-align:center;font-size:19px}
 .ordi .ot{flex:1}
@@ -378,7 +381,7 @@ details summary{cursor:pointer;font-weight:600}
   <div class="pn">
     <div class="grip"></div>
     <div class="qhead"><b>Τα κουμπιά μου</b><button class="sec" id="qEdit">✏️ Προσαρμογή</button></div>
-    <p class="muted hidden" id="qEditHelp" style="margin:0 6px 8px;font-size:12.5px">⭐ = να φαίνεται εδώ, στα «Κουμπιά μου» · 📌 = να φαίνεται στην πάνω μπάρα. Αποθηκεύεται αμέσως.</p>
+    <p class="muted hidden" id="qEditHelp" style="margin:0 6px 8px;font-size:12.5px">⭐ = να φαίνεται εδώ, στα «Κουμπιά μου» · 📌 = να φαίνεται στην πάνω μπάρα (όσα υπάρχουν ήδη στην κάτω μπάρα δεν έχουν 📌, για να μην είναι διπλά). Αποθηκεύεται αμέσως. Τη σειρά στις μπάρες την αλλάζεις κρατώντας πατημένο ένα κουμπί και σέρνοντάς το.</p>
     <div id="qGrid"></div>
     <details class="cat" data-cat="view"><summary><span class="ci">👁</span><span class="ct"><b>Προβολή</b><small>Κείμενο ή σελίδα, αναζήτηση, μετάβαση</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mView"><span class="ic">📄</span><span class="tx"><b id="mViewT">Πρωτότυπο σελίδας</b><small id="mViewS">Δες το PDF όπως είναι και γράψε πάνω του</small></span></button>
@@ -451,7 +454,7 @@ details summary{cursor:pointer;font-weight:600}
 <script src="antigrafa.js"></script>
 <script src="efarmoges-mas.js"></script>
 <script>
-const VERSION='2.13';
+const VERSION='2.14';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -1359,7 +1362,9 @@ addEventListener('resize',setHH);setHH();setTimeout(setHH,500);
 
 // ---------- Πάνω μπάρα: ο χρήστης διαλέγει τα κουμπιά ----------
 const QB_ALL=[...document.querySelectorAll('#qbar [data-q]')].map(b=>[b.dataset.q,b.querySelector('small').textContent,b.querySelector('span').textContent]);
+const NOPIN=['draw','save','menu']; // υπάρχουν ήδη στην κάτω μπάρα/στο μενού — όχι διπλά στην πάνω
 let QB=['back','find','view','tr','speak','fsm','fsp'];try{const v=JSON.parse(localStorage.getItem('glenread-qb')||'null');if(Array.isArray(v))QB=v}catch(e){}
+QB=QB.filter(k=>!NOPIN.includes(k));
 function qbApply(){const bar=$('#qbar');QB.forEach(k=>{const b=bar.querySelector(`[data-q="${k}"]`);if(b)bar.appendChild(b)});bar.querySelectorAll('[data-q]').forEach(b=>{b.classList.toggle('off',!QB.includes(b.dataset.q));if(!QB.includes(b.dataset.q))bar.appendChild(b)})}
 qbApply();
 const QB_ACT={find:()=>openFind(),view:()=>toggleView(),tr:()=>openTranslate(),speak:()=>$('#mSpeak').onclick(),fsm:()=>$('#fsMinus').onclick(),fsp:()=>$('#fsPlus').onclick(),
@@ -1373,7 +1378,7 @@ let qEditing=false;
 function drawQGrid(){
   const g=$('#qGrid');g.classList.toggle('edit',qEditing);$('#qEditHelp').classList.toggle('hidden',!qEditing);$('#qEdit').textContent=qEditing?'✓ Τέλος':'✏️ Προσαρμογή';
   const list=QB_ALL.filter(([k])=>k!=='menu'&&(qEditing||FAV.includes(k)));
-  g.innerHTML=list.map(([k,l,i])=>`<button class="qt${QB.includes(k)?' in':''}${FAV.includes(k)?' fav':''}" data-k="${k}"><span>${i}</span><small>${l}</small><span class="star" data-star="${k}" role="button" aria-label="Στα κουμπιά μου">⭐</span><span class="pin" data-pin="${k}" role="button" aria-label="Στην πάνω μπάρα">📌</span></button>`).join('')
+  g.innerHTML=list.map(([k,l,i])=>`<button class="qt${QB.includes(k)?' in':''}${FAV.includes(k)?' fav':''}" data-k="${k}"><span>${i}</span><small>${l}</small><span class="star" data-star="${k}" role="button" aria-label="Στα κουμπιά μου">⭐</span>${NOPIN.includes(k)?'':`<span class="pin" data-pin="${k}" role="button" aria-label="Στην πάνω μπάρα">📌</span>`}</button>`).join('')
     +(!qEditing&&!list.length?'<p class="muted" style="grid-column:1/-1;margin:4px">Δεν έχεις διαλέξει κουμπιά. Πάτα «✏️ Προσαρμογή».</p>':'');
 }
 $('#qEdit').onclick=()=>{qEditing=!qEditing;drawQGrid()};
@@ -1413,12 +1418,34 @@ $('#mOrdTop').onclick=()=>{closeSheet();if(!QB.length)return toast('Η πάνω 
 $('#mOrdInk').onclick=()=>{closeSheet();
   orderDialog('Σειρά εργαλείων κάτω μπάρας',INK_ALL,INK,o=>{INK=o;try{localStorage.setItem('glenread-inkorder',JSON.stringify(INK))}catch(e){}inkApply();toast('Η σειρά αποθηκεύτηκε')})};
 
+// ---------- Αλλαγή σειράς με το δάχτυλο: κράτα πατημένο ένα κουμπί και σύρε το ----------
+function makeSortable(bar,sel,keyOf,onSave){
+  let it=null,timer=null,sx=0,sy=0,moved=false,blockClick=false;
+  bar.addEventListener('pointerdown',e=>{const b=e.target.closest(sel);if(!b||!bar.contains(b))return;sx=e.clientX;sy=e.clientY;moved=false;
+    timer=setTimeout(()=>{it=b;b.classList.add('lifting');bar.classList.add('sorting');try{navigator.vibrate&&navigator.vibrate(35)}catch(x){}toast('Σύρε το κουμπί στη νέα του θέση')},450)});
+  bar.addEventListener('pointermove',e=>{
+    if(!it){if(timer&&Math.hypot(e.clientX-sx,e.clientY-sy)>10){clearTimeout(timer);timer=null}return}
+    moved=true;const over=document.elementFromPoint(e.clientX,e.clientY),t=over&&over.closest(sel);
+    if(t&&t!==it&&bar.contains(t)&&!t.classList.contains('off')){const all=[...bar.querySelectorAll(sel)],after=all.indexOf(t)>all.indexOf(it);
+      bar.insertBefore(it,after?t.nextSibling:t)}
+    const br=bar.getBoundingClientRect();if(bar.scrollWidth>bar.clientWidth){if(e.clientX<br.left+30)bar.scrollLeft-=12;else if(e.clientX>br.right-30)bar.scrollLeft+=12}});
+  // όσο σέρνεις, η μπάρα δεν κυλάει
+  bar.addEventListener('touchmove',e=>{if(it)e.preventDefault()},{passive:false});
+  const end=()=>{clearTimeout(timer);timer=null;if(!it)return;it.classList.remove('lifting');bar.classList.remove('sorting');
+    blockClick=true;setTimeout(()=>blockClick=false,350);it=null;if(moved){onSave([...bar.querySelectorAll(sel)].map(keyOf));toast('Η σειρά αποθηκεύτηκε')}};
+  bar.addEventListener('pointerup',end);bar.addEventListener('pointercancel',end);
+  bar.addEventListener('click',e=>{if(blockClick){e.stopPropagation();e.preventDefault()}},true);
+  bar.addEventListener('contextmenu',e=>{if(e.target.closest(sel))e.preventDefault()});
+}
+makeSortable($('#qbar'),'[data-q]',b=>b.dataset.q,order=>{QB=order.filter(k=>QB.includes(k));try{localStorage.setItem('glenread-qb',JSON.stringify(QB))}catch(e){}});
+makeSortable($('#inkBar'),'#inkBar > button',inkKey,order=>{INK=order;try{localStorage.setItem('glenread-inkorder',JSON.stringify(INK))}catch(e){}});
+
 // ---------- Κάτω μπάρα: σύρσιμο κάτω = μαζεύει, πάνω ή πάτημα = ανοίγει ----------
 (()=>{let min=false;try{min=localStorage.getItem('glenread-inkmin')==='1'}catch(e){}
   const set=v=>{min=v;document.body.classList.toggle('inkmin',v);$('#ibLbl').textContent=v?'▲ Εργαλεία — πάτα ή σύρε πάνω':'Σύρε κάτω για να μαζέψεις';try{localStorage.setItem('glenread-inkmin',v?'1':'0')}catch(e){}if(v){$('#inkPop').classList.add('hidden')}};
   set(min);let y0=null;const bar=$('#inkBar');
   bar.addEventListener('touchstart',e=>{y0=e.touches[0].clientY},{passive:true});
-  bar.addEventListener('touchmove',e=>{if(y0==null)return;const dy=e.touches[0].clientY-y0;if(!min&&dy>35){y0=null;set(true)}else if(min&&dy<-20){y0=null;set(false)}},{passive:true});
+  bar.addEventListener('touchmove',e=>{if(y0==null||bar.classList.contains('sorting'))return;const dy=e.touches[0].clientY-y0;if(!min&&dy>35){y0=null;set(true)}else if(min&&dy<-20){y0=null;set(false)}},{passive:true});
   bar.addEventListener('touchend',()=>{y0=null});
   $('#ibGrip').onclick=()=>set(!min);
   bar.addEventListener('click',e=>{if(min&&!e.target.closest('#ibGrip')){e.stopPropagation();e.preventDefault();set(false)}},true);
