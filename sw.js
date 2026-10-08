@@ -1,5 +1,5 @@
-const CACHE='glenread-2.1';
-const CORE=['./','index.html','manifest.json','icon-192.png','icon-512.png','icon-512-maskable.png','apple-touch-icon.png','privacy.html','antigrafa.js','efarmoges-mas.js'];
+const CACHE='glenread-2.2';
+const CORE=['./','index.html','manifest.json','icon-192.png','icon-512.png','icon-512-maskable.png','apple-touch-icon.png','privacy.html','G-glenapps.png','antigrafa.js','efarmoges-mas.js'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE))));
 self.addEventListener('message',e=>{if(e.data==='skip')self.skipWaiting()});
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>(k.startsWith('diavaseto-')||k.startsWith('gdoc-')||k.startsWith('glenread-'))&&k!==CACHE&&k!=='glenread-lib'&&k!=='glenread-share').map(k=>caches.delete(k)))).then(()=>self.clients.claim())));

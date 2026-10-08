@@ -30,6 +30,11 @@ body.reading #reader{max-width:720px;margin:0 auto}
 .tools .row{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
 .tools .row::-webkit-scrollbar{display:none}
 .tools .row button{flex:0 0 auto}
+.tools .row.ic button{width:44px;height:44px;min-height:44px;padding:0;font-size:18px;border-radius:12px}
+body.reading .tools{position:fixed;left:0;right:0;top:0;z-index:7;background:var(--bg);box-shadow:0 2px 10px #0002}
+body.reading .tools.hide{transform:translateY(-110%);box-shadow:none}
+#gBadge{position:fixed;left:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:6;width:44px;height:44px;border-radius:50%;background:#fff;box-shadow:0 2px 8px #0003;display:grid;place-items:center;opacity:.92}
+#gBadge img{width:30px;height:auto}
 #readTop{position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:6;border-radius:50%;width:48px;height:48px;padding:0;box-shadow:0 2px 8px #0003}
 main{max-width:760px;margin:0 auto;padding:16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
@@ -199,20 +204,21 @@ details summary{cursor:pointer;font-weight:600}
 <!-- ΑΝΑΓΝΩΣΗ -->
 <section id="read" class="hidden">
   <div class="tools">
-    <div class="row">
-      <button class="sec" id="bBack">← Πίσω</button>
-      <input type="search" id="q" placeholder="Αναζήτηση στο κείμενο">
-      <button class="sec" id="bNext" title="Επόμενο">⬇</button>
+    <div class="row ic">
+      <button class="sec" id="bBack" title="Πίσω" aria-label="Πίσω">←</button>
+      <button class="sec" id="bFind" title="Αναζήτηση" aria-label="Αναζήτηση">🔍</button>
+      <button class="sec" id="bSpeak" title="Ανάγνωση φωναχτά" aria-label="Ανάγνωση φωναχτά">🔊</button>
+      <button class="sec" id="bSmall" title="Μικρότερα γράμματα" aria-label="Μικρότερα γράμματα">Α−</button>
+      <button class="sec" id="bLarge" title="Μεγαλύτερα γράμματα" aria-label="Μεγαλύτερα γράμματα">Α+</button>
+      <button class="sec" id="bCopy" title="Αντιγραφή" aria-label="Αντιγραφή">📋</button>
+      <button class="sec" id="bShare" title="Αποστολή" aria-label="Αποστολή">📤</button>
+      <button class="sec" id="bTxt" title="Αποθήκευση κειμένου" aria-label="Αποθήκευση κειμένου">💾</button>
+      <button class="sec" id="bEdit" title="Διόρθωση" aria-label="Διόρθωση">✏️</button>
+      <button class="sec" id="bFull" title="Πλήρης οθόνη" aria-label="Πλήρης οθόνη">⛶</button>
     </div>
-    <div class="row" style="margin-top:8px">
-      <button class="sec" id="bFull" title="Πλήρης οθόνη">⛶</button>
-      <button class="sec" id="bSmall">Α−</button>
-      <button class="sec" id="bLarge">Α+</button>
-      <button class="sec" id="bSpeak">🔊 Ανάγνωση</button>
-      <button class="sec" id="bCopy">📋 Αντιγραφή</button>
-      <button class="sec" id="bShare">📤 Αποστολή</button>
-      <button class="sec" id="bTxt">💾 Κείμενο</button>
-      <button class="sec" id="bEdit">✏️ Διόρθωση</button>
+    <div class="row hidden" id="findRow" style="margin-top:8px">
+      <input type="search" id="q" placeholder="Αναζήτηση στο κείμενο">
+      <button class="sec" id="bNext" title="Επόμενο" aria-label="Επόμενο">⬇</button>
     </div>
     <div class="muted" id="hits"></div>
   </div>
@@ -220,7 +226,8 @@ details summary{cursor:pointer;font-weight:600}
     <div class="warn hidden" id="lowConf"></div>
     <div id="reader"></div>
   </div>
-  <button id="readTop" class="hidden" title="Εργαλεία">☰</button>
+  <button id="readTop" title="Επιλογές" aria-label="Επιλογές">☰</button>
+  <div id="gBadge" aria-hidden="true"><img src="G-glenapps.png" alt=""></div>
 </section>
 </main>
 <div id="cam" class="hidden">
@@ -241,13 +248,13 @@ details summary{cursor:pointer;font-weight:600}
 <script src="antigrafa.js"></script>
 <script src="efarmoges-mas.js"></script>
 <script>
-const VERSION='2.1';
+const VERSION='2.2';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2600)};
-const show=id=>{if(id!=='home'&&history.state&&history.state.v!=='view')history.pushState({v:'view'},'');['home','work','read'].forEach(s=>$('#'+s).classList.toggle('hidden',s!==id));document.body.classList.toggle('reading',id==='read');if(id!=='read'){$('.tools').classList.remove('hide');$('#readTop').classList.add('hidden');if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}scrollTo(0,0);if(typeof setHH==='function')setHH();if(id==='home'&&typeof efmShow==='function')efmShow()};
+const show=id=>{if(id!=='home'&&history.state&&history.state.v!=='view')history.pushState({v:'view'},'');['home','work','read'].forEach(s=>$('#'+s).classList.toggle('hidden',s!==id));document.body.classList.toggle('reading',id==='read');if(id==='read'){$('.tools').classList.add('hide');$('#findRow').classList.add('hidden')}if(id!=='read'){$('.tools').classList.remove('hide');if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}scrollTo(0,0);if(typeof setHH==='function')setHH();if(id==='home'&&typeof efmShow==='function')efmShow()};
 const prog=(p,m)=>{$('#prog i').style.width=Math.round(p*100)+'%';if(m)$('#wMsg').textContent=m};
 let cancelled=false, doc=null; // doc = {id,name,pages:[{text,conf,ocr}],date}
 
@@ -560,22 +567,22 @@ let editing=false,editT=null;
 $('#reader').addEventListener('input',()=>{if(!editing)return;clearTimeout(editT);editT=setTimeout(()=>{doc.pages=[{text:$('#reader').innerText,conf:100,ocr:false}];saveDoc(doc)},800)});
 $('#bEdit').onclick=()=>{
   const r=$('#reader');
-  if(!editing){render();r.textContent=fullText();r.contentEditable=true;r.focus();$('#bEdit').textContent='✔️ Τέλος';editing=true}
-  else{const parts=r.innerText;doc.pages=[{text:parts,conf:100,ocr:false}];r.contentEditable=false;$('#bEdit').textContent='✏️ Διόρθωση';editing=false;saveDoc(doc);$('#lowConf').classList.add('hidden');render();toast('Αποθηκεύτηκε')}
+  if(!editing){render();r.textContent=fullText();r.contentEditable=true;r.focus();$('#bEdit').textContent='✔️';editing=true}
+  else{const parts=r.innerText;doc.pages=[{text:parts,conf:100,ocr:false}];r.contentEditable=false;$('#bEdit').textContent='✏️';editing=false;saveDoc(doc);$('#lowConf').classList.add('hidden');render();toast('Αποθηκεύτηκε')}
 };
 // εκφώνηση
 let speaking=false;
 $('#bSpeak').onclick=()=>{
   if(!('speechSynthesis' in window))return toast('Το κινητό δεν υποστηρίζει ανάγνωση φωναχτά');
-  if(speaking){speechSynthesis.cancel();speaking=false;$('#bSpeak').textContent='🔊 Ανάγνωση';return}
+  if(speaking){speechSynthesis.cancel();speaking=false;$('#bSpeak').textContent='🔊';return}
   const sel=getSelection().toString()||fullText();
   const chunks=sel.match(/[^.!;\n]{1,220}[.!;\n]?/g)||[sel];
   const v=speechSynthesis.getVoices().find(v=>v.lang.startsWith('el'));
-  chunks.forEach((c,i)=>{const u=new SpeechSynthesisUtterance(c);u.lang='el-GR';if(v)u.voice=v;if(i===chunks.length-1)u.onend=()=>{speaking=false;$('#bSpeak').textContent='🔊 Ανάγνωση'};speechSynthesis.speak(u)});
-  speaking=true;$('#bSpeak').textContent='⏹ Σταμάτα';
+  chunks.forEach((c,i)=>{const u=new SpeechSynthesisUtterance(c);u.lang='el-GR';if(v)u.voice=v;if(i===chunks.length-1)u.onend=()=>{speaking=false;$('#bSpeak').textContent='🔊'};speechSynthesis.speak(u)});
+  speaking=true;$('#bSpeak').textContent='⏹';
 };
 function goHome(){
-  try{speechSynthesis.cancel()}catch(e){}speaking=false;$('#bSpeak').textContent='🔊 Ανάγνωση';
+  try{speechSynthesis.cancel()}catch(e){}speaking=false;$('#bSpeak').textContent='🔊';
   if(editing)$('#bEdit').onclick();
   if(!$('#work').classList.contains('hidden'))cancelled=true;
   show('home');drawLast();
@@ -658,12 +665,16 @@ const setHH=()=>document.documentElement.style.setProperty('--hh',(document.body
 let lastY=0;
 addEventListener('scroll',()=>{
   if(!document.body.classList.contains('reading')||editing)return;
-  const y=scrollY,t=$('.tools');
-  if(y>lastY+12&&y>120){t.classList.add('hide');$('#readTop').classList.remove('hidden')}
-  else if(y<lastY-12||y<60){t.classList.remove('hide');$('#readTop').classList.add('hidden')}
+  const y=scrollY;
+  // όσο είναι ανοιχτή η αναζήτηση δεν κρύβεται τίποτα, για να βλέπεις τα αποτελέσματα
+  if(Math.abs(y-lastY)>12&&!toolsPinned&&$('#findRow').classList.contains('hidden'))toolsHide();
   lastY=y;
 },{passive:true});
-$('#readTop').onclick=()=>{$('.tools').classList.remove('hide');$('#readTop').classList.add('hidden')};
+let toolsPinned=false;
+function toolsHide(){$('.tools').classList.add('hide')}
+function toolsShow(){$('.tools').classList.remove('hide');toolsPinned=true;setTimeout(()=>toolsPinned=false,600)}
+$('#readTop').onclick=()=>{$('.tools').classList.contains('hide')?toolsShow():toolsHide()};
+$('#bFind').onclick=()=>{const r=$('#findRow');r.classList.toggle('hidden');if(!r.classList.contains('hidden'))$('#q').focus();else{$('#q').value='';$('#q').oninput()}};
 $('#bFull').onclick=()=>{
   if(document.fullscreenElement)return document.exitFullscreen().catch(()=>{});
   const el=document.documentElement;(el.requestFullscreen?el.requestFullscreen():Promise.reject()).catch(()=>toast('Η εφαρμογή είναι ήδη σε πλήρη οθόνη'));
