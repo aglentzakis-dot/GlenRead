@@ -172,12 +172,12 @@ details summary{cursor:pointer;font-weight:600}
   </div>
   <div class="card">
     <div class="big">
-      <button class="tile" id="bPdf"><span>📂</span>Άνοιγμα PDF</button>
+      <button class="tile" id="bPdf"><span>📂</span>Άνοιγμα αρχείου<small style="font-weight:400;font-size:11.5px;opacity:.75">PDF, Word, κείμενο, βιβλία…</small></button>
       <button class="tile" id="bCam"><span>📷</span>Φωτογράφιση σελίδων</button>
       <button class="tile sec" id="bImg"><span>🖼️</span>Από φωτογραφίες</button>
       <button class="tile sec" id="bHist"><span>🕘</span>Πρόσφατα</button>
     </div>
-    <input type="file" id="fPdf" accept="application/pdf" hidden>
+    <input type="file" id="fPdf" accept="application/pdf,.pdf,.docx,.dotx,.docm,.doc,.odt,.ott,.rtf,.txt,.text,.md,.markdown,.csv,.tsv,.log,.json,.xml,.html,.htm,.xhtml,.epub,.pptx,.srt,.vtt,.ini,text/*,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,application/rtf,application/epub+zip,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/json,application/xml" hidden>
     <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
     <input type="file" id="fImg" accept="image/*" multiple hidden>
     <p class="muted" style="margin:12px 0 0">Χωρίς διαφημιστικές εταιρείες, χωρίς συνδρομή, χωρίς ανέβασμα: τα έγγραφά σου δεν φεύγουν ποτέ από το κινητό.</p>
@@ -371,7 +371,7 @@ details summary{cursor:pointer;font-weight:600}
 <script src="antigrafa.js"></script>
 <script src="efarmoges-mas.js"></script>
 <script>
-const VERSION='2.5';
+const VERSION='2.6';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -587,6 +587,95 @@ async function openPdf(file){
     console.error(e);show('home');
     toast(e.message==='nolib'?'Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.':/password/i.test(e.name+e.message)?'Το PDF έχει κωδικό — δεν μπορεί να ανοίξει.':'Δεν άνοιξε το αρχείο. Ίσως είναι κατεστραμμένο.');
   }
+}
+
+// ---------- Όλα τα αρχεία κειμένου ----------
+const libs={};
+function loadLib(url){return libs[url]||(libs[url]=new Promise((ok,no)=>{const s=document.createElement('script');s.src=url;s.onload=ok;s.onerror=()=>{delete libs[url];no(new Error('nolib'))};document.head.appendChild(s)}))}
+const JSZIP='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',MAMMOTH='https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js';
+// κείμενο σε σωστή κωδικοποίηση: πρώτα UTF-8, αλλιώς ελληνικά Windows (παλιά αρχεία)
+function decodeText(buf){
+  const b=new Uint8Array(buf);
+  if(b[0]===0xFF&&b[1]===0xFE)return new TextDecoder('utf-16le').decode(b);
+  if(b[0]===0xFE&&b[1]===0xFF)return new TextDecoder('utf-16be').decode(b);
+  try{return new TextDecoder('utf-8',{fatal:true}).decode(b)}catch(e){}
+  try{return new TextDecoder('windows-1253').decode(b)}catch(e){return new TextDecoder('iso-8859-7').decode(b)}
+}
+const xmlDoc=s=>new DOMParser().parseFromString(s,'application/xml');
+function htmlText(html){const d=new DOMParser().parseFromString(html,'text/html');d.querySelectorAll('script,style,noscript').forEach(n=>n.remove());
+  d.querySelectorAll('br').forEach(n=>n.replaceWith('\n'));d.querySelectorAll('p,div,li,h1,h2,h3,h4,h5,h6,tr,blockquote,section,article').forEach(n=>n.append('\n'));
+  d.querySelectorAll('td,th').forEach(n=>n.append('\t'));return(d.body?d.body.textContent:d.documentElement.textContent||'').replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim()}
+function rtfText(rtf){
+  // μετατροπή RTF σε απλό κείμενο (με ελληνικούς χαρακτήρες \'xx και \uN)
+  let cp=1253;const m=rtf.match(/\\ansicpg(\d+)/);if(m)cp=+m[1];let dec;try{dec=new TextDecoder('windows-'+cp)}catch(e){dec=new TextDecoder('windows-1253')}
+  let out='',i=0,depth=0,skip=[],uc=1,pend=0;const st=[];
+  while(i<rtf.length){const ch=rtf[i];
+    if(ch==='{'){st.push(skip.length);depth++;i++;continue}
+    if(ch==='}'){depth--;const k=st.pop();skip.length=k||0;i++;continue}
+    if(ch==='\\'){const n=rtf[i+1];
+      if(n==="'"){const hx=rtf.substr(i+2,2);if(!skip.length){if(pend>0)pend--;else out+=dec.decode(new Uint8Array([parseInt(hx,16)]))}i+=4;continue}
+      if(n==='\\'||n==='{'||n==='}'){if(!skip.length)out+=n;i+=2;continue}
+      if(n==='*'){skip.push(1);i+=2;continue}
+      const w=/^\\([a-z]+)(-?\d+)? ?/i.exec(rtf.slice(i,i+40));if(!w){i+=2;continue}
+      const word=w[1],arg=w[2];i+=w[0].length;
+      if(['fonttbl','colortbl','stylesheet','info','pict','object','themedata','colorschememapping','latentstyles','datastore','xmlnstbl','listtable','listoverridetable','rsidtbl','generator'].includes(word)){skip.push(1);continue}
+      if(skip.length)continue;
+      if(word==='par'||word==='line'||word==='sect'||word==='page')out+='\n';else if(word==='tab'||word==='cell')out+='\t';else if(word==='row')out+='\n';
+      else if(word==='uc')uc=+arg;else if(word==='u'){let c=+arg;if(c<0)c+=65536;out+=String.fromCharCode(c);pend=uc}
+      continue}
+    if(ch==='\r'||ch==='\n'){i++;continue}
+    if(!skip.length){if(pend>0)pend--;else out+=ch}i++}
+  return out.replace(/\n{3,}/g,'\n\n').trim();
+}
+// παλιό Word (.doc): εξαγωγή κειμένου όσο γίνεται
+function docText(buf){
+  const b=new Uint8Array(buf);let best='';
+  const u16=new TextDecoder('utf-16le').decode(b).match(/[ -~Ͱ-Ͽἀ-῿ -ÿ‐-‟\r\n\t]{12,}/g)||[];
+  const t16=u16.join('\n');
+  const a8=decodeText(buf).match(/[ -~Ͱ-Ͽ -ÿ\r\n\t]{24,}/g)||[];
+  const t8=a8.join('\n');
+  best=(t16.replace(/\s/g,'').length>t8.replace(/\s/g,'').length*0.6)?t16:t8;
+  return best.replace(/\r/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+}
+async function odtText(buf){await loadLib(JSZIP);const z=await JSZip.loadAsync(buf);const x=xmlDoc(await z.file('content.xml').async('string'));
+  const out=[];const walk=n=>{for(const c of n.childNodes){if(c.nodeType===3){out.push(c.nodeValue);continue}const ln=c.localName;
+    if(ln==='s'){out.push(' '.repeat(+(c.getAttribute('text:c')||1)));continue}if(ln==='tab'){out.push('\t');continue}if(ln==='line-break'){out.push('\n');continue}
+    walk(c);if(ln==='p'||ln==='h')out.push('\n')}};walk(x.documentElement);return out.join('').replace(/\n{3,}/g,'\n\n').trim()}
+async function epubPages(buf){await loadLib(JSZIP);const z=await JSZip.loadAsync(buf);
+  const cont=xmlDoc(await z.file('META-INF/container.xml').async('string'));const opfPath=cont.getElementsByTagName('rootfile')[0].getAttribute('full-path');
+  const base=opfPath.includes('/')?opfPath.slice(0,opfPath.lastIndexOf('/')+1):'';const opf=xmlDoc(await z.file(opfPath).async('string'));
+  const man={};[...opf.getElementsByTagName('item')].forEach(it=>man[it.getAttribute('id')]=it.getAttribute('href'));
+  const pages=[];for(const r of opf.getElementsByTagName('itemref')){const h=man[r.getAttribute('idref')];if(!h)continue;const f=z.file(decodeURIComponent(base+h));if(!f)continue;
+    const t=htmlText(await f.async('string'));if(t.trim())pages.push({text:t,conf:100,ocr:false})}
+  return pages}
+async function pptxPages(buf){await loadLib(JSZIP);const z=await JSZip.loadAsync(buf);
+  const names=Object.keys(z.files).filter(n=>/^ppt\/slides\/slide\d+\.xml$/.test(n)).sort((a,b)=>+a.match(/\d+/)[0]-+b.match(/\d+/)[0]);
+  const pages=[];for(const n of names){const x=xmlDoc(await z.file(n).async('string'));const paras=[...x.getElementsByTagNameNS('*','p')].map(p=>[...p.getElementsByTagNameNS('*','t')].map(t=>t.textContent).join('')).filter(Boolean);
+    pages.push({text:paras.join('\n'),conf:100,ocr:false})}
+  return pages}
+const KIND={docx:'Word',dotx:'Word',docm:'Word',doc:'Word (παλιό)',odt:'OpenDocument',ott:'OpenDocument',rtf:'RTF',epub:'ηλεκτρονικό βιβλίο',pptx:'παρουσίαση',html:'σελίδα ιστού',htm:'σελίδα ιστού',xhtml:'σελίδα ιστού'};
+async function openAny(file){
+  if(!file)return toast('Δεν ήρθε κανένα αρχείο');
+  const name=file.name||'αρχείο',ext=(name.match(/\.([a-z0-9]+)$/i)||[])[1]?.toLowerCase()||'',t=file.type||'';
+  if(t==='application/pdf'||ext==='pdf')return openPdf(file);
+  if(t.startsWith('image/')){addImages([file]);return toast('Η φωτογραφία μπήκε — πάτα «Αναγνώριση κειμένου»')}
+  show('work');$('#wTitle').textContent=name;prog(.3,'Διαβάζω το αρχείο…');
+  try{
+    const buf=await file.arrayBuffer();let pages;
+    if(['docx','dotx','docm'].includes(ext)||t.includes('wordprocessingml')){await loadLib(MAMMOTH);const r=await mammoth.extractRawText({arrayBuffer:buf});pages=[{text:r.value}]}
+    else if(ext==='doc'||t==='application/msword'){pages=[{text:docText(buf)}];toast('Παλιό αρχείο Word: διαβάστηκε το κείμενο, χωρίς μορφοποίηση')}
+    else if(['odt','ott'].includes(ext)||t.includes('opendocument.text'))pages=[{text:await odtText(buf)}];
+    else if(ext==='rtf'||t.includes('rtf'))pages=[{text:rtfText(decodeText(buf))}];
+    else if(ext==='epub'||t==='application/epub+zip')pages=await epubPages(buf);
+    else if(ext==='pptx'||t.includes('presentationml'))pages=await pptxPages(buf);
+    else if(['html','htm','xhtml'].includes(ext)||t==='text/html')pages=[{text:htmlText(decodeText(buf))}];
+    else{const txt=decodeText(buf);const bad=(txt.slice(0,4000).match(/[\u0000-\u0008\u000E-\u001F�]/g)||[]).length;
+      if(bad>40){show('home');return toast('Αυτό το αρχείο δεν είναι κείμενο που μπορώ να διαβάσω')}
+      pages=[{text:ext==='srt'||ext==='vtt'?txt.replace(/^\d+\s*$/gm,'').replace(/^[\d:.,]+ --> .*$/gm,'').replace(/^WEBVTT.*$/m,'').replace(/\n{3,}/g,'\n\n').trim():txt}]}
+    pages=pages.map(p=>({text:(p.text||'').replace(/\r\n?/g,'\n'),conf:100,ocr:false}));
+    if(!pages.length||pages.every(p=>!p.text.trim())){show('home');return toast('Δεν βρέθηκε κείμενο μέσα στο αρχείο')}
+    prog(1);finish({name:name.replace(/\.[^.]+$/,''),pages,kind:KIND[ext]||'κείμενο'});
+  }catch(e){console.error(e);show('home');toast(e.message==='nolib'?'Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.':'Δεν άνοιξε το αρχείο. Ίσως είναι κατεστραμμένο ή με κωδικό.')}
 }
 
 // ---------- Φωτογραφίες ----------
@@ -835,6 +924,7 @@ async function pvOpen(){
   viewLabels();try{localStorage.setItem('glenread-view','page')}catch(e){}
   const box=$('#pagesView');box.innerHTML='<p class="muted" style="text-align:center;padding:30px">Φόρτωση σελίδων…</p>';
   pv.file=await draftGet('file-'+doc.id);
+  if(!pv.file&&doc.kind){box.innerHTML='<div class="card" style="margin:16px">Για αρχεία «'+esc(doc.kind)+'» υπάρχει μόνο η προβολή κειμένου. Για να γράψεις πάνω σε σελίδες, άνοιξε PDF ή φωτογραφίες.</div>';return}
   if(!pv.file){box.innerHTML='<div class="card" style="margin:16px">Το πρωτότυπο αυτού του εγγράφου δεν κρατήθηκε (ανοίχτηκε πριν την έκδοση 2.3). Άνοιξέ το ξανά από το «Άνοιγμα PDF» για να γράψεις πάνω του.</div>';return}
   doc.ann=doc.ann||{};pv.undo=[];pv.redo=[];pv.pages=[];pv.z=1;box.style.setProperty('--z',1);
   try{
@@ -1106,7 +1196,7 @@ $('#bCam').onclick=$('#bAddPage').onclick=()=>openCam();
 $('#bImg').onclick=()=>$('#fImg').click();
 $('#bHist').onclick=()=>{$('#histBox').classList.remove('hidden');drawHist()};
 $('#bHistClose').onclick=()=>$('#histBox').classList.add('hidden');
-$('#fPdf').onchange=e=>{const f=e.target.files[0];e.target.value='';f&&openPdf(f)};
+$('#fPdf').onchange=e=>{const f=e.target.files[0];e.target.value='';f&&openAny(f)};
 $('#fCam').onchange=$('#fImg').onchange=e=>{try{sessionStorage.removeItem('glenread-cam')}catch(x){}const f=[...e.target.files];e.target.value='';addImages(f)};
 $('#bOcrImgs').onclick=ocrShots;$('#bMakePdf').onclick=makePdf;
 $('#bCancel').onclick=()=>{cancelled=true;prog(0,'Ακύρωση μετά την τρέχουσα σελίδα… οι σελίδες που έγιναν κρατιούνται')};
@@ -1121,15 +1211,14 @@ $('#bCancel').onclick=()=>{cancelled=true;prog(0,'Ακύρωση μετά την
     for(const k of keys){const r=await c.match(k);const b=await r.blob();files.push(new File([b],decodeURIComponent(r.headers.get('x-name')||'arxeio'),{type:r.headers.get('content-type')||b.type}))}
     for(const k of keys)await c.delete(k);
     if(!files.length)return toast('Δεν ήρθε κανένα αρχείο');
-    const pdf=files.find(f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name));
-    if(pdf)return openPdf(pdf);
     const imgs=files.filter(f=>f.type.startsWith('image/'));
-    if(imgs.length){addImages(imgs);toast('Οι φωτογραφίες μπήκαν — πάτα «Αναγνώριση κειμένου»')}else toast('Αυτό το αρχείο δεν υποστηρίζεται');
+    if(imgs.length===files.length){addImages(imgs);return toast('Οι φωτογραφίες μπήκαν — πάτα «Αναγνώριση κειμένου»')}
+    openAny(files.find(f=>!f.type.startsWith('image/')));
   }catch(e){toast('Το αρχείο δεν άνοιξε')}
 })();
 
 // άνοιγμα PDF που «μοιράστηκε» προς την εφαρμογή
-if('launchQueue' in window)launchQueue.setConsumer(async p=>{if(p.files&&p.files[0])openPdf(await p.files[0].getFile())});
+if('launchQueue' in window)launchQueue.setConsumer(async p=>{if(p.files&&p.files[0])openAny(await p.files[0].getFile())});
 
 const setHH=()=>document.documentElement.style.setProperty('--hh',(document.body.classList.contains('reading')?0:$('.hdr').offsetHeight)+'px');
 addEventListener('resize',setHH);setHH();setTimeout(setHH,500);

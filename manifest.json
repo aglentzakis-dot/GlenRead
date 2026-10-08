@@ -32,6 +32,27 @@
       "accept": {
         "application/pdf": [
           ".pdf"
+        ],
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
+          ".docx"
+        ],
+        "application/msword": [
+          ".doc"
+        ],
+        "application/vnd.oasis.opendocument.text": [
+          ".odt"
+        ],
+        "application/rtf": [
+          ".rtf"
+        ],
+        "text/plain": [
+          ".txt",
+          ".md",
+          ".csv",
+          ".srt"
+        ],
+        "application/epub+zip": [
+          ".epub"
         ]
       }
     }
@@ -53,7 +74,30 @@
             ".jpg",
             ".jpeg",
             ".png",
-            ".webp"
+            ".webp",
+            "text/*",
+            ".txt",
+            ".md",
+            ".csv",
+            ".html",
+            ".htm",
+            ".rtf",
+            ".srt",
+            ".json",
+            ".xml",
+            "application/msword",
+            ".doc",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            ".docx",
+            "application/vnd.oasis.opendocument.text",
+            ".odt",
+            "application/rtf",
+            "application/epub+zip",
+            ".epub",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            ".pptx",
+            "application/json",
+            "application/xml"
           ]
         }
       ]
