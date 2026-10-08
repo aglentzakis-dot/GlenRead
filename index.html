@@ -42,10 +42,12 @@ body.reading.pinned #read{padding-top:64px}
 #findBar{position:fixed;left:0;right:0;top:0;z-index:9;background:var(--card);box-shadow:0 2px 10px #0003;padding:8px 10px;padding-top:calc(8px + env(safe-area-inset-top));display:flex;flex-direction:column;gap:4px}
 #findBar .row{flex-wrap:nowrap}
 /* κουμπί μενού με το G */
-#gMenu{position:fixed;left:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:8;width:62px;height:62px;min-height:0;padding:0;border-radius:50%;background:#fff;border:4px solid #FDD117;box-shadow:0 0 0 2px #EF9F02,0 4px 14px #0005;display:grid;place-items:center}
+#gMenu{position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom));touch-action:none;transition:transform .15s;z-index:8;width:62px;height:62px;min-height:0;padding:0;border-radius:50%;background:#fff;border:4px solid #FDD117;box-shadow:0 0 0 2px #EF9F02,0 4px 14px #0005;display:grid;place-items:center}
 #gMenu img{width:40px;height:auto}
 #gMenu::after{content:"Μενού";position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);background:#EF9F02;color:#fff;font-size:10px;font-weight:800;border-radius:8px;padding:1px 6px;letter-spacing:.3px}
-body.pv #gMenu{bottom:calc(92px + env(safe-area-inset-bottom))}
+body.pv #gMenu{bottom:calc(128px + env(safe-area-inset-bottom))}
+#gMenu.custom{right:auto!important;bottom:auto!important;left:var(--gx);top:var(--gy)}
+#gMenu.dragging{transform:scale(1.18);box-shadow:0 0 0 2px #EF9F02,0 10px 24px #0007;transition:none}
 /* φύλλο μενού */
 #sheet{position:fixed;inset:0;z-index:30}
 #sheet .bk{position:absolute;inset:0;background:#0007}
@@ -79,25 +81,23 @@ body.pv #gMenu{bottom:calc(92px + env(safe-area-inset-bottom))}
 .help li{margin:6px 0}
 /* προβολή «Σελίδα» με σημειώσεις */
 body.pv #read>.card{display:none}
-#pagesView{padding:8px 0 150px;overflow-x:auto;touch-action:pan-x pan-y}
+#pagesView{padding:8px 0 200px;overflow-x:auto;touch-action:pan-x pan-y}
 .pvp{position:relative;margin:0 auto 10px;width:calc(var(--z,1)*100%);max-width:calc(var(--z,1)*900px);background:#fff;box-shadow:0 1px 6px #0002}
 .pvp canvas{position:absolute;inset:0;width:100%;height:100%}
 body.drawing .pvp .ink{touch-action:none}
 body:not(.drawing) .pvp .ink{pointer-events:none}
 .pvn{position:absolute;right:8px;bottom:6px;font-size:11px;color:#888;z-index:1}
-#inkBar{position:fixed;left:0;right:0;bottom:0;z-index:8;display:flex;align-items:center;gap:2px;background:var(--card);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom));overflow-x:auto;scrollbar-width:none}
-#inkBar::-webkit-scrollbar{display:none}
-#inkBar button{flex:0 0 auto;width:60px;height:62px;min-height:0;padding:2px;border-radius:14px;background:transparent;border:0;font-size:22px;color:var(--ink);flex-direction:column;gap:1px;line-height:1.1}
-#inkBar button small{font-size:10px;font-weight:600;color:var(--soft)}
+#inkBar{position:fixed;left:0;right:0;bottom:0;z-index:8;display:grid;grid-template-columns:repeat(6,1fr);gap:3px;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -2px 10px #0001;padding:5px 6px calc(5px + env(safe-area-inset-bottom))}
+#inkBar button{width:100%;height:50px;min-height:0;padding:2px 0;border-radius:12px;background:transparent;border:0;font-size:19px;color:var(--ink);flex-direction:column;gap:0;line-height:1.15}
+#inkBar button small{font-size:9.5px;font-weight:600;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 #inkBar button.on{background:#FDD11766;box-shadow:inset 0 0 0 2px var(--acc2)}
-#inkBar .dot{display:inline-block;width:24px;height:24px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #888}
-#inkBar .sep{flex:0 0 1px;height:40px;background:var(--line);margin:0 2px}
-#inkPop{position:fixed;left:8px;right:8px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:9;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 6px 20px #0003;padding:10px}
+#inkBar .dot{display:inline-block;width:20px;height:20px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #888}
+#inkPop{position:fixed;left:8px;right:8px;bottom:calc(122px + env(safe-area-inset-bottom));z-index:9;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 6px 20px #0003;padding:10px}
 #inkPop .sws{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0 8px}
 #inkPop .sws button{width:36px;height:36px;min-height:0;padding:0;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #999}
 #inkPop .sws button.on{box-shadow:0 0 0 3px var(--acc2)}
 #inkPop .lbl{font-size:12.5px;color:var(--soft);margin:2px 2px}
-body.pv #toast{bottom:calc(150px + env(safe-area-inset-bottom))}
+body.pv #toast{bottom:calc(196px + env(safe-area-inset-bottom))}
 #zoomHint{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9;background:#000b;color:#fff;border-radius:12px;padding:4px 10px;font-size:13px;pointer-events:none}
 main{max-width:760px;margin:0 auto;padding:16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
@@ -299,10 +299,10 @@ details summary{cursor:pointer;font-weight:600}
     <button data-tool="sig"><span>✍️</span><small>Υπογραφή</small></button>
     <button data-tool="mv"><span>✥</span><small>Μετακίνηση</small></button>
     <button data-tool="er"><span>🧽</span><small>Γόμα</small></button>
-    <span class="sep"></span>
     <button id="inkColor"><span class="dot"></span><small>Χρώμα</small></button>
     <button id="inkUndo"><span>↶</span><small>Αναίρεση</small></button>
     <button id="inkRedo"><span>↷</span><small>Επανάληψη</small></button>
+    <button id="inkSave"><span>📑</span><small>Αποθήκευση</small></button>
   </div>
   <div id="inkPop" class="hidden"></div>
   <button id="gMenu" aria-label="Μενού επιλογών"><img src="G-glenapps.png" alt=""></button>
@@ -371,7 +371,7 @@ details summary{cursor:pointer;font-weight:600}
 <script src="antigrafa.js"></script>
 <script src="efarmoges-mas.js"></script>
 <script>
-const VERSION='2.6';
+const VERSION='2.7';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -1093,6 +1093,7 @@ function pvApply(a,fwd){const L=doc.ann[a.i]=doc.ann[a.i]||[];
   else if(a.ed){const o=a.ed.o,v=fwd?a.ed.b:a.ed.a;Object.assign(o,v)}
   else{const add=a.add?fwd:!fwd,list=a.add||a.del;if(add)L.push(...list);else list.forEach(x=>{const k=L.indexOf(x);if(k>=0)L.splice(k,1)})}
   pvInk(a.i);annSave()}
+$('#inkSave').onclick=()=>$('#mAnnPdf').onclick();
 $('#inkUndo').onclick=()=>{const a=pv.undo.pop();if(a){pvApply(a,false);pv.redo.push(a)}else toast('Δεν υπάρχει κάτι για αναίρεση')};
 $('#inkRedo').onclick=()=>{const a=pv.redo.pop();if(a){pvApply(a,true);pv.undo.push(a)}};
 // κουτί κειμένου
@@ -1232,7 +1233,23 @@ function openSheet(){
   if(history.state&&history.state.v!=='sheet')history.pushState({v:'sheet'},'');
 }
 function closeSheet(fromPop){if($('#sheet').classList.contains('hidden'))return;$('#sheet').classList.add('hidden');if(!fromPop&&history.state&&history.state.v==='sheet')history.back()}
-$('#gMenu').onclick=openSheet;$('#sheet .bk').onclick=()=>closeSheet();
+// κουμπί G: πάτημα = μενού· παρατεταμένο πάτημα = το σέρνεις όπου θέλεις (η θέση αποθηκεύεται)
+(()=>{
+  const g=$('#gMenu');let timer=null,drag=false,moved=false,sx=0,sy=0,ox=0,oy=0;
+  const S=62,clamp=(x,y)=>{const minB=document.body.classList.contains('pv')?126:12;return[Math.max(6,Math.min(innerWidth-S-6,x)),Math.max(6,Math.min(innerHeight-S-minB,y))]};
+  const place=(x,y)=>{[x,y]=clamp(x,y);g.style.setProperty('--gx',x+'px');g.style.setProperty('--gy',y+'px');g.classList.add('custom');return[x,y]};
+  const load=()=>{try{const p=JSON.parse(localStorage.getItem('glenread-gpos')||'null');if(p)place(p.x*innerWidth,p.y*innerHeight);else g.classList.remove('custom')}catch(e){}};
+  load();addEventListener('resize',load);new MutationObserver(()=>{if(g.classList.contains('custom')){const r=g.getBoundingClientRect();place(r.left,r.top)}}).observe(document.body,{attributes:true,attributeFilter:['class']});
+  g.addEventListener('pointerdown',e=>{moved=false;sx=e.clientX;sy=e.clientY;const r=g.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;g.setPointerCapture(e.pointerId);
+    timer=setTimeout(()=>{drag=true;g.classList.add('dragging');try{navigator.vibrate&&navigator.vibrate(40)}catch(x){}},450)});
+  g.addEventListener('pointermove',e=>{if(drag){moved=true;place(e.clientX-ox,e.clientY-oy);return}if(Math.hypot(e.clientX-sx,e.clientY-sy)>10){clearTimeout(timer)}});
+  const end=e=>{clearTimeout(timer);if(drag){drag=false;g.classList.remove('dragging');const r=g.getBoundingClientRect();
+      try{localStorage.setItem('glenread-gpos',JSON.stringify({x:r.left/innerWidth,y:r.top/innerHeight}))}catch(x){}
+      if(!moved)toast('Σύρε το κουμπί όπου θέλεις');else toast('Η θέση του κουμπιού αποθηκεύτηκε');return}
+    if(e.type==='pointerup'&&Math.hypot(e.clientX-sx,e.clientY-sy)<12)openSheet()};
+  g.addEventListener('pointerup',end);g.addEventListener('pointercancel',end);
+  g.addEventListener('contextmenu',e=>e.preventDefault());
+})();$('#sheet .bk').onclick=()=>closeSheet();
 addEventListener('popstate',()=>{if(!$('#sheet').classList.contains('hidden'))closeSheet(true)});
 // σύρσιμο προς τα κάτω κλείνει το μενού
 (()=>{let y0=null;const pn=$('#sheet .pn');pn.addEventListener('touchstart',e=>{y0=pn.scrollTop<=0?e.touches[0].clientY:null},{passive:true});
@@ -1287,7 +1304,7 @@ $('#bmList').onclick=async e=>{const go=e.target.closest('[data-k]'),del=e.targe
 $('#mRename').onclick=()=>{closeSheet();dlgOpen('Μετονομασία εγγράφου',`<input id="rnIn" value="${esc(doc.name).replace(/"/g,'&quot;')}">`,()=>{const v=$('#rnIn').value.trim();if(v){doc.name=v;saveDoc(doc);viewLabels();toast('Μετονομάστηκε')}});setTimeout(()=>$('#rnIn').select(),50)};
 // οδηγός
 $('#mHelp').onclick=()=>{closeSheet();dlgOpen('Οδηγός χρήσης',`<ul class="help">
-<li><b>Κουμπί G (κάτω αριστερά)</b>: ανοίγει αυτό το μενού με όλες τις επιλογές.</li>
+<li><b>Κουμπί G</b>: ανοίγει αυτό το μενού. Κράτα το πατημένο για να το μετακινήσεις όπου σε βολεύει.</li>
 <li><b>Δύο δάχτυλα</b>: στο κείμενο μεγαλώνουν τα γράμματα· στη σελίδα κάνουν μεγέθυνση. Ποτέ δεν ζωγραφίζουν.</li>
 <li><b>Κείμενο ή Σελίδα</b>: «Κείμενο» = καθαρό κείμενο για εύκολο διάβασμα· «Σελίδα» = το πρωτότυπο PDF, για να γράψεις πάνω του.</li>
 <li><b>Στυλό / Μαρκαδόρος</b>: γράφεις ή υπογραμμίζεις. Πάτα ξανά το ίδιο εργαλείο για χρώμα και πάχος.</li>
