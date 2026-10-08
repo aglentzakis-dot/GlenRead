@@ -98,6 +98,10 @@ body:not(.drawing) .pvp .ink{pointer-events:none}
 #inkPop .sws button.on{box-shadow:0 0 0 3px var(--acc2)}
 #inkPop .lbl{font-size:12.5px;color:var(--soft);margin:2px 2px}
 body.pv #toast{bottom:calc(196px + env(safe-area-inset-bottom))}
+body.selon #gMenu{display:none}
+#selBar{position:fixed;left:8px;right:8px;bottom:calc(122px + env(safe-area-inset-bottom));z-index:9;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:var(--card);border:2px solid var(--acc2);border-radius:16px;box-shadow:0 6px 20px #0003;padding:6px}
+#selBar button{min-height:46px;padding:4px;flex-direction:column;gap:0;font-size:18px;line-height:1.1;background:transparent;border:1px solid var(--line);color:var(--ink)}
+#selBar button small{font-size:10.5px;font-weight:600;color:var(--soft)}
 #zoomHint{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9;background:#000b;color:#fff;border-radius:12px;padding:4px 10px;font-size:13px;pointer-events:none}
 main{max-width:760px;margin:0 auto;padding:16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
@@ -305,6 +309,12 @@ details summary{cursor:pointer;font-weight:600}
     <button id="inkSave"><span>📑</span><small>Αποθήκευση</small></button>
   </div>
   <div id="inkPop" class="hidden"></div>
+  <div id="selBar" class="hidden">
+    <button id="selMinus"><span>➖</span><small>Μικρότερο</small></button>
+    <button id="selPlus"><span>➕</span><small>Μεγαλύτερο</small></button>
+    <button id="selDel"><span>🗑</span><small>Σβήσιμο</small></button>
+    <button id="selDone"><span>✓</span><small>Τέλος</small></button>
+  </div>
   <button id="gMenu" aria-label="Μενού επιλογών"><img src="G-glenapps.png" alt=""></button>
 </section>
 </main>
@@ -371,7 +381,7 @@ details summary{cursor:pointer;font-weight:600}
 <script src="antigrafa.js"></script>
 <script src="efarmoges-mas.js"></script>
 <script>
-const VERSION='2.7';
+const VERSION='2.8';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -944,6 +954,7 @@ async function pvOpen(){
   pvTool(pv.tool,true);
 }
 function pvClose(){
+  pv.sel=null;$('#selBar').classList.add('hidden');document.body.classList.remove('selon');
   pv.on=false;document.body.classList.remove('pv','drawing');$('#pagesView').classList.add('hidden');$('#inkBar').classList.add('hidden');$('#inkPop').classList.add('hidden');
   if(pv.obs){pv.obs.disconnect();pv.obs=null}$('#pagesView').innerHTML='';pv.pdf=null;pv.file=null;viewLabels();
 }
@@ -976,7 +987,26 @@ function pvInk(i,extra){
   const el=$(`.pvp[data-i="${i}"]`);if(!el||!el._drawn)return;
   const c=el.querySelector('.ink'),x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);
   drawAnn(x,c.width,c.height,[...(doc.ann[i]||[]),...(extra||[])]);
+  if(pv.sel&&pv.sel.i===i&&pv.sel.objs.length){const b=bboxOf(i,pv.sel.objs),W=c.width,H=c.height,m=6;
+    x.save();x.setLineDash([8,6]);x.lineWidth=2.5;x.strokeStyle='#EF9F02';x.strokeRect(b.x0*W-m,b.y0*H-m,(b.x1-b.x0)*W+2*m,(b.y1-b.y0)*H+2*m);x.restore()}
 }
+// πλαίσιο που περικλείει μια ομάδα σημειώσεων (σε κλάσματα σελίδας)
+function bboxOf(i,objs){const a=pv.pages[i].h/pv.pages[i].w;let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  objs.forEach(o=>{if(o.t==='tx'){const b=txBox(o,a);x0=Math.min(x0,b.x);y0=Math.min(y0,b.y);x1=Math.max(x1,b.x+b.w);y1=Math.max(y1,b.y+b.h)}
+    else o.pts.forEach(q=>{x0=Math.min(x0,q[0]-o.w/2);x1=Math.max(x1,q[0]+o.w/2);y0=Math.min(y0,q[1]-o.w/2/a);y1=Math.max(y1,q[1]+o.w/2/a)})});
+  return{x0,y0,x1,y1}}
+const snap=o=>JSON.parse(JSON.stringify({pts:o.pts,w:o.w,s:o.s,x:o.x,y:o.y}));
+function selShow(i,objs){pv.sel={i,objs};document.body.classList.add('selon');$('#selBar').classList.remove('hidden');$('#inkPop').classList.add('hidden');pvInk(i)}
+function selClear(){const s=pv.sel;pv.sel=null;document.body.classList.remove('selon');$('#selBar').classList.add('hidden');if(s)pvInk(s.i)}
+function selScale(f){const S=pv.sel;if(!S)return;const b=bboxOf(S.i,S.objs),cx=(b.x0+b.x1)/2,cy=(b.y0+b.y1)/2;
+  if(f>1&&(b.x1-b.x0)*f>1.2)return toast('Δεν μεγαλώνει άλλο');if(f<1&&(b.x1-b.x0)*f<.02)return toast('Δεν μικραίνει άλλο');
+  const ch=S.objs.map(o=>{const a=snap(o);
+    if(o.t==='tx'){o.x=cx+(o.x-cx)*f;o.y=cy+(o.y-cy)*f;o.s*=f}else{o.pts=o.pts.map(q=>[+(cx+(q[0]-cx)*f).toFixed(4),+(cy+(q[1]-cy)*f).toFixed(4)]);o.w*=f}
+    return{o,a,b:snap(o)}});
+  pushAct({i:S.i,ed2:ch});pvInk(S.i)}
+$('#selMinus').onclick=()=>selScale(1/1.15);$('#selPlus').onclick=()=>selScale(1.15);
+$('#selDel').onclick=()=>{const S=pv.sel;if(!S)return;doc.ann[S.i]=(doc.ann[S.i]||[]).filter(o=>!S.objs.includes(o));pushAct({i:S.i,del:S.objs});selClear();pvInk(S.i)};
+$('#selDone').onclick=()=>selClear();
 // μέγεθος κειμένου (σε κλάσματα σελίδας) για να το «πιάνουμε» με το δάχτυλο
 const mctx=document.createElement('canvas').getContext('2d');
 function txBox(s,asp){const W=1000;mctx.font=`600 ${s.s*W}px system-ui,sans-serif`;const lines=(s.text||'').split('\n');const w=Math.max(...lines.map(l=>mctx.measureText(l).width))/W;return{x:s.x,y:s.y,w,h:lines.length*s.s*1.25/asp}}
@@ -1017,7 +1047,7 @@ function pvBind(el){
     if(pv.tool==='er'){erased=[];erase(p);return}
     if(pv.tool==='tx'){const s=hitObj(i,p,.01);textDialog(i,s&&s.t==='tx'?s:null,p);return}
     if(pv.tool==='sig'){placeSig(i,p);return}
-    if(pv.tool==='mv'){const s=hitObj(i,p,.03);if(!s){toast('Πάτα πάνω σε μια σημείωση για να τη μετακινήσεις');return}mv={objs:groupOf(i,s),p0:p,dx:0,dy:0};return}
+    if(pv.tool==='mv'){const s=hitObj(i,p,.03);if(!s){selClear();toast('Πάτα πάνω σε μια σημείωση για να τη μετακινήσεις ή να αλλάξεις μέγεθος');return}const g=groupOf(i,s);selShow(i,g);mv={objs:g,p0:p,dx:0,dy:0};return}
     if(pv.tool==='sh'){shape={a:p,b:p};return}
     cur={t:pv.tool,c:pv.tool==='hl'?HL_COLORS[pv.hl]:PEN_COLORS[pv.pen],w:pv.tool==='hl'?WIDTHS.hl[pv.hw]:WIDTHS.pen[pv.pw],pts:[p]};live([cur]);
   });
@@ -1061,9 +1091,9 @@ let zhT=null;function zoomHint(z){let h=$('#zoomHint');if(!h){h=document.createE
 // εργαλεία
 const TOOL_TIPS={pan:'Κύλιση: μετακινείσαι στη σελίδα. Δύο δάχτυλα = μεγέθυνση.',pen:'Στυλό: γράψε με ένα δάχτυλο. Δύο δάχτυλα = μεγέθυνση, δεν γράφει.',hl:'Μαρκαδόρος: σύρε πάνω στις γραμμές του κειμένου.',
   tx:'Κείμενο: πάτα στο σημείο που θέλεις να γράψεις. Πάτα σε υπάρχον κείμενο για αλλαγή.',sh:'Σχήμα: σύρε από τη μία γωνία στην άλλη. Ξαναπάτα «Σχήμα» για άλλο σχήμα.',
-  sig:'Υπογραφή: πάτα στο σημείο που θέλεις να μπει η υπογραφή σου.',mv:'Μετακίνηση: πιάσε μια σημείωση και σύρε τη.',er:'Γόμα: πέρνα πάνω από ό,τι θέλεις να σβήσεις.'};
+  sig:'Υπογραφή: πάτα στο σημείο που θέλεις να μπει η υπογραφή σου.',mv:'Μετακίνηση: πάτα μια σημείωση για να τη μετακινήσεις, να τη μεγαλώσεις ή να τη μικρύνεις.',er:'Γόμα: πέρνα πάνω από ό,τι θέλεις να σβήσεις.'};
 function pvTool(t,silent){
-  const again=pv.tool===t&&!silent;pv.tool=t;document.body.classList.toggle('drawing',t!=='pan');
+  const again=pv.tool===t&&!silent;if(t!=='mv')selClear();pv.tool=t;document.body.classList.toggle('drawing',t!=='pan');
   document.querySelectorAll('#inkBar [data-tool]').forEach(b=>b.classList.toggle('on',b.dataset.tool===t));
   $('#inkColor .dot').style.background=t==='hl'?HL_COLORS[pv.hl]:PEN_COLORS[pv.pen];
   $('#shIc').textContent=SHAPES[pv.shape][0];
@@ -1091,6 +1121,7 @@ function inkPop(){
 function pvApply(a,fwd){const L=doc.ann[a.i]=doc.ann[a.i]||[];
   if(a.mv){const k=fwd?1:-1;a.mv.forEach(o=>{if(o.t==='tx'){o.x+=a.dx*k;o.y+=a.dy*k}else o.pts=o.pts.map(q=>[q[0]+a.dx*k,q[1]+a.dy*k])})}
   else if(a.ed){const o=a.ed.o,v=fwd?a.ed.b:a.ed.a;Object.assign(o,v)}
+  else if(a.ed2){a.ed2.forEach(c=>Object.assign(c.o,JSON.parse(JSON.stringify(fwd?c.b:c.a))))}
   else{const add=a.add?fwd:!fwd,list=a.add||a.del;if(add)L.push(...list);else list.forEach(x=>{const k=L.indexOf(x);if(k>=0)L.splice(k,1)})}
   pvInk(a.i);annSave()}
 $('#inkSave').onclick=()=>$('#mAnnPdf').onclick();
@@ -1122,11 +1153,14 @@ function sigDialog(){
   c.onpointerup=c.onpointercancel=()=>{st=null};
   $('#sigClr').onclick=()=>{strokes=[];x.clearRect(0,0,c.width,c.height)};
 }
-function placeSig(i,p){
+function placeSig(i,p,ok){
   const sig=getSig();if(!sig)return sigDialog();
+  // αν υπάρχει ήδη υπογραφή στο έγγραφο, ρωτάμε πριν βάλουμε δεύτερη
+  const has=Object.values(doc.ann||{}).some(L=>L.some(o=>o.sig));
+  if(has&&!ok){dlgOpen('Δεύτερη υπογραφή;','<p style="margin:0">Το έγγραφο έχει ήδη υπογραφή. Θέλεις να βάλεις και δεύτερη σε αυτό το σημείο;</p>',()=>placeSig(i,p,true));$('#dlgOk').textContent='Ναι, βάλε δεύτερη';$('#dlgNo').textContent='Όχι';return}
   const asp=pv.pages[i].h/pv.pages[i].w,w=.3,h=w*sig.r/asp,x0=p[0]-w/2,y0=p[1]-h/2,g=newG(),c=PEN_COLORS[pv.pen];
-  const st=sig.s.map(s=>({t:'pen',c,w:.004,g,pts:s.map(q=>[+(x0+q[0]*w).toFixed(4),+(y0+q[1]*h).toFixed(4)])}));
-  (doc.ann[i]=doc.ann[i]||[]).push(...st);pushAct({i,add:st});pvInk(i);toast('Μπήκε η υπογραφή. Με «Μετακίνηση» τη μετακινείς.');
+  const st=sig.s.map(s=>({t:'pen',c,w:.004,g,sig:1,pts:s.map(q=>[+(x0+q[0]*w).toFixed(4),+(y0+q[1]*h).toFixed(4)])}));
+  (doc.ann[i]=doc.ann[i]||[]).push(...st);pushAct({i,add:st});pvTool('mv',true);selShow(i,st);toast('Μπήκε η υπογραφή. Μεγάλωσέ τη ή μίκρυνέ τη με τα κουμπιά, ή σύρε τη για να τη μετακινήσεις.');
 }
 // PDF με τις σημειώσεις: πάνω στο πρωτότυπο, ώστε να κρατιέται το κείμενο του PDF
 const hex2rgb=h=>{const n=parseInt(h.slice(1),16);return[(n>>16&255)/255,(n>>8&255)/255,(n&255)/255]};
@@ -1311,13 +1345,13 @@ $('#mHelp').onclick=()=>{closeSheet();dlgOpen('Οδηγός χρήσης',`<ul c
 <li><b>Κείμενο (🔤)</b>: πάτα στη σελίδα και γράψε· πάτα σε υπάρχον κείμενο για αλλαγή ή σβήσιμο.</li>
 <li><b>Σχήμα</b>: γραμμή, βέλος, ορθογώνιο, κύκλος — σύρε από γωνία σε γωνία.</li>
 <li><b>Υπογραφή</b>: τη ζωγραφίζεις μία φορά και μετά τη βάζεις με ένα πάτημα.</li>
-<li><b>Μετακίνηση</b>: πιάνεις μια σημείωση και τη σέρνεις. <b>Γόμα</b>: σβήνει ό,τι αγγίξεις.</li>
+<li><b>Μετακίνηση</b>: πατάς μια σημείωση (υπογραφή, κείμενο, σχήμα) για να τη σύρεις ή να τη μεγαλώσεις/μικρύνεις με ➕ ➖. <b>Γόμα</b>: σβήνει ό,τι αγγίξεις.</li>
 <li><b>↶ ↷</b>: αναίρεση και επανάληψη. Όλα αποθηκεύονται μόνα τους.</li>
 <li><b>Αποθήκευση PDF με τις σημειώσεις</b>: φτιάχνει νέο PDF για αποστολή — το πρωτότυπο δεν αλλάζει.</li></ul>`,null,true)};
 // παράθυρο διαλόγου
 let dlgCb=null;
 let dlgAt=0;
-function dlgOpen(title,body,cb,infoOnly){dlgAt=Date.now();$('#dlgT').textContent=title;$('#dlgB').innerHTML=body;dlgCb=cb;$('#dlgNo').classList.toggle('hidden',!!infoOnly);$('#dlg').classList.remove('hidden')}
+function dlgOpen(title,body,cb,infoOnly){dlgAt=Date.now();$('#dlgOk').textContent='Εντάξει';$('#dlgNo').textContent='Ακύρωση';$('#dlgT').textContent=title;$('#dlgB').innerHTML=body;dlgCb=cb;$('#dlgNo').classList.toggle('hidden',!!infoOnly);$('#dlg').classList.remove('hidden')}
 const dlgClose=()=>{$('#dlg').classList.add('hidden');$('#dlgB').innerHTML='';dlgCb=null};
 $('#dlgOk').onclick=()=>{const cb=dlgCb;try{cb&&cb()}finally{dlgClose()}};
 $('#dlgNo').onclick=dlgClose;$('#dlg').onclick=e=>{if(e.target.id==='dlg'&&Date.now()-dlgAt>600)dlgClose()};
