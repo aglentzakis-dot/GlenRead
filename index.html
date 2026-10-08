@@ -23,36 +23,82 @@ header small{opacity:.75;font-size:12px}
 /* λειτουργία ανάγνωσης: μόνο το κείμενο σε όλη την οθόνη */
 body.reading .hdr{display:none}
 body.reading main{padding:0;max-width:none}
-body.reading .tools{top:0;padding:8px 12px;border-bottom:1px solid var(--line);transition:transform .25s}
-body.reading .tools.hide{transform:translateY(-110%)}
-body.reading #read .card{border:0;border-radius:0;margin:0;padding:18px 18px 80vh;background:var(--bg)}
-body.reading #reader{max-width:720px;margin:0 auto}
-.tools .row{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
-.tools .row::-webkit-scrollbar{display:none}
-.tools .row button{flex:0 0 auto}
-.tools .row.ic button{width:44px;height:44px;min-height:44px;padding:0;font-size:18px;border-radius:12px}
-body.reading .tools{position:fixed;left:0;right:0;top:0;z-index:7;background:var(--bg);box-shadow:0 2px 10px #0002}
-body.reading .tools.hide{transform:translateY(-110%);box-shadow:none}
-#gBadge{position:fixed;left:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:6;width:44px;height:44px;border-radius:50%;background:#fff;box-shadow:0 2px 8px #0003;display:grid;place-items:center;opacity:.92}
-#gBadge img{width:30px;height:auto}
+body.reading{--fs-font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body.reading[data-th=sepia]{--bg:#f4ecd8;--card:#f4ecd8;--ink:#5b4636;--soft:#8a7560;--line:#e0d3b6}
+body.reading[data-th=night]{--bg:#121212;--card:#1b1b1b;--ink:#dcdcdc;--soft:#9a9a9a;--line:#333}
+body.reading[data-th=night] .pvp canvas.img{filter:invert(.92) hue-rotate(180deg)}
+body.reading[data-th=night] .pvp{background:#1b1b1b}
+#read .card{border:0;border-radius:0;margin:0;padding:18px var(--mg,18px) 80vh;background:var(--bg);touch-action:pan-y}
+#reader{max-width:720px;margin:0 auto;font-family:var(--ff,inherit);line-height:var(--lh,1.65)!important}
+body.reading.ffr #reader{letter-spacing:.02em;word-spacing:.12em}
+/* σταθερή γρήγορη μπάρα (προαιρετική) */
+#qbar{position:fixed;left:0;right:0;top:0;z-index:7;background:var(--bg);box-shadow:0 2px 10px #0002;display:none;align-items:center;gap:6px;padding:6px 10px;padding-top:calc(6px + env(safe-area-inset-top))}
+body.reading.pinned #qbar{display:flex}
+body.reading.pinned #read{padding-top:64px}
+#qbar .qt{flex:1;min-width:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px}
+.lb{flex-direction:column;gap:0;padding:4px 8px;min-height:50px;min-width:54px;font-size:20px;line-height:1.1}
+.lb small{font-size:10.5px;font-weight:600;color:var(--soft)}
+/* αναζήτηση */
+#findBar{position:fixed;left:0;right:0;top:0;z-index:9;background:var(--card);box-shadow:0 2px 10px #0003;padding:8px 10px;padding-top:calc(8px + env(safe-area-inset-top));display:flex;flex-direction:column;gap:4px}
+#findBar .row{flex-wrap:nowrap}
+/* κουμπί μενού με το G */
+#gMenu{position:fixed;left:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:8;width:62px;height:62px;min-height:0;padding:0;border-radius:50%;background:#fff;border:4px solid #FDD117;box-shadow:0 0 0 2px #EF9F02,0 4px 14px #0005;display:grid;place-items:center}
+#gMenu img{width:40px;height:auto}
+#gMenu::after{content:"Μενού";position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);background:#EF9F02;color:#fff;font-size:10px;font-weight:800;border-radius:8px;padding:1px 6px;letter-spacing:.3px}
+body.pv #gMenu{bottom:calc(92px + env(safe-area-inset-bottom))}
+/* φύλλο μενού */
+#sheet{position:fixed;inset:0;z-index:30}
+#sheet .bk{position:absolute;inset:0;background:#0007}
+#sheet .pn{position:absolute;left:0;right:0;bottom:0;max-height:88vh;overflow-y:auto;background:var(--card);color:var(--ink);border-radius:22px 22px 0 0;padding:6px 14px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -6px 24px #0004;overscroll-behavior:contain}
+#sheet .grip{width:44px;height:5px;border-radius:3px;background:var(--line);margin:6px auto 4px}
+#sheet h3{font-size:12px;letter-spacing:.06em;text-transform:none;color:var(--acc2);margin:16px 4px 6px;font-weight:800}
+.mi{display:flex;width:100%;justify-content:flex-start;align-items:center;gap:12px;background:transparent;border:0;border-radius:14px;padding:10px 8px;color:var(--ink);text-align:left;font-weight:500}
+.mi:active{background:var(--line)}
+.mi .ic{font-size:22px;width:34px;text-align:center;flex:0 0 auto}
+.mi .tx{flex:1;display:flex;flex-direction:column}
+.mi .tx b{font-size:15.5px}
+.mi .tx small{font-size:12.5px;color:var(--soft);font-weight:400}
+.mi .sw{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;flex:0 0 auto}
+.mi .sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0004;transition:left .2s}
+.mi.on .sw{background:#EF9F02}.mi.on .sw::after{left:21px}
+.opt{display:flex;align-items:center;gap:8px;padding:6px 8px}
+.opt>span{flex:0 0 108px;font-size:14px;color:var(--soft)}
+.seg{display:flex;flex:1;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;min-height:38px;padding:4px 6px;border-radius:9px;background:transparent;color:var(--ink);font-weight:600;font-size:13.5px}
+.seg button.on{background:#FDD117;color:#1d1d1b}
+.bmi{display:flex;align-items:center;gap:8px;padding:4px 8px}
+.bmi button.go{flex:1;justify-content:flex-start;background:transparent;border:1px solid var(--line);color:var(--ink);font-weight:500;min-height:40px}
+/* παράθυρα διαλόγου */
+.dlg{position:fixed;inset:0;z-index:40;background:#0007;display:flex;align-items:flex-end;justify-content:center}
+.dlg .bx{background:var(--card);color:var(--ink);width:100%;max-width:560px;border-radius:20px 20px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+.dlg h4{margin:0 0 10px;font-size:17px}
+.dlg textarea,.dlg input{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink)}
+.dlg textarea{min-height:90px}
+.dlg .row{margin-top:10px;justify-content:flex-end}
+#sigPad{width:100%;height:200px;background:#fff;border:2px dashed #bbb;border-radius:12px;touch-action:none;display:block}
+.help li{margin:6px 0}
 /* προβολή «Σελίδα» με σημειώσεις */
-#pagesView{padding:8px 0 120px}
-.pvp{position:relative;margin:0 auto 10px;width:100%;max-width:900px;background:#fff;box-shadow:0 1px 6px #0002}
+body.pv #read>.card{display:none}
+#pagesView{padding:8px 0 150px;overflow-x:auto;touch-action:pan-x pan-y}
+.pvp{position:relative;margin:0 auto 10px;width:calc(var(--z,1)*100%);max-width:calc(var(--z,1)*900px);background:#fff;box-shadow:0 1px 6px #0002}
 .pvp canvas{position:absolute;inset:0;width:100%;height:100%}
-.pvp .ink{touch-action:auto}
 body.drawing .pvp .ink{touch-action:none}
 body:not(.drawing) .pvp .ink{pointer-events:none}
 .pvn{position:absolute;right:8px;bottom:6px;font-size:11px;color:#888;z-index:1}
-#inkBar{position:fixed;left:0;right:0;bottom:0;z-index:8;display:flex;justify-content:space-around;align-items:center;gap:4px;background:var(--card);border-top:1px solid var(--line);padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
-#inkBar button{width:46px;height:46px;min-height:46px;padding:0;border-radius:50%;background:transparent;border:0;font-size:22px;color:var(--ink)}
-#inkBar button.on{background:#FDD11766;outline:2px solid var(--acc2)}
-#inkBar .dot{display:inline-block;width:22px;height:22px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #888}
-body.pv #readTop{bottom:calc(84px + env(safe-area-inset-bottom))}
-body.pv #gBadge{bottom:calc(84px + env(safe-area-inset-bottom))}
-body.pv #read>.card{display:none}
-body.reading.pinned #read{padding-top:var(--th,0px)}
-#bPin.on{background:#FDD117;border-color:var(--acc2)}
-#readTop{position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:6;border-radius:50%;width:48px;height:48px;padding:0;box-shadow:0 2px 8px #0003}
+#inkBar{position:fixed;left:0;right:0;bottom:0;z-index:8;display:flex;align-items:center;gap:2px;background:var(--card);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom));overflow-x:auto;scrollbar-width:none}
+#inkBar::-webkit-scrollbar{display:none}
+#inkBar button{flex:0 0 auto;width:60px;height:62px;min-height:0;padding:2px;border-radius:14px;background:transparent;border:0;font-size:22px;color:var(--ink);flex-direction:column;gap:1px;line-height:1.1}
+#inkBar button small{font-size:10px;font-weight:600;color:var(--soft)}
+#inkBar button.on{background:#FDD11766;box-shadow:inset 0 0 0 2px var(--acc2)}
+#inkBar .dot{display:inline-block;width:24px;height:24px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #888}
+#inkBar .sep{flex:0 0 1px;height:40px;background:var(--line);margin:0 2px}
+#inkPop{position:fixed;left:8px;right:8px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:9;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 6px 20px #0003;padding:10px}
+#inkPop .sws{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0 8px}
+#inkPop .sws button{width:36px;height:36px;min-height:0;padding:0;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #999}
+#inkPop .sws button.on{box-shadow:0 0 0 3px var(--acc2)}
+#inkPop .lbl{font-size:12.5px;color:var(--soft);margin:2px 2px}
+body.pv #toast{bottom:calc(150px + env(safe-area-inset-bottom))}
+#zoomHint{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9;background:#000b;color:#fff;border-radius:12px;padding:4px 10px;font-size:13px;pointer-events:none}
 main{max-width:760px;margin:0 auto;padding:16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
 .big{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -70,7 +116,6 @@ button:disabled{opacity:.45}
 #reader mark{background:#ffe066;color:#000;border-radius:3px}
 #reader mark.cur{background:var(--acc2)}
 .pg{color:var(--soft);font-size:13px;border-top:1px dashed var(--line);margin:18px 0 6px;padding-top:6px}
-.tools{position:sticky;top:var(--hh,64px);z-index:4;background:var(--bg);padding:8px 0}
 input[type=search],select{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);min-height:46px}
 input[type=search]{flex:1;min-width:0}
 .thumbs{display:flex;gap:8px;overflow-x:auto;padding:4px 0}
@@ -92,6 +137,12 @@ details summary{cursor:pointer;font-weight:600}
 #cam .shot{width:74px;height:74px;border-radius:50%;border:5px solid #fff;background:#FDD117;padding:0;min-height:0}
 #cam .cnt{color:#fff;font-size:14px;min-width:90px}
 #cam .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .15s}
+#cam .camtools{position:absolute;top:calc(48px + env(safe-area-inset-top));left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+#cam .camtools button{color:#fff;border-color:#777;background:#0006;min-height:40px}
+#cam .camtools button.on{background:#FDD117;color:#000}
+#cam .camres{color:#fff;font-size:12px;background:#0006;border-radius:8px;padding:2px 8px}
+#cam .camzoom{position:absolute;left:16px;right:16px;bottom:calc(120px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;color:#fff;background:#0006;border-radius:14px;padding:8px 12px}
+#cam .camzoom input{flex:1}
 #cam .hint{position:absolute;top:calc(12px + env(safe-area-inset-top));left:0;right:0;text-align:center;color:#fff;font-size:14px;text-shadow:0 1px 3px #000}
 </style>
 </head>
@@ -220,25 +271,17 @@ details summary{cursor:pointer;font-weight:600}
 
 <!-- ΑΝΑΓΝΩΣΗ -->
 <section id="read" class="hidden">
-  <div class="tools">
-    <div class="row ic">
-      <button class="sec" id="bBack" title="Πίσω" aria-label="Πίσω">←</button>
-      <button class="sec" id="bView" title="Σελίδα / Κείμενο" aria-label="Σελίδα ή κείμενο">📄</button>
-      <button class="sec" id="bFind" title="Αναζήτηση" aria-label="Αναζήτηση">🔍</button>
-      <button class="sec" id="bSpeak" title="Ανάγνωση φωναχτά" aria-label="Ανάγνωση φωναχτά">🔊</button>
-      <button class="sec" id="bSmall" title="Μικρότερα γράμματα" aria-label="Μικρότερα γράμματα">Α−</button>
-      <button class="sec" id="bLarge" title="Μεγαλύτερα γράμματα" aria-label="Μεγαλύτερα γράμματα">Α+</button>
-      <button class="sec" id="bCopy" title="Αντιγραφή" aria-label="Αντιγραφή">📋</button>
-      <button class="sec" id="bShare" title="Αποστολή" aria-label="Αποστολή">📤</button>
-      <button class="sec" id="bAnnPdf" title="PDF με τις σημειώσεις" aria-label="PDF με τις σημειώσεις">📑</button>
-      <button class="sec" id="bTxt" title="Αποθήκευση κειμένου" aria-label="Αποθήκευση κειμένου">💾</button>
-      <button class="sec" id="bEdit" title="Διόρθωση" aria-label="Διόρθωση">✏️</button>
-      <button class="sec" id="bFull" title="Πλήρης οθόνη" aria-label="Πλήρης οθόνη">⛶</button>
-      <button class="sec" id="bPin" title="Σταθερή μπάρα" aria-label="Σταθερή μπάρα">📌</button>
-    </div>
-    <div class="row hidden" id="findRow" style="margin-top:8px">
-      <input type="search" id="q" placeholder="Αναζήτηση στο κείμενο">
-      <button class="sec" id="bNext" title="Επόμενο" aria-label="Επόμενο">⬇</button>
+  <div id="qbar">
+    <button class="sec lb" id="bBack"><span>←</span><small>Πίσω</small></button>
+    <div class="qt" id="qTitle"></div>
+    <button class="sec lb" id="qFind"><span>🔍</span><small>Αναζήτηση</small></button>
+    <button class="sec lb" id="qView"><span>📄</span><small>Σελίδα</small></button>
+  </div>
+  <div id="findBar" class="hidden">
+    <div class="row">
+      <input type="search" id="q" placeholder="Γράψε λέξη για αναζήτηση">
+      <button class="sec lb" id="bNext"><span>⬇</span><small>Επόμενο</small></button>
+      <button class="sec lb" id="findClose"><span>✕</span><small>Κλείσιμο</small></button>
     </div>
     <div class="muted" id="hits"></div>
   </div>
@@ -248,21 +291,70 @@ details summary{cursor:pointer;font-weight:600}
   </div>
   <div id="pagesView" class="hidden"></div>
   <div id="inkBar" class="hidden">
-    <button data-tool="pan" title="Κύλιση" aria-label="Κύλιση">✋</button>
-    <button data-tool="pen" title="Στυλό" aria-label="Στυλό">🖊️</button>
-    <button data-tool="hl" title="Μαρκαδόρος" aria-label="Μαρκαδόρος">🖍️</button>
-    <button data-tool="er" title="Γόμα" aria-label="Γόμα">🧽</button>
-    <button id="inkColor" title="Χρώμα" aria-label="Χρώμα"><span class="dot"></span></button>
-    <button id="inkUndo" title="Αναίρεση" aria-label="Αναίρεση">↶</button>
-    <button id="inkRedo" title="Επανάληψη" aria-label="Επανάληψη">↷</button>
+    <button data-tool="pan"><span>✋</span><small>Κύλιση</small></button>
+    <button data-tool="pen"><span>🖊️</span><small>Στυλό</small></button>
+    <button data-tool="hl"><span>🖍️</span><small>Μαρκαδόρος</small></button>
+    <button data-tool="tx"><span>🔤</span><small>Κείμενο</small></button>
+    <button data-tool="sh"><span id="shIc">⬜</span><small>Σχήμα</small></button>
+    <button data-tool="sig"><span>✍️</span><small>Υπογραφή</small></button>
+    <button data-tool="mv"><span>✥</span><small>Μετακίνηση</small></button>
+    <button data-tool="er"><span>🧽</span><small>Γόμα</small></button>
+    <span class="sep"></span>
+    <button id="inkColor"><span class="dot"></span><small>Χρώμα</small></button>
+    <button id="inkUndo"><span>↶</span><small>Αναίρεση</small></button>
+    <button id="inkRedo"><span>↷</span><small>Επανάληψη</small></button>
   </div>
-  <button id="readTop" title="Επιλογές" aria-label="Επιλογές">☰</button>
-  <div id="gBadge" aria-hidden="true"><img src="G-glenapps.png" alt=""></div>
+  <div id="inkPop" class="hidden"></div>
+  <button id="gMenu" aria-label="Μενού επιλογών"><img src="G-glenapps.png" alt=""></button>
 </section>
 </main>
+<div id="sheet" class="hidden">
+  <div class="bk"></div>
+  <div class="pn">
+    <div class="grip"></div>
+    <h3>ΠΡΟΒΟΛΗ</h3>
+    <button class="mi" id="mView"><span class="ic">📄</span><span class="tx"><b id="mViewT">Πρωτότυπο σελίδας</b><small id="mViewS">Δες το PDF όπως είναι και γράψε πάνω του</small></span></button>
+    <button class="mi" id="mFind"><span class="ic">🔍</span><span class="tx"><b>Αναζήτηση στο κείμενο</b><small>Βρες λέξεις, ακόμη και χωρίς τόνους</small></span></button>
+    <button class="mi" id="mGo"><span class="ic">🔢</span><span class="tx"><b>Μετάβαση σε σελίδα</b><small>Πήγαινε κατευθείαν σε μια σελίδα</small></span></button>
+    <button class="mi" id="mFull"><span class="ic">⛶</span><span class="tx"><b>Πλήρης οθόνη</b><small>Κρύβει και τη γραμμή ειδοποιήσεων</small></span></button>
+    <button class="mi" id="mAwake"><span class="ic">☀️</span><span class="tx"><b>Να μη σβήνει η οθόνη</b><small>Όσο διαβάζεις</small></span><span class="sw"></span></button>
+    <button class="mi" id="mPin"><span class="ic">📌</span><span class="tx"><b>Σταθερή μπάρα πάνω</b><small>Πίσω, αναζήτηση και σελίδα πάντα ορατά</small></span><span class="sw"></span></button>
+    <h3>ΕΜΦΑΝΙΣΗ ΚΕΙΜΕΝΟΥ</h3>
+    <div class="opt"><span>Μέγεθος</span><div class="seg"><button id="fsMinus">Α−</button><button id="fsVal" disabled>19</button><button id="fsPlus">Α+</button></div></div>
+    <div class="opt"><span>Θέμα</span><div class="seg" data-k="th"><button data-v="light">☀️ Φωτεινό</button><button data-v="sepia">📜 Σέπια</button><button data-v="night">🌙 Νύχτα</button></div></div>
+    <div class="opt"><span>Γραμματοσειρά</span><div class="seg" data-k="ff"><button data-v="s">Απλή</button><button data-v="r" style="font-family:Georgia,serif">Κλασική</button><button data-v="e">Ευανάγνωστη</button></div></div>
+    <div class="opt"><span>Διάστιχο</span><div class="seg" data-k="lh"><button data-v="1.4">Πυκνό</button><button data-v="1.65">Κανονικό</button><button data-v="2">Αραιό</button></div></div>
+    <div class="opt"><span>Περιθώρια</span><div class="seg" data-k="mg"><button data-v="10">Στενά</button><button data-v="18">Κανονικά</button><button data-v="34">Φαρδιά</button></div></div>
+    <h3>ΑΚΡΟΑΣΗ</h3>
+    <button class="mi" id="mSpeak"><span class="ic" id="mSpeakI">🔊</span><span class="tx"><b id="mSpeakT">Ανάγνωση φωναχτά</b><small>Διαβάζει το κείμενο (ή όσο έχεις επιλέξει)</small></span></button>
+    <div class="opt"><span>Ταχύτητα</span><div class="seg" data-k="rate"><button data-v="0.75">0,75×</button><button data-v="1">1×</button><button data-v="1.25">1,25×</button><button data-v="1.5">1,5×</button></div></div>
+    <h3>ΣΕΛΙΔΟΔΕΙΚΤΕΣ</h3>
+    <button class="mi" id="mBm"><span class="ic">🔖</span><span class="tx"><b>Βάλε σελιδοδείκτη εδώ</b><small>Για να γυρίσεις αργότερα σε αυτό το σημείο</small></span></button>
+    <div id="bmList"></div>
+    <h3>ΣΗΜΕΙΩΣΕΙΣ ΚΑΙ ΔΙΟΡΘΩΣΗ</h3>
+    <button class="mi" id="mDraw"><span class="ic">🖊️</span><span class="tx"><b>Γράψε πάνω στη σελίδα</b><small>Στυλό, μαρκαδόρος, κείμενο, σχήματα, υπογραφή</small></span></button>
+    <button class="mi" id="mEdit"><span class="ic">✏️</span><span class="tx"><b id="mEditT">Διόρθωση κειμένου</b><small>Διόρθωσε λάθη της αναγνώρισης</small></span></button>
+    <button class="mi" id="mClear"><span class="ic">🗑️</span><span class="tx"><b>Σβήσε όλες τις σημειώσεις</b><small>Καθαρίζει ό,τι έγραψες πάνω στις σελίδες</small></span></button>
+    <h3>ΑΡΧΕΙΟ</h3>
+    <button class="mi" id="mAnnPdf"><span class="ic">📑</span><span class="tx"><b>Αποθήκευση PDF με τις σημειώσεις</b><small>Για να το στείλεις ή να το κρατήσεις</small></span></button>
+    <button class="mi" id="mShare"><span class="ic">📤</span><span class="tx"><b>Αποστολή κειμένου</b><small>Σε μήνυμα, ταχυδρομείο κ.λπ.</small></span></button>
+    <button class="mi" id="mCopy"><span class="ic">📋</span><span class="tx"><b>Αντιγραφή κειμένου</b><small>Όλου, ή μόνο όσου έχεις επιλέξει</small></span></button>
+    <button class="mi" id="mTxt"><span class="ic">💾</span><span class="tx"><b>Αποθήκευση ως κείμενο</b><small>Αρχείο .txt στις Λήψεις</small></span></button>
+    <button class="mi" id="mRename"><span class="ic">🏷️</span><span class="tx"><b>Μετονομασία</b><small id="mRenameS"></small></span></button>
+    <h3>ΒΟΗΘΕΙΑ</h3>
+    <button class="mi" id="mHelp"><span class="ic">❓</span><span class="tx"><b>Οδηγός χρήσης</b><small>Τι κάνει κάθε κουμπί</small></span></button>
+    <button class="mi" id="mHome"><span class="ic">🏠</span><span class="tx"><b>Πίσω στην αρχική</b><small>Τα πάντα έχουν αποθηκευτεί</small></span></button>
+  </div>
+</div>
+<div class="dlg hidden" id="dlg"><div class="bx"><h4 id="dlgT"></h4><div id="dlgB"></div><div class="row"><button class="sec" id="dlgNo">Ακύρωση</button><button id="dlgOk">Εντάξει</button></div></div></div>
 <div id="cam" class="hidden">
-  <div class="hint">Κράτα το κινητό ίσια πάνω από τη σελίδα</div>
+  <div class="hint">Κράτα το κινητό ίσια πάνω από τη σελίδα, να τη γεμίζει. Πάτα στην οθόνη για εστίαση.</div>
   <video id="camV" playsinline muted autoplay></video>
+  <div class="camtools">
+    <button class="sec hidden" id="camTorch">🔦 Φλας</button>
+    <span class="camres" id="camRes"></span>
+  </div>
+  <div class="camzoom hidden" id="camZoomBox"><span>🔍</span><input type="range" id="camZoom" min="1" max="4" step="0.1" value="1"><span id="camZoomV">1×</span></div>
   <div class="flash" id="camF"></div>
   <div class="bar">
     <button class="sec" id="camClose" style="color:#fff;border-color:#555">✕ Κλείσιμο</button>
@@ -279,13 +371,13 @@ details summary{cursor:pointer;font-weight:600}
 <script src="antigrafa.js"></script>
 <script src="efarmoges-mas.js"></script>
 <script>
-const VERSION='2.4';
+const VERSION='2.5';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2600)};
-const show=id=>{if(id!=='home'&&history.state&&history.state.v!=='view')history.pushState({v:'view'},'');['home','work','read'].forEach(s=>$('#'+s).classList.toggle('hidden',s!==id));document.body.classList.toggle('reading',id==='read');if(id==='read'){$('.tools').classList.toggle('hide',!pinned);$('#findRow').classList.add('hidden');if(typeof pinApply==='function')setTimeout(pinApply,0)}if(id!=='read'){$('.tools').classList.remove('hide');if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}scrollTo(0,0);if(typeof setHH==='function')setHH();if(id==='home'&&typeof efmShow==='function')efmShow()};
+const show=id=>{if(id!=='home'&&history.state&&history.state.v!=='view')history.pushState({v:'view'},'');['home','work','read'].forEach(s=>$('#'+s).classList.toggle('hidden',s!==id));document.body.classList.toggle('reading',id==='read');if(id==='read'){if(typeof pinApply==='function'){pinApply();rdApply();if(RD.awake)awake(true)}}else{document.body.removeAttribute('data-th');if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}scrollTo(0,0);if(typeof setHH==='function')setHH();if(id==='home'&&typeof efmShow==='function')efmShow()};
 const prog=(p,m)=>{if(p!=null)$('#prog i').style.width=Math.round(p*100)+'%';if(m)$('#wMsg').textContent=m};
 let cancelled=false, doc=null; // doc = {id,name,pages:[{text,conf,ocr}],date}
 
@@ -406,7 +498,7 @@ function adaptive(G){
   x.putImageData(im,0,0);return c;
 }
 function rotated(src,deg){const c=document.createElement('canvas'),r=deg%180!==0;c.width=r?src.height:src.width;c.height=r?src.width:src.height;const x=c.getContext('2d');x.translate(c.width/2,c.height/2);x.rotate(deg*Math.PI/180);x.drawImage(src,-src.width/2,-src.height/2);return c}
-function imgToCanvas(img,maxSide=2400){
+function imgToCanvas(img,maxSide=3000){
   let w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
   // μικρές φωτογραφίες: μεγέθυνση για καλύτερη αναγνώριση
   const scale=Math.min(maxSide/Math.max(w,h), Math.max(1,1600/Math.max(w,h)));
@@ -500,13 +592,13 @@ async function openPdf(file){
 // ---------- Φωτογραφίες ----------
 let shots=[]; // dataURL
 // μικραίνει κάθε φωτογραφία (έως 2000 εικονοστοιχεία, αρκετά για καθαρή αναγνώριση) για να χωράει στη μνήμη του κινητού
-async function shrink(src,max=2000){
+async function shrink(src,max=3000){
   let bmp;
   try{bmp=await createImageBitmap(src)}catch(e){bmp=await loadImg(URL.createObjectURL(src))}
   const w=bmp.width,h=bmp.height,k=Math.min(1,max/Math.max(w,h));
   const c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);
   c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);try{bmp.close&&bmp.close()}catch(e){}
-  const url=c.toDataURL('image/jpeg',0.85);c.width=c.height=0;return url;
+  const url=c.toDataURL('image/jpeg',0.9);c.width=c.height=0;return url;
 }
 async function addImages(files){
   const list=[...files];if(!list.length)return;
@@ -556,30 +648,51 @@ async function makePdf(){
 // ---------- Ζωντανή κάμερα μέσα στην εφαρμογή ----------
 // Η κάμερα του κινητού ανοίγει σαν ξεχωριστή εφαρμογή και το Ανδροειδές μπορεί να κλείσει το GlenRead
 // για να ελευθερώσει μνήμη. Με τη ζωντανή κάμερα μένουμε μέσα στην εφαρμογή.
-let camStream=null;
+let camStream=null,camTrack=null,camIC=null,torchOn=false;
 async function openCam(){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){camFallback();return}
   try{
-    camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1440}},audio:false});
+    // ζητάμε την πιο υψηλή ανάλυση που δίνει ο φακός, για να διαβάζονται και τα μικρά γράμματα
+    camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:4096},height:{ideal:3072}},audio:false});
   }catch(e){toast('Δεν δόθηκε άδεια για την κάμερα — ανοίγει η κάμερα του κινητού');camFallback();return}
+  camTrack=camStream.getVideoTracks()[0];
+  try{const cp=camTrack.getCapabilities?camTrack.getCapabilities():{};const adv={};
+    if(cp.width&&cp.height){await camTrack.applyConstraints({width:{ideal:cp.width.max},height:{ideal:cp.height.max}}).catch(()=>{})}
+    if(cp.focusMode&&cp.focusMode.includes('continuous'))await camTrack.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(()=>{});
+    $('#camTorch').classList.toggle('hidden',!cp.torch);
+    const zb=$('#camZoomBox');if(cp.zoom&&cp.zoom.max>cp.zoom.min){const z=$('#camZoom');z.min=cp.zoom.min;z.max=Math.min(cp.zoom.max,8);z.step=cp.zoom.step||.1;z.value=cp.zoom.min;$('#camZoomV').textContent=(+z.value).toFixed(1)+'×';zb.classList.remove('hidden')}else zb.classList.add('hidden');
+  }catch(e){}
+  try{camIC='ImageCapture' in window?new ImageCapture(camTrack):null}catch(e){camIC=null}
   $('#camV').srcObject=camStream;$('#cam').classList.remove('hidden');camCount();
+  $('#camV').onloadedmetadata=()=>{const v=$('#camV');$('#camRes').textContent=Math.max(v.videoWidth,v.videoHeight)+' εικονοστοιχεία'};
   if(history.state&&history.state.v!=='cam')history.pushState({v:'cam'},'');
 }
 function camFallback(){try{sessionStorage.setItem('glenread-cam','1')}catch(e){}$('#fCam').click()}
 function camCount(){$('#camCnt').textContent=shots.length+(shots.length===1?' σελίδα':' σελίδες')}
 function closeCam(fromPop){
-  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null}
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null}camTrack=null;camIC=null;torchOn=false;$('#camTorch').classList.remove('on');
   $('#camV').srcObject=null;$('#cam').classList.add('hidden');
   if(!fromPop&&history.state&&history.state.v==='cam')history.back();
   if(shots.length)$('#scanBox').scrollIntoView({behavior:'smooth',block:'center'});
 }
+$('#camTorch').onclick=async()=>{torchOn=!torchOn;try{await camTrack.applyConstraints({advanced:[{torch:torchOn}]});$('#camTorch').classList.toggle('on',torchOn)}catch(e){torchOn=false;toast('Το φλας δεν άναψε')}};
+$('#camZoom').oninput=async e=>{const z=+e.target.value;$('#camZoomV').textContent=z.toFixed(1)+'×';try{await camTrack.applyConstraints({advanced:[{zoom:z}]})}catch(x){}};
+// πάτημα στην οθόνη = εστίαση εκεί (όπου το υποστηρίζει το κινητό)
+$('#camV').onclick=async e=>{if(!camTrack)return;const r=e.currentTarget.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+  try{await camTrack.applyConstraints({advanced:[{pointsOfInterest:[{x,y}],focusMode:'single-shot'}]});setTimeout(()=>camTrack&&camTrack.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(()=>{}),1500)}catch(x){}
+  const f=document.createElement('div');f.style.cssText=`position:fixed;left:${e.clientX-30}px;top:${e.clientY-30}px;width:60px;height:60px;border:2px solid #FDD117;border-radius:50%;z-index:21;pointer-events:none;transition:opacity .6s`;document.body.appendChild(f);setTimeout(()=>f.style.opacity=0,500);setTimeout(()=>f.remove(),1100)};
+let shooting=false;
 $('#camShot').onclick=async()=>{
-  const v=$('#camV');if(!v.videoWidth)return;
-  const c=document.createElement('canvas');const k=Math.min(1,2000/Math.max(v.videoWidth,v.videoHeight));
-  c.width=Math.round(v.videoWidth*k);c.height=Math.round(v.videoHeight*k);c.getContext('2d').drawImage(v,0,0,c.width,c.height);
-  shots.push(c.toDataURL('image/jpeg',0.85));c.width=c.height=0;
-  const f=$('#camF');f.style.opacity=.8;setTimeout(()=>f.style.opacity=0,120);
+  const v=$('#camV');if(!v.videoWidth||shooting)return;shooting=true;
+  const fl=$('#camF');fl.style.opacity=.8;setTimeout(()=>fl.style.opacity=0,120);
   try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}
+  let url=null;
+  // πραγματική φωτογραφία σε πλήρη ανάλυση (όχι στιγμιότυπο από το βίντεο)
+  if(camIC&&camIC.takePhoto){try{const pc=await camIC.getPhotoCapabilities().catch(()=>null);const opt=pc&&pc.imageWidth?{imageWidth:pc.imageWidth.max,imageHeight:pc.imageHeight.max}:{};
+    if(torchOn)opt.fillLightMode='flash';const blob=await camIC.takePhoto(opt).catch(()=>camIC.takePhoto());url=await shrink(blob,3000)}catch(e){url=null}}
+  if(!url){const c=document.createElement('canvas');const k=Math.min(1,3000/Math.max(v.videoWidth,v.videoHeight));
+    c.width=Math.round(v.videoWidth*k);c.height=Math.round(v.videoHeight*k);c.getContext('2d').drawImage(v,0,0,c.width,c.height);url=c.toDataURL('image/jpeg',0.9);c.width=c.height=0}
+  shots.push(url);shooting=false;
   drawThumbs();camCount();draftSet('shots',shots);
 };
 $('#camClose').onclick=()=>closeCam(false);
@@ -599,12 +712,12 @@ function openReader(){
   render();
   try{const l=JSON.parse(localStorage.getItem('glenread-last')||'null');if(l&&l.id===doc.id&&l.y>0)setTimeout(()=>scrollTo(0,l.y*(document.body.scrollHeight-innerHeight)),60)}catch(e){}
   try{localStorage.setItem('glenread-last',JSON.stringify({id:doc.id,y:0}))}catch(e){}
-  pvClose();try{if(localStorage.getItem('glenread-view')==='page')pvOpen()}catch(e){}
+  pvClose();viewLabels();try{if(localStorage.getItem('glenread-view')==='page')pvOpen()}catch(e){}
   if(doc.partial)toast('Αυτό το έγγραφο είχε διακοπεί — έχει μόνο τις σελίδες που πρόλαβαν');
   const low=doc.pages.map((p,i)=>p.ocr&&p.conf<70?i+1:0).filter(Boolean);
   const bad=doc.pages.length&&doc.pages.every(p=>p.ocr&&(p.conf<50||!p.text.trim()));
   $('#lowConf').classList.toggle('hidden',!low.length);
-  $('#lowConf').innerHTML=low.length?`⚠️ Η αναγνώριση ${low.length===1?'στη σελίδα':'στις σελίδες'} ${low.join(', ')} δεν είναι σίγουρη. Δες το πρωτότυπο με το 📄, ή δοκίμασε πιο ίσια φωτογραφία με καλό φως.`:'';
+  $('#lowConf').innerHTML=low.length?`⚠️ Η αναγνώριση ${low.length===1?'στη σελίδα':'στις σελίδες'} ${low.join(', ')} δεν είναι σίγουρη. Δες το πρωτότυπο από το Μενού (G) → «Πρωτότυπο σελίδας», ή δοκίμασε πιο ίσια φωτογραφία με καλό φως.`:'';
   // αν η αναγνώριση απέτυχε, δείχνουμε κατευθείαν το πρωτότυπο αντί για «σκουπίδια»
   if(bad&&!pv.on){pvOpen();toast('Το κείμενο δεν διαβάστηκε καθαρά — σου δείχνω το πρωτότυπο')}
 }
@@ -626,39 +739,62 @@ $('#q').oninput=()=>{const q=$('#q').value.trim();hitCount=render(q.length>1?q:'
 function nextHit(){if(!hitCount)return;hitIdx=(hitIdx+1)%hitCount;document.querySelectorAll('#reader mark').forEach(m=>m.classList.toggle('cur',+m.dataset.n===hitIdx));const m=document.querySelector(`#reader mark[data-n="${hitIdx}"]`);m&&m.scrollIntoView({block:'center',behavior:'smooth'});$('#hits').textContent=`${hitIdx+1} από ${hitCount}`}
 $('#bNext').onclick=nextHit;
 
-let fs=+(localStorage.getItem('glenread-fs')||19);const setFs=()=>{document.documentElement.style.setProperty('--fs',fs+'px');try{localStorage.setItem('glenread-fs',fs)}catch(e){}};setFs();
-$('#bSmall').onclick=()=>{fs=Math.max(13,fs-2);setFs()};$('#bLarge').onclick=()=>{fs=Math.min(40,fs+2);setFs()};
+// ---------- Ρυθμίσεις εμφάνισης κειμένου ----------
+let RD={th:'light',ff:'s',lh:'1.65',mg:'18',rate:'1',awake:false};
+try{Object.assign(RD,JSON.parse(localStorage.getItem('glenread-rd')||'{}'))}catch(e){}
+const FONTS={s:'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif',r:'Georgia,"Noto Serif","Times New Roman",serif',e:'Verdana,Tahoma,"Noto Sans",sans-serif'};
+function rdApply(){
+  try{localStorage.setItem('glenread-rd',JSON.stringify(RD))}catch(e){}
+  const r=document.documentElement.style;r.setProperty('--ff',FONTS[RD.ff]||FONTS.s);r.setProperty('--lh',RD.lh);r.setProperty('--mg',RD.mg+'px');
+  document.body.dataset.th=RD.th;document.body.classList.toggle('ffr',RD.ff==='e');
+  document.querySelectorAll('#sheet .seg[data-k]').forEach(sg=>sg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===String(RD[sg.dataset.k]))));
+  $('#mAwake').classList.toggle('on',!!RD.awake);
+}
+document.querySelectorAll('#sheet .seg[data-k]').forEach(sg=>sg.onclick=e=>{const b=e.target.closest('button');if(!b)return;RD[sg.dataset.k]=b.dataset.v;rdApply()});
+let fs=+(localStorage.getItem('glenread-fs')||19);
+const setFs=()=>{document.documentElement.style.setProperty('--fs',fs+'px');$('#fsVal').textContent=Math.round(fs);try{localStorage.setItem('glenread-fs',Math.round(fs))}catch(e){}};setFs();
+$('#fsMinus').onclick=()=>{fs=Math.max(13,fs-2);setFs()};$('#fsPlus').onclick=()=>{fs=Math.min(44,fs+2);setFs()};
+// μεγέθυνση γραμμάτων με δύο δάχτυλα στο κείμενο (χωρίς να μεγαλώνει όλη η οθόνη)
+(()=>{const P=new Map();let d0=0,f0=0;const card=$('#read .card');
+  const dist=()=>{const[a,b]=[...P.values()];return Math.hypot(a.x-b.x,a.y-b.y)};
+  card.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch')return;P.set(e.pointerId,{x:e.clientX,y:e.clientY});if(P.size===2){d0=dist();f0=fs}});
+  card.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;P.set(e.pointerId,{x:e.clientX,y:e.clientY});if(P.size===2&&d0>0){fs=Math.max(13,Math.min(44,f0*dist()/d0));setFs()}});
+  const up=e=>{P.delete(e.pointerId);if(P.size<2)d0=0};card.addEventListener('pointerup',up);card.addEventListener('pointercancel',up);})();
+
 const fullText=()=>doc.pages.map(p=>p.text).join('\n\n');
-$('#bCopy').onclick=async()=>{const sel=getSelection().toString();try{await navigator.clipboard.writeText(sel||fullText());toast(sel?'Αντιγράφηκε η επιλογή':'Αντιγράφηκε όλο το κείμενο')}catch(e){toast('Δεν επιτράπηκε η αντιγραφή')}};
-$('#bShare').onclick=async()=>{if(navigator.share){try{await navigator.share({title:doc.name,text:fullText()})}catch(e){}}else $('#bCopy').onclick()};
-$('#bTxt').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([fullText()],{type:'text/plain;charset=utf-8'}));a.download=doc.name+'.txt';a.click()};
+$('#mCopy').onclick=async()=>{const sel=getSelection().toString();closeSheet();try{await navigator.clipboard.writeText(sel||fullText());toast(sel?'Αντιγράφηκε η επιλογή':'Αντιγράφηκε όλο το κείμενο')}catch(e){toast('Δεν επιτράπηκε η αντιγραφή')}};
+$('#mShare').onclick=async()=>{closeSheet();if(navigator.share){try{await navigator.share({title:doc.name,text:fullText()})}catch(e){}}else $('#mCopy').onclick()};
+$('#mTxt').onclick=()=>{closeSheet();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([fullText()],{type:'text/plain;charset=utf-8'}));a.download=doc.name+'.txt';a.click();toast('Αποθηκεύτηκε στις Λήψεις')};
 let editing=false,editT=null;
 $('#reader').addEventListener('input',()=>{if(!editing)return;clearTimeout(editT);editT=setTimeout(()=>{doc.pages=[{text:$('#reader').innerText,conf:100,ocr:false}];saveDoc(doc)},800)});
-$('#bEdit').onclick=()=>{
+function toggleEdit(){
   const r=$('#reader');
-  if(!editing){render();r.textContent=fullText();r.contentEditable=true;r.focus();$('#bEdit').textContent='✔️';editing=true}
-  else{const parts=r.innerText;doc.pages=[{text:parts,conf:100,ocr:false}];r.contentEditable=false;$('#bEdit').textContent='✏️';editing=false;saveDoc(doc);$('#lowConf').classList.add('hidden');render();toast('Αποθηκεύτηκε')}
-};
+  if(!editing){if(pv.on)viewText();render();r.textContent=fullText();r.contentEditable=true;r.focus();editing=true;$('#mEditT').textContent='Τέλος διόρθωσης';toast('Γράψε κατευθείαν στο κείμενο. Αποθηκεύεται μόνο του.')}
+  else{doc.pages=[{text:r.innerText,conf:100,ocr:false}];r.contentEditable=false;editing=false;$('#mEditT').textContent='Διόρθωση κειμένου';saveDoc(doc);$('#lowConf').classList.add('hidden');render();toast('Αποθηκεύτηκε')}
+}
+$('#mEdit').onclick=()=>{closeSheet();toggleEdit()};
 // εκφώνηση
 let speaking=false;
-$('#bSpeak').onclick=()=>{
+function speakUI(){$('#mSpeakT').textContent=speaking?'Σταμάτα την ανάγνωση':'Ανάγνωση φωναχτά';$('#mSpeakI').textContent=speaking?'⏹':'🔊'}
+function stopSpeak(){try{speechSynthesis.cancel()}catch(e){}speaking=false;speakUI()}
+$('#mSpeak').onclick=()=>{
+  closeSheet();
   if(!('speechSynthesis' in window))return toast('Το κινητό δεν υποστηρίζει ανάγνωση φωναχτά');
-  if(speaking){speechSynthesis.cancel();speaking=false;$('#bSpeak').textContent='🔊';return}
+  if(speaking)return stopSpeak();
   const sel=getSelection().toString()||fullText();
   const chunks=sel.match(/[^.!;\n]{1,220}[.!;\n]?/g)||[sel];
   const v=speechSynthesis.getVoices().find(v=>v.lang.startsWith('el'));
-  chunks.forEach((c,i)=>{const u=new SpeechSynthesisUtterance(c);u.lang='el-GR';if(v)u.voice=v;if(i===chunks.length-1)u.onend=()=>{speaking=false;$('#bSpeak').textContent='🔊'};speechSynthesis.speak(u)});
-  speaking=true;$('#bSpeak').textContent='⏹';
+  chunks.forEach((c,i)=>{const u=new SpeechSynthesisUtterance(c);u.lang='el-GR';u.rate=+RD.rate||1;if(v)u.voice=v;if(i===chunks.length-1)u.onend=()=>{speaking=false;speakUI()};speechSynthesis.speak(u)});
+  speaking=true;speakUI();toast('Διαβάζω… (Μενού → Σταμάτα την ανάγνωση)');
 };
 function goHome(){
-  pvClose();
-  try{speechSynthesis.cancel()}catch(e){}speaking=false;$('#bSpeak').textContent='🔊';
-  if(editing)$('#bEdit').onclick();
+  const st=history.state&&history.state.v;$('#sheet').classList.add('hidden');pvClose();closeFind();stopSpeak();awake(false);
+  if(editing)toggleEdit();
   if(!$('#work').classList.contains('hidden'))cancelled=true;
   show('home');drawLast();
-  if(history.state&&history.state.v==='view')history.back();
+  if(st==='sheet')history.go(-2);else if(st==='view')history.back();
 }
-$('#bBack').onclick=goHome;
+$('#bBack').onclick=goHome;$('#mHome').onclick=goHome;
 // κουμπί «πίσω» του κινητού: γυρίζει στην αρχική αντί να κλείνει την εφαρμογή
 let backAt=0;
 history.replaceState({v:'root'},'');history.pushState({v:'home'},'');
@@ -689,16 +825,18 @@ async function drawLast(){
 drawLast();
 
 // ---------- Προβολή «Σελίδα» και σημειώσεις πάνω στο PDF ----------
-const PEN_COLORS=['#1e5eff','#e53935','#111111','#2e7d32'],HL_COLORS=['#ffe600','#7cfc00','#ff80ab','#4fc3f7'];
-const pv={on:false,tool:'pan',pen:0,hl:0,file:null,pdf:null,pages:[],undo:[],redo:[],obs:null};
+const PEN_COLORS=['#1e5eff','#e53935','#111111','#2e7d32','#8e24aa','#ff6d00'],HL_COLORS=['#ffe600','#7cfc00','#ff80ab','#4fc3f7','#ffab40'];
+const WIDTHS={pen:[.0025,.0045,.008],hl:[.018,.028,.04]};
+const SHAPES={line:['╱','Γραμμή'],arrow:['➚','Βέλος'],rect:['⬜','Ορθογώνιο'],oval:['⭕','Κύκλος']};
+const pv={on:false,tool:'pan',pen:0,hl:0,pw:1,hw:1,ts:1,shape:'rect',file:null,pdf:null,pages:[],undo:[],redo:[],obs:null,z:1,pinch:null,ptrs:new Map()};
+let gid=1;const newG=()=>Date.now().toString(36)+(gid++);
 async function pvOpen(){
-  pv.on=true;document.body.classList.add('pv');$('#pagesView').classList.remove('hidden');$('#inkBar').classList.remove('hidden');
-  $('#bView').textContent='📝';$('#findRow').classList.add('hidden');
-  try{localStorage.setItem('glenread-view','page')}catch(e){}
+  pv.on=true;document.body.classList.add('pv');$('#pagesView').classList.remove('hidden');$('#inkBar').classList.remove('hidden');closeFind();
+  viewLabels();try{localStorage.setItem('glenread-view','page')}catch(e){}
   const box=$('#pagesView');box.innerHTML='<p class="muted" style="text-align:center;padding:30px">Φόρτωση σελίδων…</p>';
   pv.file=await draftGet('file-'+doc.id);
   if(!pv.file){box.innerHTML='<div class="card" style="margin:16px">Το πρωτότυπο αυτού του εγγράφου δεν κρατήθηκε (ανοίχτηκε πριν την έκδοση 2.3). Άνοιξέ το ξανά από το «Άνοιγμα PDF» για να γράψεις πάνω του.</div>';return}
-  doc.ann=doc.ann||{};pv.undo=[];pv.redo=[];pv.pages=[];
+  doc.ann=doc.ann||{};pv.undo=[];pv.redo=[];pv.pages=[];pv.z=1;box.style.setProperty('--z',1);
   try{
     if(pv.file.pdf){
       if(!window.pdfjsLib)throw new Error('nolib');
@@ -713,16 +851,17 @@ async function pvOpen(){
   // σχεδιάζει μόνο τις σελίδες κοντά στην οθόνη και ελευθερώνει τις μακρινές, για να μη γεμίζει η μνήμη
   pv.obs=new IntersectionObserver(es=>es.forEach(e=>{const el=e.target;if(e.isIntersecting)pvDrawPage(el);else pvFree(el)}),{rootMargin:'1200px 0px'});
   box.querySelectorAll('.pvp').forEach(el=>{pv.obs.observe(el);pvBind(el)});
-  pvTool(pv.tool);
+  pvTool(pv.tool,true);
 }
 function pvClose(){
-  pv.on=false;document.body.classList.remove('pv','drawing');$('#pagesView').classList.add('hidden');$('#inkBar').classList.add('hidden');
-  $('#bView').textContent='📄';if(pv.obs){pv.obs.disconnect();pv.obs=null}$('#pagesView').innerHTML='';pv.pdf=null;pv.file=null;
+  pv.on=false;document.body.classList.remove('pv','drawing');$('#pagesView').classList.add('hidden');$('#inkBar').classList.add('hidden');$('#inkPop').classList.add('hidden');
+  if(pv.obs){pv.obs.disconnect();pv.obs=null}$('#pagesView').innerHTML='';pv.pdf=null;pv.file=null;viewLabels();
 }
 async function pvDrawPage(el){
   if(el._drawn)return;el._drawn=true;
   const i=+el.dataset.i,img=el.querySelector('.img'),ink=el.querySelector('.ink');
-  const W=Math.round(el.clientWidth*Math.min(2,devicePixelRatio||1)),H=Math.round(W*pv.pages[i].h/pv.pages[i].w);
+  // ανάλυση ανάλογη με τη μεγέθυνση, με όριο για να μη γεμίζει η μνήμη
+  const W=Math.round(Math.min(2600,el.clientWidth*Math.min(2,devicePixelRatio||1))),H=Math.round(W*pv.pages[i].h/pv.pages[i].w);
   img.width=ink.width=W;img.height=ink.height=H;
   try{
     if(pv.pdf){const pg=await pv.pdf.getPage(i+1);const vp=pg.getViewport({scale:W/pv.pages[i].w});await pg.render({canvasContext:img.getContext('2d'),viewport:vp}).promise}
@@ -731,11 +870,11 @@ async function pvDrawPage(el){
   pvInk(i);
 }
 function pvFree(el){if(!el._drawn)return;el._drawn=false;el.querySelectorAll('canvas').forEach(c=>{c.width=c.height=0})}
-function pvInk(i,extra){
-  const el=$(`.pvp[data-i="${i}"]`);if(!el||!el._drawn)return;
-  const c=el.querySelector('.ink'),x=c.getContext('2d'),W=c.width,H=c.height;x.clearRect(0,0,W,H);
-  for(const s of [...(doc.ann[i]||[]),...(extra?[extra]:[])]){
-    if(!s.pts.length)continue;x.save();x.lineCap='round';x.lineJoin='round';x.strokeStyle=s.c;x.lineWidth=Math.max(1,s.w*W);
+// ζωγραφίζει στυλό/μαρκαδόρο/σχήματα και κείμενα πάνω σε έναν καμβά
+function drawAnn(x,W,H,list){
+  for(const s of list){
+    if(s.t==='tx'){x.save();x.fillStyle=s.c;x.textBaseline='top';const fz=s.s*W;x.font=`600 ${fz}px system-ui,sans-serif`;(s.text||'').split('\n').forEach((ln,k)=>x.fillText(ln,s.x*W,s.y*H+k*fz*1.25));x.restore();continue}
+    if(!s.pts||!s.pts.length)continue;x.save();x.lineCap='round';x.lineJoin='round';x.strokeStyle=s.c;x.lineWidth=Math.max(1,s.w*W);
     if(s.t==='hl'){x.globalAlpha=.35;x.globalCompositeOperation='multiply'}
     x.beginPath();x.moveTo(s.pts[0][0]*W,s.pts[0][1]*H);
     if(s.pts.length===1)x.lineTo(s.pts[0][0]*W+.1,s.pts[0][1]*H);
@@ -743,48 +882,167 @@ function pvInk(i,extra){
     x.stroke();x.restore();
   }
 }
+function pvInk(i,extra){
+  const el=$(`.pvp[data-i="${i}"]`);if(!el||!el._drawn)return;
+  const c=el.querySelector('.ink'),x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);
+  drawAnn(x,c.width,c.height,[...(doc.ann[i]||[]),...(extra||[])]);
+}
+// μέγεθος κειμένου (σε κλάσματα σελίδας) για να το «πιάνουμε» με το δάχτυλο
+const mctx=document.createElement('canvas').getContext('2d');
+function txBox(s,asp){const W=1000;mctx.font=`600 ${s.s*W}px system-ui,sans-serif`;const lines=(s.text||'').split('\n');const w=Math.max(...lines.map(l=>mctx.measureText(l).width))/W;return{x:s.x,y:s.y,w,h:lines.length*s.s*1.25/asp}}
+function hitObj(i,p,R){
+  const a=pv.pages[i].h/pv.pages[i].w,L=doc.ann[i]||[];
+  for(let k=L.length-1;k>=0;k--){const s=L[k];
+    if(s.t==='tx'){const b=txBox(s,a);if(p[0]>=b.x-.01&&p[0]<=b.x+b.w+.01&&p[1]>=b.y-.01&&p[1]<=b.y+b.h+.01)return s;continue}
+    if(s.pts.some(q=>Math.hypot(q[0]-p[0],(q[1]-p[1])*a)<R+s.w/2))return s}
+  return null;
+}
+const groupOf=(i,s)=>s.g?(doc.ann[i]||[]).filter(o=>o.g===s.g):[s];
 let annT=null;const annSave=()=>{clearTimeout(annT);annT=setTimeout(()=>saveDoc(doc),600)};
+function pushAct(a){pv.undo.push(a);pv.redo=[];annSave()}
+// σχήματα: γίνονται κανονικές γραμμές, ώστε να σβήνονται/μετακινούνται/αποθηκεύονται όπως όλα
+function shapeStrokes(kind,a,b,asp,c,w){
+  const g=newG(),S=pts=>({t:'pen',c,w,g,pts});
+  if(kind==='line')return[S([a,b])];
+  if(kind==='rect')return[S([a,[b[0],a[1]],b,[a[0],b[1]],a])];
+  if(kind==='oval'){const cx=(a[0]+b[0])/2,cy=(a[1]+b[1])/2,rx=Math.abs(b[0]-a[0])/2,ry=Math.abs(b[1]-a[1])/2,pts=[];for(let k=0;k<=48;k++){const t=k/48*Math.PI*2;pts.push([cx+rx*Math.cos(t),cy+ry*Math.sin(t)])}return[S(pts)]}
+  if(kind==='arrow'){const dx=b[0]-a[0],dy=(b[1]-a[1])*asp,L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L,h=Math.min(.05,L*.35);
+    const p1=[b[0]-h*(ux*Math.cos(.5)-uy*Math.sin(.5)),b[1]-h*(uy*Math.cos(.5)+ux*Math.sin(.5))/asp],p2=[b[0]-h*(ux*Math.cos(-.5)-uy*Math.sin(-.5)),b[1]-h*(uy*Math.cos(-.5)+ux*Math.sin(-.5))/asp];
+    return[S([a,b]),S([p1,b,p2])]}
+  return[];
+}
 function pvBind(el){
-  const c=el.querySelector('.ink'),i=+el.dataset.i;let cur=null,raf=0,erased=[];
+  const c=el.querySelector('.ink'),i=+el.dataset.i;let cur=null,raf=0,erased=[],shape=null,mv=null;
+  const asp=()=>pv.pages[i].h/pv.pages[i].w;
   const pt=e=>{const r=c.getBoundingClientRect();return[(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height]};
-  const erase=p=>{const a=pv.pages[i].h/pv.pages[i].w,list=doc.ann[i]||[],R=.025;
-    const keep=list.filter(s=>{const hit=s.pts.some(q=>Math.hypot(q[0]-p[0],(q[1]-p[1])*a)<R+s.w/2);if(hit)erased.push(s);return!hit});
-    if(keep.length!==list.length){doc.ann[i]=keep;pvInk(i)}};
+  const live=x=>{if(!raf)raf=requestAnimationFrame(()=>{raf=0;pvInk(i,x)})};
+  const erase=p=>{const s=hitObj(i,p,.02);if(!s)return;const grp=groupOf(i,s);doc.ann[i]=(doc.ann[i]||[]).filter(o=>!grp.includes(o));erased.push(...grp);pvInk(i)};
+  // όταν ακουμπήσει δεύτερο δάχτυλο: ακυρώνεται ό,τι άρχισε (θα γίνει μεγέθυνση)
+  el._cancel=()=>{if(erased.length){(doc.ann[i]=doc.ann[i]||[]).push(...erased);erased=[]}
+    if(mv){mv.objs.forEach(o=>shift(o,-mv.dx,-mv.dy));mv=null}cur=null;shape=null;pvInk(i)};
+  const shift=(o,dx,dy)=>{if(o.t==='tx'){o.x+=dx;o.y+=dy}else o.pts=o.pts.map(q=>[q[0]+dx,q[1]+dy])};
   c.addEventListener('pointerdown',e=>{
-    if(pv.tool==='pan'||!e.isPrimary)return;c.setPointerCapture(e.pointerId);e.preventDefault();
-    if(pv.tool==='er'){erased=[];erase(pt(e));return}
-    cur={t:pv.tool,c:pv.tool==='hl'?HL_COLORS[pv.hl]:PEN_COLORS[pv.pen],w:pv.tool==='hl'?.028:.0045,pts:[pt(e)]};pvInk(i,cur);
+    if(pv.tool==='pan'||!e.isPrimary||pv.pinch)return;c.setPointerCapture(e.pointerId);e.preventDefault();$('#inkPop').classList.add('hidden');
+    const p=pt(e);
+    if(pv.tool==='er'){erased=[];erase(p);return}
+    if(pv.tool==='tx'){const s=hitObj(i,p,.01);textDialog(i,s&&s.t==='tx'?s:null,p);return}
+    if(pv.tool==='sig'){placeSig(i,p);return}
+    if(pv.tool==='mv'){const s=hitObj(i,p,.03);if(!s){toast('Πάτα πάνω σε μια σημείωση για να τη μετακινήσεις');return}mv={objs:groupOf(i,s),p0:p,dx:0,dy:0};return}
+    if(pv.tool==='sh'){shape={a:p,b:p};return}
+    cur={t:pv.tool,c:pv.tool==='hl'?HL_COLORS[pv.hl]:PEN_COLORS[pv.pen],w:pv.tool==='hl'?WIDTHS.hl[pv.hw]:WIDTHS.pen[pv.pw],pts:[p]};live([cur]);
   });
   c.addEventListener('pointermove',e=>{
-    if(pv.tool==='pan'||!e.isPrimary||!c.hasPointerCapture(e.pointerId))return;
-    if(pv.tool==='er'){erase(pt(e));return}
-    if(!cur)return;const p=pt(e),q=cur.pts[cur.pts.length-1];if(Math.hypot(p[0]-q[0],p[1]-q[1])<.0015)return;
+    if(pv.tool==='pan'||!e.isPrimary||pv.pinch||!c.hasPointerCapture(e.pointerId))return;
+    const p=pt(e);
+    if(pv.tool==='er'){erase(p);return}
+    if(mv){const dx=p[0]-mv.p0[0],dy=p[1]-mv.p0[1];mv.objs.forEach(o=>shift(o,dx-mv.dx,dy-mv.dy));mv.dx=dx;mv.dy=dy;live();return}
+    if(shape){shape.b=p;live(shapeStrokes(pv.shape,shape.a,shape.b,asp(),PEN_COLORS[pv.pen],WIDTHS.pen[pv.pw]));return}
+    if(!cur)return;const q=cur.pts[cur.pts.length-1];if(Math.hypot(p[0]-q[0],p[1]-q[1])<.0015)return;
     if(cur.t==='hl'&&cur.pts.length>1&&Math.abs(p[1]-cur.pts[0][1])<.012)p[1]=cur.pts[0][1]; // ίσια γραμμή μαρκαδόρου
-    cur.pts.push(p);if(!raf)raf=requestAnimationFrame(()=>{raf=0;pvInk(i,cur)});
+    cur.pts.push(p);live([cur]);
   });
   const end=()=>{
-    if(pv.tool==='er'){if(erased.length){pv.undo.push({i,del:erased});pv.redo=[];annSave()}erased=[];return}
+    if(pv.tool==='er'){if(erased.length)pushAct({i,del:erased});erased=[];return}
+    if(mv){if(mv.dx||mv.dy)pushAct({i,mv:mv.objs,dx:mv.dx,dy:mv.dy});mv=null;pvInk(i);return}
+    if(shape){const st=shapeStrokes(pv.shape,shape.a,shape.b,asp(),PEN_COLORS[pv.pen],WIDTHS.pen[pv.pw]);shape=null;
+      if(Math.hypot(st[0].pts[0][0]-st[0].pts[st[0].pts.length-1][0],st[0].pts[0][1]-st[0].pts[st[0].pts.length-1][1])<.01&&pv.shape!=='rect'&&pv.shape!=='oval'){pvInk(i);return}
+      (doc.ann[i]=doc.ann[i]||[]).push(...st);pushAct({i,add:st});pvInk(i);return}
     if(!cur)return;cur.pts=cur.pts.map(q=>[+q[0].toFixed(4),+q[1].toFixed(4)]);
-    (doc.ann[i]=doc.ann[i]||[]).push(cur);pv.undo.push({i,add:[cur]});pv.redo=[];cur=null;pvInk(i);annSave();
+    (doc.ann[i]=doc.ann[i]||[]).push(cur);pushAct({i,add:[cur]});cur=null;pvInk(i);
   };
   c.addEventListener('pointerup',end);c.addEventListener('pointercancel',end);
 }
-function pvTool(t){
-  pv.tool=t;document.body.classList.toggle('drawing',t!=='pan');
+// μεγέθυνση/μετακίνηση με δύο δάχτυλα μέσα στη σελίδα — δεν ζωγραφίζει και δεν χάνονται τα κουμπιά
+(()=>{
+  const box=$('#pagesView'),P=pv.ptrs;
+  const mid=()=>{const[a,b]=[...P.values()];return{x:(a.x+b.x)/2,y:(a.y+b.y)/2,d:Math.hypot(a.x-b.x,a.y-b.y)}};
+  box.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch')return;P.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(P.size===2){box.querySelectorAll('.pvp').forEach(el=>el._cancel&&el._cancel());const m=mid();const top=box.getBoundingClientRect().top+scrollY;
+      pv.pinch={d0:m.d,z0:pv.z,cx:(box.scrollLeft+m.x)/pv.z,cy:(scrollY+m.y-top)/pv.z,top}}},true);
+  box.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;P.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pv.pinch&&P.size===2){e.preventDefault();const m=mid(),z=Math.max(1,Math.min(4,pv.pinch.z0*m.d/pv.pinch.d0));pv.z=z;box.style.setProperty('--z',z);
+      box.scrollLeft=pv.pinch.cx*z-m.x;scrollTo(scrollX,pv.pinch.top+pv.pinch.cy*z-m.y);zoomHint(z)}},true);
+  const up=e=>{if(!P.has(e.pointerId))return;P.delete(e.pointerId);
+    if(pv.pinch&&P.size<2){const changed=Math.abs(pv.z-pv.pinch.z0)>.02;pv.pinch=null;
+      if(changed)box.querySelectorAll('.pvp').forEach(el=>{if(el._drawn){el._drawn=false;pvDrawPage(el)}})}};
+  box.addEventListener('pointerup',up,true);box.addEventListener('pointercancel',up,true);
+})();
+let zhT=null;function zoomHint(z){let h=$('#zoomHint');if(!h){h=document.createElement('div');h.id='zoomHint';document.body.appendChild(h)}h.textContent=Math.round(z*100)+'%';h.classList.remove('hidden');clearTimeout(zhT);zhT=setTimeout(()=>h.classList.add('hidden'),900)}
+// εργαλεία
+const TOOL_TIPS={pan:'Κύλιση: μετακινείσαι στη σελίδα. Δύο δάχτυλα = μεγέθυνση.',pen:'Στυλό: γράψε με ένα δάχτυλο. Δύο δάχτυλα = μεγέθυνση, δεν γράφει.',hl:'Μαρκαδόρος: σύρε πάνω στις γραμμές του κειμένου.',
+  tx:'Κείμενο: πάτα στο σημείο που θέλεις να γράψεις. Πάτα σε υπάρχον κείμενο για αλλαγή.',sh:'Σχήμα: σύρε από τη μία γωνία στην άλλη. Ξαναπάτα «Σχήμα» για άλλο σχήμα.',
+  sig:'Υπογραφή: πάτα στο σημείο που θέλεις να μπει η υπογραφή σου.',mv:'Μετακίνηση: πιάσε μια σημείωση και σύρε τη.',er:'Γόμα: πέρνα πάνω από ό,τι θέλεις να σβήσεις.'};
+function pvTool(t,silent){
+  const again=pv.tool===t&&!silent;pv.tool=t;document.body.classList.toggle('drawing',t!=='pan');
   document.querySelectorAll('#inkBar [data-tool]').forEach(b=>b.classList.toggle('on',b.dataset.tool===t));
   $('#inkColor .dot').style.background=t==='hl'?HL_COLORS[pv.hl]:PEN_COLORS[pv.pen];
-  if(t!=='pan')toolsHide();
+  $('#shIc').textContent=SHAPES[pv.shape][0];
+  if(t==='sig'&&!getSig()){sigDialog();return}
+  if(again&&t!=='pan'&&t!=='er'&&t!=='mv')return inkPop();
+  $('#inkPop').classList.add('hidden');if(!silent)toast(TOOL_TIPS[t]);
 }
 document.querySelectorAll('#inkBar [data-tool]').forEach(b=>b.onclick=()=>pvTool(b.dataset.tool));
-$('#inkColor').onclick=()=>{if(pv.tool==='hl')pv.hl=(pv.hl+1)%HL_COLORS.length;else{pv.pen=(pv.pen+1)%PEN_COLORS.length;if(pv.tool!=='pen')return pvTool('pen')}pvTool(pv.tool)};
-function pvApply(a,fwd){const L=doc.ann[a.i]=doc.ann[a.i]||[];const add=a.add?fwd:!fwd,list=a.add||a.del;
-  if(add)L.push(...list);else list.forEach(x=>{const k=L.indexOf(x);if(k>=0)L.splice(k,1)});pvInk(a.i);annSave()}
-$('#inkUndo').onclick=()=>{const a=pv.undo.pop();if(a){pvApply(a,false);pv.redo.push(a)}};
+$('#inkColor').onclick=()=>{if(['pan','er','mv'].includes(pv.tool))pvTool('pen',true);inkPop()};
+function inkPop(){
+  const t=pv.tool,pop=$('#inkPop'),isHl=t==='hl',cols=isHl?HL_COLORS:PEN_COLORS,ci=isHl?pv.hl:pv.pen;
+  let h=`<div class="lbl">Χρώμα</div><div class="sws">${cols.map((c,k)=>`<button data-c="${k}" class="${k===ci?'on':''}" style="background:${c}" aria-label="χρώμα"></button>`).join('')}</div>`;
+  if(t==='pen'||t==='hl'||t==='sh'){const wi=isHl?pv.hw:pv.pw;h+=`<div class="lbl">Πάχος</div><div class="seg" id="popW">${['Λεπτό','Μεσαίο','Χοντρό'].map((n,k)=>`<button data-w="${k}" class="${k===wi?'on':''}">${n}</button>`).join('')}</div>`}
+  if(t==='sh')h+=`<div class="lbl" style="margin-top:8px">Σχήμα</div><div class="seg" id="popS">${Object.entries(SHAPES).map(([k,v])=>`<button data-s="${k}" class="${k===pv.shape?'on':''}">${v[0]} ${v[1]}</button>`).join('')}</div>`;
+  if(t==='tx')h+=`<div class="lbl" style="margin-top:8px">Μέγεθος γραμμάτων</div><div class="seg" id="popT">${['Μικρά','Μεσαία','Μεγάλα'].map((n,k)=>`<button data-t="${k}" class="${k===pv.ts?'on':''}">${n}</button>`).join('')}</div>`;
+  if(t==='sig')h+=`<div class="row" style="margin-top:8px"><button class="sec" id="popSig">✍️ Νέα υπογραφή</button></div>`;
+  pop.innerHTML=h;pop.classList.remove('hidden');
+  pop.onclick=e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.c!=null){if(isHl)pv.hl=+b.dataset.c;else pv.pen=+b.dataset.c}
+    if(b.dataset.w!=null){if(isHl)pv.hw=+b.dataset.w;else pv.pw=+b.dataset.w}
+    if(b.dataset.s)pv.shape=b.dataset.s;if(b.dataset.t!=null)pv.ts=+b.dataset.t;
+    if(b.id==='popSig'){pop.classList.add('hidden');return sigDialog()}
+    pvTool(pv.tool,true);inkPop()};
+}
+function pvApply(a,fwd){const L=doc.ann[a.i]=doc.ann[a.i]||[];
+  if(a.mv){const k=fwd?1:-1;a.mv.forEach(o=>{if(o.t==='tx'){o.x+=a.dx*k;o.y+=a.dy*k}else o.pts=o.pts.map(q=>[q[0]+a.dx*k,q[1]+a.dy*k])})}
+  else if(a.ed){const o=a.ed.o,v=fwd?a.ed.b:a.ed.a;Object.assign(o,v)}
+  else{const add=a.add?fwd:!fwd,list=a.add||a.del;if(add)L.push(...list);else list.forEach(x=>{const k=L.indexOf(x);if(k>=0)L.splice(k,1)})}
+  pvInk(a.i);annSave()}
+$('#inkUndo').onclick=()=>{const a=pv.undo.pop();if(a){pvApply(a,false);pv.redo.push(a)}else toast('Δεν υπάρχει κάτι για αναίρεση')};
 $('#inkRedo').onclick=()=>{const a=pv.redo.pop();if(a){pvApply(a,true);pv.undo.push(a)}};
-$('#bView').onclick=()=>{if(pv.on){pvClose();try{localStorage.setItem('glenread-view','text')}catch(e){}render()}else pvOpen();toolsHide()};
+// κουτί κειμένου
+function textDialog(i,obj,p){
+  dlgOpen(obj?'Αλλαγή κειμένου':'Γράψε κείμενο',`<textarea id="txIn" placeholder="π.χ. υπογραφή εδώ, ημερομηνία, σχόλιο…">${obj?esc(obj.text):''}</textarea>`+(obj?'<div class="row" style="justify-content:flex-start"><button class="sec" id="txDel">🗑 Σβήσε αυτό το κείμενο</button></div>':''),()=>{
+    const v=$('#txIn').value.replace(/\s+$/,'');
+    if(obj){if(!v){const k=doc.ann[i].indexOf(obj);doc.ann[i].splice(k,1);pushAct({i,del:[obj]})}else{const before={text:obj.text};obj.text=v;pushAct({i,ed:{o:obj,a:before,b:{text:v}}})}}
+    else if(v){const s={t:'tx',x:p[0],y:p[1],s:[.022,.032,.048][pv.ts],c:PEN_COLORS[pv.pen],text:v};(doc.ann[i]=doc.ann[i]||[]).push(s);pushAct({i,add:[s]})}
+    pvInk(i)});
+  setTimeout(()=>{$('#txIn').focus();const d=$('#txDel');if(d)d.onclick=()=>{$('#txIn').value='';$('#dlgOk').click()}},50);
+}
+// υπογραφή: τη ζωγραφίζεις μία φορά και μετά τη βάζεις όπου θέλεις
+const getSig=()=>{try{return JSON.parse(localStorage.getItem('glenread-sig')||'null')}catch(e){return null}};
+function sigDialog(){
+  dlgOpen('Η υπογραφή σου','<canvas id="sigPad"></canvas><p class="muted" style="margin:6px 0 0">Υπόγραψε με το δάχτυλο. Θα αποθηκευτεί για να τη βάζεις με ένα πάτημα.</p><div class="row" style="justify-content:flex-start"><button class="sec" id="sigClr">Καθαρισμός</button></div>',()=>{
+    if(!strokes.length)return toast('Δεν ζωγράφισες υπογραφή');
+    const all=strokes.flat(),x0=Math.min(...all.map(q=>q[0])),x1=Math.max(...all.map(q=>q[0])),y0=Math.min(...all.map(q=>q[1])),y1=Math.max(...all.map(q=>q[1])),w=Math.max(1,x1-x0),h=Math.max(1,y1-y0);
+    const sig={r:h/w,s:strokes.map(st=>st.map(q=>[+((q[0]-x0)/w).toFixed(4),+((q[1]-y0)/h).toFixed(4)]))};
+    try{localStorage.setItem('glenread-sig',JSON.stringify(sig))}catch(e){}
+    toast('Η υπογραφή αποθηκεύτηκε. Πάτα στη σελίδα όπου θέλεις να μπει.');pvTool('sig',true);
+  });
+  const c=$('#sigPad');c.width=c.clientWidth*2;c.height=c.clientHeight*2;const x=c.getContext('2d');x.lineWidth=5;x.lineCap=x.lineJoin='round';x.strokeStyle='#1a237e';
+  let strokes=[],st=null;
+  c.onpointerdown=e=>{c.setPointerCapture(e.pointerId);const r=c.getBoundingClientRect();st=[[(e.clientX-r.left)*2,(e.clientY-r.top)*2]];strokes.push(st);x.beginPath();x.moveTo(st[0][0],st[0][1])};
+  c.onpointermove=e=>{if(!st)return;const r=c.getBoundingClientRect(),q=[(e.clientX-r.left)*2,(e.clientY-r.top)*2];st.push(q);x.lineTo(q[0],q[1]);x.stroke()};
+  c.onpointerup=c.onpointercancel=()=>{st=null};
+  $('#sigClr').onclick=()=>{strokes=[];x.clearRect(0,0,c.width,c.height)};
+}
+function placeSig(i,p){
+  const sig=getSig();if(!sig)return sigDialog();
+  const asp=pv.pages[i].h/pv.pages[i].w,w=.3,h=w*sig.r/asp,x0=p[0]-w/2,y0=p[1]-h/2,g=newG(),c=PEN_COLORS[pv.pen];
+  const st=sig.s.map(s=>({t:'pen',c,w:.004,g,pts:s.map(q=>[+(x0+q[0]*w).toFixed(4),+(y0+q[1]*h).toFixed(4)])}));
+  (doc.ann[i]=doc.ann[i]||[]).push(...st);pushAct({i,add:st});pvInk(i);toast('Μπήκε η υπογραφή. Με «Μετακίνηση» τη μετακινείς.');
+}
 // PDF με τις σημειώσεις: πάνω στο πρωτότυπο, ώστε να κρατιέται το κείμενο του PDF
 const hex2rgb=h=>{const n=parseInt(h.slice(1),16);return[(n>>16&255)/255,(n>>8&255)/255,(n&255)/255]};
-$('#bAnnPdf').onclick=async()=>{
+function txPng(s,W){const sc=3,fz=s.s*W*sc,lines=(s.text||'').split('\n');const c=document.createElement('canvas'),x=c.getContext('2d');x.font=`600 ${fz}px system-ui,sans-serif`;
+  c.width=Math.ceil(Math.max(...lines.map(l=>x.measureText(l).width))+4);c.height=Math.ceil(lines.length*fz*1.25+4);x.font=`600 ${fz}px system-ui,sans-serif`;x.fillStyle=s.c;x.textBaseline='top';lines.forEach((l,k)=>x.fillText(l,0,k*fz*1.25));return{url:c.toDataURL('image/png'),w:c.width/sc,h:c.height/sc}}
+$('#mAnnPdf').onclick=async()=>{
+  closeSheet();
   const file=pv.file||await draftGet('file-'+doc.id);
   if(!file)return toast('Το πρωτότυπο δεν κρατήθηκε — άνοιξε ξανά το PDF για να γράψεις πάνω του');
   const ann=doc.ann||{};toast('Ετοιμάζεται το PDF…');
@@ -793,14 +1051,17 @@ $('#bAnnPdf').onclick=async()=>{
     if(file.pdf&&window.PDFLib){
       const P=PDFLib,pd=await P.PDFDocument.load(file.pdf.slice(0),{ignoreEncryption:true});
       const pages=pd.getPages();
-      pages.forEach((page,i)=>{
-        const L=ann[i];if(!L||!L.length)return;
+      for(let i=0;i<pages.length;i++){
+        const page=pages[i],L=ann[i];if(!L||!L.length)continue;
         const rot=(page.getRotation().angle||0)%360;if(rot)throw new Error('rot');
         const box=page.getCropBox?page.getCropBox():{x:0,y:0,...page.getSize()};const W=box.width,H=box.height;
-        L.forEach(s=>{const d='M '+s.pts.map(q=>(q[0]*W).toFixed(2)+' '+(q[1]*H).toFixed(2)).join(' L ')+(s.pts.length===1?' l 0.1 0':'');
+        for(const s of L){
+          if(s.t==='tx'){const im=txPng(s,W);const png=await pd.embedPng(im.url);page.drawImage(png,{x:box.x+s.x*W,y:box.y+H-s.y*H-im.h,width:im.w,height:im.h});continue}
+          const d='M '+s.pts.map(q=>(q[0]*W).toFixed(2)+' '+(q[1]*H).toFixed(2)).join(' L ')+(s.pts.length===1?' l 0.1 0':'');
           const [r,g,b]=hex2rgb(s.c);
-          page.drawSvgPath(d,{x:box.x,y:box.y+H,borderColor:P.rgb(r,g,b),borderWidth:s.w*W,borderOpacity:s.t==='hl'?.35:1,borderLineCap:P.LineCapStyle.Round});});
-      });
+          page.drawSvgPath(d,{x:box.x,y:box.y+H,borderColor:P.rgb(r,g,b),borderWidth:s.w*W,borderOpacity:s.t==='hl'?.35:1,borderLineCap:P.LineCapStyle.Round});
+        }
+      }
       bytes=await pd.save();
     }else throw new Error('img');
     shareOrSave(new Blob([bytes],{type:'application/pdf'}),doc.name+' (σημειώσεις).pdf');
@@ -814,8 +1075,7 @@ $('#bAnnPdf').onclick=async()=>{
         const c=document.createElement('canvas');
         if(pdfjs){const pg=await pdfjs.getPage(i+1);const vp0=pg.getViewport({scale:1});const vp=pg.getViewport({scale:1600/vp0.width});c.width=vp.width;c.height=vp.height;await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise}
         else{const im=await loadImg(file.images[i]);c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0)}
-        const x=c.getContext('2d'),W=c.width,H=c.height;
-        for(const s of ann[i]||[]){x.save();x.lineCap=x.lineJoin='round';x.strokeStyle=s.c;x.lineWidth=s.w*W;if(s.t==='hl'){x.globalAlpha=.35;x.globalCompositeOperation='multiply'}x.beginPath();s.pts.forEach((q,k)=>k?x.lineTo(q[0]*W,q[1]*H):x.moveTo(q[0]*W,q[1]*H));x.stroke();x.restore()}
+        const W=c.width,H=c.height;drawAnn(c.getContext('2d'),W,H,ann[i]||[]);
         const o=W>H?'l':'p';if(!out)out=new jsPDF({unit:'px',format:[W,H],orientation:o,hotfixes:['px_scaling']});else out.addPage([W,H],o);
         out.addImage(c.toDataURL('image/jpeg',.85),'JPEG',0,0,W,H);c.width=c.height=0;
       }
@@ -872,30 +1132,89 @@ $('#bCancel').onclick=()=>{cancelled=true;prog(0,'Ακύρωση μετά την
 if('launchQueue' in window)launchQueue.setConsumer(async p=>{if(p.files&&p.files[0])openPdf(await p.files[0].getFile())});
 
 const setHH=()=>document.documentElement.style.setProperty('--hh',(document.body.classList.contains('reading')?0:$('.hdr').offsetHeight)+'px');
-// στην ανάγνωση: τα κουμπιά κρύβονται όταν κατεβαίνεις, ξαναβγαίνουν όταν ανεβαίνεις ή πατάς ☰
-let lastY=0;
-addEventListener('scroll',()=>{
-  if(!document.body.classList.contains('reading')||editing)return;
-  const y=scrollY;
-  // όσο είναι ανοιχτή η αναζήτηση δεν κρύβεται τίποτα, για να βλέπεις τα αποτελέσματα
-  if(Math.abs(y-lastY)>12&&!toolsPinned&&$('#findRow').classList.contains('hidden'))toolsHide();
-  lastY=y;
-},{passive:true});
-let toolsPinned=false;
-let pinned=false;try{pinned=localStorage.getItem('glenread-pin')==='1'}catch(e){}
-function setTH(){document.documentElement.style.setProperty('--th',$('.tools').offsetHeight+'px')}
-function pinApply(){document.body.classList.toggle('pinned',pinned);$('#bPin').classList.toggle('on',pinned);if(pinned){$('.tools').classList.remove('hide');setTH()}}
-$('#bPin').onclick=()=>{pinned=!pinned;try{localStorage.setItem('glenread-pin',pinned?'1':'0')}catch(e){}pinApply();toast(pinned?'Η μπάρα μένει σταθερή':'Η μπάρα κρύβεται όταν κατεβαίνεις')};
-addEventListener('resize',()=>pinned&&setTH());
-function toolsHide(){if(pinned)return;$('.tools').classList.add('hide')}
-function toolsShow(){$('.tools').classList.remove('hide');toolsPinned=true;setTimeout(()=>toolsPinned=false,600)}
-$('#readTop').onclick=()=>{$('.tools').classList.contains('hide')?toolsShow():toolsHide()};
-$('#bFind').onclick=()=>{setTimeout(()=>pinned&&setTH(),0);if(pv.on){pvClose();render()}const r=$('#findRow');r.classList.toggle('hidden');if(!r.classList.contains('hidden'))$('#q').focus();else{$('#q').value='';$('#q').oninput()}};
-$('#bFull').onclick=()=>{
-  if(document.fullscreenElement)return document.exitFullscreen().catch(()=>{});
-  const el=document.documentElement;(el.requestFullscreen?el.requestFullscreen():Promise.reject()).catch(()=>toast('Η εφαρμογή είναι ήδη σε πλήρη οθόνη'));
-};
 addEventListener('resize',setHH);setHH();setTimeout(setHH,500);
+
+// ---------- Μενού επιλογών (κουμπί G) ----------
+function openSheet(){
+  if(editing){toggleEdit()}
+  $('#mRenameS').textContent=doc?doc.name:'';drawBm();rdApply();viewLabels();speakUI();
+  $('#mPin').classList.toggle('on',pinned);
+  $('#sheet').classList.remove('hidden');$('#inkPop').classList.add('hidden');
+  if(history.state&&history.state.v!=='sheet')history.pushState({v:'sheet'},'');
+}
+function closeSheet(fromPop){if($('#sheet').classList.contains('hidden'))return;$('#sheet').classList.add('hidden');if(!fromPop&&history.state&&history.state.v==='sheet')history.back()}
+$('#gMenu').onclick=openSheet;$('#sheet .bk').onclick=()=>closeSheet();
+addEventListener('popstate',()=>{if(!$('#sheet').classList.contains('hidden'))closeSheet(true)});
+// σύρσιμο προς τα κάτω κλείνει το μενού
+(()=>{let y0=null;const pn=$('#sheet .pn');pn.addEventListener('touchstart',e=>{y0=pn.scrollTop<=0?e.touches[0].clientY:null},{passive:true});
+  pn.addEventListener('touchmove',e=>{if(y0!=null&&e.touches[0].clientY-y0>90){y0=null;closeSheet()}},{passive:true})})();
+// προβολή κείμενο / σελίδα
+function viewLabels(){
+  const on=pv.on;$('#mViewT').textContent=on?'Μόνο κείμενο':'Πρωτότυπο σελίδας';$('#mViewS').textContent=on?'Καθαρό κείμενο που μεγαλώνει, χωρίς ζουμ':'Δες το PDF όπως είναι και γράψε πάνω του';
+  $('#mView .ic').textContent=on?'📝':'📄';const q=$('#qView');q.querySelector('span').textContent=on?'📝':'📄';q.querySelector('small').textContent=on?'Κείμενο':'Σελίδα';
+  if(doc)$('#qTitle').textContent=doc.name;
+}
+function viewText(){pvClose();try{localStorage.setItem('glenread-view','text')}catch(e){}render()}
+const toggleView=()=>{closeSheet();if(pv.on)viewText();else pvOpen()};
+$('#mView').onclick=toggleView;$('#qView').onclick=toggleView;
+$('#mDraw').onclick=async()=>{closeSheet();if(!pv.on)await pvOpen();if(pv.on&&pv.file)pvTool('pen')};
+$('#mClear').onclick=()=>{closeSheet();const n=Object.values(doc.ann||{}).reduce((a,l)=>a+l.length,0);if(!n)return toast('Δεν υπάρχουν σημειώσεις');
+  if(!confirm('Να σβηστούν όλες οι σημειώσεις ('+n+') από όλες τις σελίδες;'))return;doc.ann={};pv.undo=[];pv.redo=[];saveDoc(doc);document.querySelectorAll('.pvp').forEach(el=>pvInk(+el.dataset.i));toast('Σβήστηκαν')};
+// αναζήτηση
+function openFind(){closeSheet();if(pv.on)viewText();$('#findBar').classList.remove('hidden');$('#q').focus()}
+function closeFind(){$('#findBar').classList.add('hidden');if($('#q').value){$('#q').value='';$('#hits').textContent='';if(doc&&!pv.on)render()}}
+$('#mFind').onclick=openFind;$('#qFind').onclick=openFind;$('#findClose').onclick=closeFind;
+// μετάβαση σε σελίδα
+$('#mGo').onclick=()=>{closeSheet();const n=pv.on?pv.pages.length:doc.pages.length;if(n<2)return toast('Το έγγραφο έχει μία σελίδα');
+  dlgOpen('Μετάβαση σε σελίδα',`<input id="goIn" type="number" inputmode="numeric" min="1" max="${n}" placeholder="1 έως ${n}">`,()=>{const k=Math.max(1,Math.min(n,+$('#goIn').value||1));
+    const el=pv.on?$(`.pvp[data-i="${k-1}"]`):document.querySelectorAll('#reader .pg')[k-1];if(el)el.scrollIntoView({block:'start'})});setTimeout(()=>$('#goIn').focus(),50)};
+// πλήρης οθόνη
+$('#mFull').onclick=()=>{closeSheet();
+  if(document.fullscreenElement)return document.exitFullscreen().catch(()=>{});
+  const el=document.documentElement;(el.requestFullscreen?el.requestFullscreen():Promise.reject()).catch(()=>toast('Η εφαρμογή είναι ήδη σε πλήρη οθόνη'))};
+// να μη σβήνει η οθόνη
+let wl=null;
+async function awake(on){try{if(on&&'wakeLock' in navigator&&!wl){wl=await navigator.wakeLock.request('screen');wl.addEventListener('release',()=>wl=null)}else if(!on&&wl){await wl.release();wl=null}}catch(e){}}
+$('#mAwake').onclick=()=>{RD.awake=!RD.awake;rdApply();awake(RD.awake);if(!('wakeLock' in navigator))toast('Το κινητό δεν υποστηρίζει αυτή τη ρύθμιση');else toast(RD.awake?'Η οθόνη θα μένει αναμμένη όσο διαβάζεις':'Η οθόνη σβήνει κανονικά')};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&RD.awake&&document.body.classList.contains('reading'))awake(true)});
+// σταθερή μπάρα πάνω
+let pinned=false;try{pinned=localStorage.getItem('glenread-pin')==='1'}catch(e){}
+function pinApply(){document.body.classList.toggle('pinned',pinned);$('#mPin').classList.toggle('on',pinned)}
+$('#mPin').onclick=()=>{pinned=!pinned;try{localStorage.setItem('glenread-pin',pinned?'1':'0')}catch(e){}pinApply();toast(pinned?'Η μπάρα μένει σταθερή πάνω':'Η μπάρα κρύφτηκε — όλα είναι στο Μενού')};
+// σελιδοδείκτες
+function curPos(){
+  if(pv.on){const els=[...document.querySelectorAll('.pvp')];const k=Math.max(0,els.findIndex(el=>el.getBoundingClientRect().bottom>80));return{v:'page',p:k,label:'Σελίδα '+(k+1)}}
+  const h=document.body.scrollHeight-innerHeight,y=h>0?scrollY/h:0;const pgs=[...document.querySelectorAll('#reader .pg')];let k=pgs.findIndex(el=>el.getBoundingClientRect().top>innerHeight/3);k=k<0?pgs.length:k;
+  return{v:'text',y,label:(pgs.length?'Σελίδα '+Math.max(1,k)+' · ':'')+Math.round(y*100)+'%'};
+}
+function drawBm(){const L=doc&&doc.bm||[];$('#bmList').innerHTML=L.length?L.map((b,k)=>`<div class="bmi"><button class="go" data-k="${k}">🔖 ${esc(b.label)}</button><button class="sec" data-del="${k}" aria-label="Σβήσιμο">🗑</button></div>`).join(''):'<p class="muted" style="margin:2px 10px">Δεν έχεις σελιδοδείκτες σε αυτό το έγγραφο.</p>'}
+$('#mBm').onclick=()=>{const b=curPos();doc.bm=doc.bm||[];doc.bm.push(b);saveDoc(doc);drawBm();toast('Μπήκε σελιδοδείκτης: '+b.label)};
+$('#bmList').onclick=async e=>{const go=e.target.closest('[data-k]'),del=e.target.closest('[data-del]');
+  if(del){doc.bm.splice(+del.dataset.del,1);saveDoc(doc);drawBm();return}
+  if(!go)return;const b=doc.bm[+go.dataset.k];closeSheet();
+  if(b.v==='page'){if(!pv.on)await pvOpen();setTimeout(()=>{const el=$(`.pvp[data-i="${b.p}"]`);el&&el.scrollIntoView({block:'start'})},300)}
+  else{if(pv.on)viewText();setTimeout(()=>scrollTo(0,b.y*(document.body.scrollHeight-innerHeight)),60)}};
+// μετονομασία
+$('#mRename').onclick=()=>{closeSheet();dlgOpen('Μετονομασία εγγράφου',`<input id="rnIn" value="${esc(doc.name).replace(/"/g,'&quot;')}">`,()=>{const v=$('#rnIn').value.trim();if(v){doc.name=v;saveDoc(doc);viewLabels();toast('Μετονομάστηκε')}});setTimeout(()=>$('#rnIn').select(),50)};
+// οδηγός
+$('#mHelp').onclick=()=>{closeSheet();dlgOpen('Οδηγός χρήσης',`<ul class="help">
+<li><b>Κουμπί G (κάτω αριστερά)</b>: ανοίγει αυτό το μενού με όλες τις επιλογές.</li>
+<li><b>Δύο δάχτυλα</b>: στο κείμενο μεγαλώνουν τα γράμματα· στη σελίδα κάνουν μεγέθυνση. Ποτέ δεν ζωγραφίζουν.</li>
+<li><b>Κείμενο ή Σελίδα</b>: «Κείμενο» = καθαρό κείμενο για εύκολο διάβασμα· «Σελίδα» = το πρωτότυπο PDF, για να γράψεις πάνω του.</li>
+<li><b>Στυλό / Μαρκαδόρος</b>: γράφεις ή υπογραμμίζεις. Πάτα ξανά το ίδιο εργαλείο για χρώμα και πάχος.</li>
+<li><b>Κείμενο (🔤)</b>: πάτα στη σελίδα και γράψε· πάτα σε υπάρχον κείμενο για αλλαγή ή σβήσιμο.</li>
+<li><b>Σχήμα</b>: γραμμή, βέλος, ορθογώνιο, κύκλος — σύρε από γωνία σε γωνία.</li>
+<li><b>Υπογραφή</b>: τη ζωγραφίζεις μία φορά και μετά τη βάζεις με ένα πάτημα.</li>
+<li><b>Μετακίνηση</b>: πιάνεις μια σημείωση και τη σέρνεις. <b>Γόμα</b>: σβήνει ό,τι αγγίξεις.</li>
+<li><b>↶ ↷</b>: αναίρεση και επανάληψη. Όλα αποθηκεύονται μόνα τους.</li>
+<li><b>Αποθήκευση PDF με τις σημειώσεις</b>: φτιάχνει νέο PDF για αποστολή — το πρωτότυπο δεν αλλάζει.</li></ul>`,null,true)};
+// παράθυρο διαλόγου
+let dlgCb=null;
+let dlgAt=0;
+function dlgOpen(title,body,cb,infoOnly){dlgAt=Date.now();$('#dlgT').textContent=title;$('#dlgB').innerHTML=body;dlgCb=cb;$('#dlgNo').classList.toggle('hidden',!!infoOnly);$('#dlg').classList.remove('hidden')}
+const dlgClose=()=>{$('#dlg').classList.add('hidden');$('#dlgB').innerHTML='';dlgCb=null};
+$('#dlgOk').onclick=()=>{const cb=dlgCb;try{cb&&cb()}finally{dlgClose()}};
+$('#dlgNo').onclick=dlgClose;$('#dlg').onclick=e=>{if(e.target.id==='dlg'&&Date.now()-dlgAt>600)dlgClose()};
 
 // ---------- Εγκατάσταση στο κινητό ----------
 let instEvt=null;
@@ -922,7 +1241,8 @@ if('serviceWorker' in navigator){
     $('#bUpd').onclick=async()=>{toast('Έλεγχος…');await reg.update();if(!reg.waiting&&!reg.installing)toast('Έχεις την τελευταία έκδοση ('+VERSION+')')};
     reg.addEventListener('updatefound',()=>{const w=reg.installing;w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller){toast('Νέα έκδοση — αναβάθμιση…');w.postMessage('skip')}})});
   });
-  let reloaded=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!reloaded){reloaded=true;location.reload()}});
+  // ξαναφόρτωση μόνο όταν αντικαθίσταται παλιά έκδοση — όχι στο πρώτο άνοιγμα της εφαρμογής
+  const hadCtl=!!navigator.serviceWorker.controller;let reloaded=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadCtl&&!reloaded){reloaded=true;location.reload()}});
 }else $('#bUpd').onclick=()=>location.reload();
 </script>
 </body>
