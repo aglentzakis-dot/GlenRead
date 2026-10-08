@@ -58,6 +58,11 @@ body.pv #gMenu{bottom:calc(128px + env(safe-area-inset-bottom))}
 .qhead{display:flex;align-items:center;justify-content:space-between;margin:8px 6px 8px}
 .qhead b{font-size:13px;letter-spacing:.04em;color:var(--acc2)}
 .qhead button{min-height:34px;padding:4px 10px;font-size:13px}
+.ordi{display:flex;align-items:center;gap:8px;padding:5px 2px;border-bottom:1px solid var(--line)}
+.ordi .oi{width:30px;text-align:center;font-size:19px}
+.ordi .ot{flex:1}
+.ordi button{min-height:38px;width:44px;padding:0}
+#ordList{max-height:55vh;overflow-y:auto}
 details.cat{border:1px solid var(--line);border-radius:14px;margin:6px 0;background:var(--card);overflow:hidden}
 details.cat summary{list-style:none;display:flex;align-items:center;gap:12px;padding:10px 12px;cursor:pointer}
 details.cat summary::-webkit-details-marker{display:none}
@@ -410,9 +415,11 @@ details summary{cursor:pointer;font-weight:600}
     <button class="mi" id="mTxt"><span class="ic">💾</span><span class="tx"><b>Αποθήκευση ως κείμενο</b><small>Αρχείο .txt στο GlenApps › GlenRead › Έγγραφα</small></span></button>
     <button class="mi" id="mRename"><span class="ic">🏷️</span><span class="tx"><b>Μετονομασία</b><small id="mRenameS"></small></span></button>
     </details>
-    <details class="cat" data-cat="set"><summary><span class="ci">⚙️</span><span class="ct"><b>Ρυθμίσεις</b><small>Οθόνη, πάνω μπάρα, θέση του G</small></span><span class="cv">›</span></summary>
+    <details class="cat" data-cat="set"><summary><span class="ci">⚙️</span><span class="ct"><b>Ρυθμίσεις</b><small>Οθόνη, μπάρες και σειρά κουμπιών, θέση του G</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mAwake"><span class="ic">☀️</span><span class="tx"><b>Να μη σβήνει η οθόνη</b><small>Όσο διαβάζεις</small></span><span class="sw"></span></button>
     <button class="mi" id="mPin"><span class="ic">📌</span><span class="tx"><b>Σταθερή μπάρα πάνω</b><small>Τα κουμπιά που θέλεις, πάντα ορατά</small></span><span class="sw"></span></button>
+    <button class="mi" id="mOrdTop"><span class="ic">↔️</span><span class="tx"><b>Σειρά κουμπιών πάνω μπάρας</b><small>Ποιο κουμπί έρχεται πρώτο</small></span></button>
+    <button class="mi" id="mOrdInk"><span class="ic">↕️</span><span class="tx"><b>Σειρά εργαλείων κάτω μπάρας</b><small>Βάλε μπροστά όσα χρησιμοποιείς πιο συχνά</small></span></button>
     <button class="mi" id="mGpos"><span class="ic">↘️</span><span class="tx"><b>Επαναφορά θέσης του G</b><small>Το κουμπί μενού γυρίζει κάτω δεξιά</small></span></button>
     </details>
     <button class="mi" id="mHelp"><span class="ic">❓</span><span class="tx"><b>Οδηγός χρήσης</b><small>Τι κάνει κάθε κουμπί</small></span></button>
@@ -444,7 +451,7 @@ details summary{cursor:pointer;font-weight:600}
 <script src="antigrafa.js"></script>
 <script src="efarmoges-mas.js"></script>
 <script>
-const VERSION='2.12';
+const VERSION='2.13';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -1199,7 +1206,7 @@ function textDialog(i,obj,p){
 // υπογραφή: τη ζωγραφίζεις μία φορά και μετά τη βάζεις όπου θέλεις
 const getSig=()=>{try{return JSON.parse(localStorage.getItem('glenread-sig')||'null')}catch(e){return null}};
 function sigDialog(fromMenu){
-  const cur=getSig();
+  const cur=getSig();if(!cur&&pv.tool==='sig')pvTool('pan',true);
   dlgOpen('Η υπογραφή σου',(cur?'<p class="muted" style="margin:0 0 6px">Η τωρινή σου υπογραφή φαίνεται παρακάτω. Ζωγράφισε νέα για να την αλλάξεις.</p>':'')+'<canvas id="sigPad"></canvas><p class="muted" style="margin:6px 0 0">Υπόγραψε με το δάχτυλο. Θα αποθηκευτεί για να τη βάζεις με ένα πάτημα.</p><div class="row" style="justify-content:flex-start"><button class="sec" id="sigClr">Καθαρισμός</button></div>',()=>{
     if(!strokes.length)return toast('Δεν ζωγράφισες υπογραφή');
     const all=strokes.flat(),x0=Math.min(...all.map(q=>q[0])),x1=Math.max(...all.map(q=>q[0])),y0=Math.min(...all.map(q=>q[1])),y1=Math.max(...all.map(q=>q[1])),w=Math.max(1,x1-x0),h=Math.max(1,y1-y0);
@@ -1353,7 +1360,7 @@ addEventListener('resize',setHH);setHH();setTimeout(setHH,500);
 // ---------- Πάνω μπάρα: ο χρήστης διαλέγει τα κουμπιά ----------
 const QB_ALL=[...document.querySelectorAll('#qbar [data-q]')].map(b=>[b.dataset.q,b.querySelector('small').textContent,b.querySelector('span').textContent]);
 let QB=['back','find','view','tr','speak','fsm','fsp'];try{const v=JSON.parse(localStorage.getItem('glenread-qb')||'null');if(Array.isArray(v))QB=v}catch(e){}
-function qbApply(){document.querySelectorAll('#qbar [data-q]').forEach(b=>b.classList.toggle('off',!QB.includes(b.dataset.q)))}
+function qbApply(){const bar=$('#qbar');QB.forEach(k=>{const b=bar.querySelector(`[data-q="${k}"]`);if(b)bar.appendChild(b)});bar.querySelectorAll('[data-q]').forEach(b=>{b.classList.toggle('off',!QB.includes(b.dataset.q));if(!QB.includes(b.dataset.q))bar.appendChild(b)})}
 qbApply();
 const QB_ACT={find:()=>openFind(),view:()=>toggleView(),tr:()=>openTranslate(),speak:()=>$('#mSpeak').onclick(),fsm:()=>$('#fsMinus').onclick(),fsp:()=>$('#fsPlus').onclick(),
   theme:()=>{RD.th={light:'sepia',sepia:'night',night:'light'}[RD.th]||'light';rdApply();toast({light:'Φωτεινό θέμα',sepia:'Σέπια',night:'Νυχτερινό θέμα'}[RD.th])},
@@ -1377,7 +1384,7 @@ $('#qGrid').onclick=e=>{
     try{localStorage.setItem('glenread-fav',JSON.stringify(FAV))}catch(x){}drawQGrid();toast(FAV.includes(k)?'«'+name(k)+'» μπήκε στα κουμπιά μου':'«'+name(k)+'» βγήκε από τα κουμπιά μου');return}
   if(pin){e.stopPropagation();const k=pin.dataset.pin;
     if(QB.includes(k)){if(k==='back')return toast('Το «Πίσω» μένει πάντα στην πάνω μπάρα');QB=QB.filter(x=>x!==k)}else QB.push(k);
-    QB=QB_ALL.map(x=>x[0]).filter(x=>QB.includes(x));try{localStorage.setItem('glenread-qb',JSON.stringify(QB))}catch(x){}qbApply();drawQGrid();
+    try{localStorage.setItem('glenread-qb',JSON.stringify(QB))}catch(x){}qbApply();drawQGrid();
     if(QB.includes(k)&&!pinned){pinned=true;try{localStorage.setItem('glenread-pin','1')}catch(x){}pinApply()}
     toast(QB.includes(k)?'«'+name(k)+'» μπήκε στην πάνω μπάρα':'«'+name(k)+'» βγήκε από την πάνω μπάρα');return}
   if(qEditing)return;
@@ -1387,6 +1394,24 @@ $('#qGrid').onclick=e=>{
 // μόνο μία κατηγορία ανοιχτή τη φορά
 document.querySelectorAll('#sheet details.cat').forEach(d=>d.addEventListener('toggle',()=>{if(d.open){document.querySelectorAll('#sheet details.cat').forEach(o=>{if(o!==d)o.open=false});setTimeout(()=>d.scrollIntoView({block:'nearest',behavior:'smooth'}),60)}}));
 $('#mGpos').onclick=()=>{try{localStorage.removeItem('glenread-gpos')}catch(e){}$('#gMenu').classList.remove('custom');closeSheet();toast('Το κουμπί G γύρισε κάτω δεξιά')};
+
+// ---------- Σειρά κουμπιών (πάνω και κάτω μπάρα) ----------
+const inkKey=b=>b.dataset.tool||b.id;
+const INK_ALL=[...document.querySelectorAll('#inkBar > button')].map(b=>[inkKey(b),b.querySelector('small').textContent,b.querySelector('span').textContent||'🎨']);
+let INK=INK_ALL.map(x=>x[0]);try{const v=JSON.parse(localStorage.getItem('glenread-inkorder')||'null');if(Array.isArray(v))INK=[...v.filter(k=>INK.includes(k)),...INK.filter(k=>!v.includes(k))]}catch(e){}
+function inkApply(){const bar=$('#inkBar');INK.forEach(k=>{const b=[...bar.children].find(x=>x.tagName==='BUTTON'&&inkKey(x)===k);if(b)bar.appendChild(b)})}
+inkApply();
+function orderDialog(title,items,cur,onSave){
+  let order=cur.slice();
+  const draw=()=>{$('#ordList').innerHTML=order.map((k,i)=>{const it=items.find(x=>x[0]===k)||[k,k,''];return`<div class="ordi"><span class="oi">${it[2]}</span><span class="ot">${it[1]}</span><button class="sec" data-up="${i}" ${i?'':'disabled'} aria-label="Πάνω">▲</button><button class="sec" data-dn="${i}" ${i<order.length-1?'':'disabled'} aria-label="Κάτω">▼</button></div>`}).join('')};
+  dlgOpen(title,'<p class="muted" style="margin:0 0 6px">Με ▲ ▼ αλλάζεις τη σειρά. Το πρώτο είναι αριστερά.</p><div id="ordList"></div>',()=>onSave(order));
+  $('#dlgOk').textContent='Αποθήκευση';draw();
+  $('#ordList').onclick=e=>{const u=e.target.closest('[data-up]'),d=e.target.closest('[data-dn]');if(u){const i=+u.dataset.up;[order[i-1],order[i]]=[order[i],order[i-1]];draw()}if(d){const i=+d.dataset.dn;[order[i+1],order[i]]=[order[i],order[i+1]];draw()}};
+}
+$('#mOrdTop').onclick=()=>{closeSheet();if(!QB.length)return toast('Η πάνω μπάρα δεν έχει κουμπιά');
+  orderDialog('Σειρά κουμπιών πάνω μπάρας',QB_ALL,QB,o=>{QB=o;try{localStorage.setItem('glenread-qb',JSON.stringify(QB))}catch(e){}qbApply();toast('Η σειρά αποθηκεύτηκε')})};
+$('#mOrdInk').onclick=()=>{closeSheet();
+  orderDialog('Σειρά εργαλείων κάτω μπάρας',INK_ALL,INK,o=>{INK=o;try{localStorage.setItem('glenread-inkorder',JSON.stringify(INK))}catch(e){}inkApply();toast('Η σειρά αποθηκεύτηκε')})};
 
 // ---------- Κάτω μπάρα: σύρσιμο κάτω = μαζεύει, πάνω ή πάτημα = ανοίγει ----------
 (()=>{let min=false;try{min=localStorage.getItem('glenread-inkmin')==='1'}catch(e){}
@@ -1442,6 +1467,7 @@ $('#mSig').onclick=()=>{closeSheet();sigDialog(true)};
 // ---------- Μενού επιλογών (κουμπί G) ----------
 function openSheet(){
   if(editing){toggleEdit()}
+  document.querySelectorAll('#sheet details.cat').forEach(d=>d.open=false);$('#sheet .pn').scrollTop=0;
   $('#mRenameS').textContent=doc?doc.name:'';sigPreview();qEditing=false;drawQGrid();drawBm();rdApply();viewLabels();speakUI();
   $('#mPin').classList.toggle('on',pinned);
   $('#sheet').classList.remove('hidden');$('#inkPop').classList.add('hidden');
@@ -1453,6 +1479,7 @@ function closeSheet(fromPop){if($('#sheet').classList.contains('hidden'))return;
   const g=$('#gMenu');let timer=null,drag=false,moved=false,sx=0,sy=0,ox=0,oy=0;
   const S=62,clamp=(x,y)=>{const minB=document.body.classList.contains('pv')?126:12;return[Math.max(6,Math.min(innerWidth-S-6,x)),Math.max(6,Math.min(innerHeight-S-minB,y))]};
   const place=(x,y)=>{[x,y]=clamp(x,y);g.style.setProperty('--gx',x+'px');g.style.setProperty('--gy',y+'px');g.classList.add('custom');return[x,y]};
+  try{if(localStorage.getItem('glenread-gpos-v')!=='2'){localStorage.removeItem('glenread-gpos');localStorage.setItem('glenread-gpos-v','2')}}catch(e){}
   const load=()=>{try{const p=JSON.parse(localStorage.getItem('glenread-gpos')||'null');if(p)place(p.x*innerWidth,p.y*innerHeight);else g.classList.remove('custom')}catch(e){}};
   load();addEventListener('resize',load);new MutationObserver(()=>{if(g.classList.contains('custom')){const r=g.getBoundingClientRect();place(r.left,r.top)}}).observe(document.body,{attributes:true,attributeFilter:['class']});
   g.addEventListener('pointerdown',e=>{moved=false;sx=e.clientX;sy=e.clientY;const r=g.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;g.setPointerCapture(e.pointerId);
