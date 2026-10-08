@@ -25,9 +25,30 @@ body.reading .hdr{display:none}
 body.reading main{padding:0;max-width:none}
 body.reading{--fs-font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 body.reading[data-th=sepia]{--bg:#f4ecd8;--card:#f4ecd8;--ink:#5b4636;--soft:#8a7560;--line:#e0d3b6}
-body.reading[data-th=night]{--bg:#121212;--card:#1b1b1b;--ink:#dcdcdc;--soft:#9a9a9a;--line:#333}
+body.reading[data-th=paper]{--bg:#fbfaf6;--card:#fbfaf6;--ink:#2b2b2b;--soft:#777;--line:#e8e4da}
+body.reading[data-th=mint]{--bg:#e9f5ee;--card:#e9f5ee;--ink:#1f3a2b;--soft:#5c7a68;--line:#cfe5d8}
+body.reading[data-th=gray]{--bg:#e6e6e6;--card:#e6e6e6;--ink:#222;--soft:#666;--line:#cfcfcf}
+body.reading[data-th=contrast]{--bg:#ffffff;--card:#ffffff;--ink:#000000;--soft:#333;--line:#000}
+body.reading[data-th=night]{--bg:#121212;--card:#121212;--ink:#dcdcdc;--soft:#9a9a9a;--line:#333}
 body.reading[data-th=night] .pvp canvas.img{filter:invert(.92) hue-rotate(180deg)}
-body.reading[data-th=night] .pvp{background:#1b1b1b}
+body.reading[data-th=night] .pvp{background:#121212}
+body.reading[data-th=navy]{--bg:#0f1b2d;--card:#0f1b2d;--ink:#d6e2f0;--soft:#8fa4bd;--line:#24364f}
+body.reading[data-th=navy] .pvp canvas.img{filter:invert(.92) hue-rotate(180deg)}
+body.reading[data-th=navy] .pvp{background:#0f1b2d}
+body.reading[data-th=amoled]{--bg:#000000;--card:#000000;--ink:#c8c8c8;--soft:#8a8a8a;--line:#222}
+body.reading[data-th=amoled] .pvp canvas.img{filter:invert(.92) hue-rotate(180deg)}
+body.reading[data-th=amoled] .pvp{background:#000000}
+body.reading[data-th=yellow]{--bg:#000000;--card:#000000;--ink:#ffe14d;--soft:#d9c04a;--line:#444}
+body.reading[data-th=yellow] .pvp canvas.img{filter:invert(.92) hue-rotate(180deg)}
+body.reading[data-th=yellow] .pvp{background:#000000}
+body.reading[data-th=contrast] #reader,body.reading[data-th=yellow] #reader{font-weight:600}
+.opt.thopt{flex-direction:column;align-items:stretch}
+.opt.thopt>span{flex:none}
+.seg button{font-size:13px}
+.seg.thg{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;padding:4px}
+.seg.thg button{min-width:0;flex-direction:column;gap:0;min-height:58px;padding:4px 2px;border-radius:12px;border:2px solid var(--line);font-size:17px;font-weight:800;line-height:1.1}
+.thg button small{font-size:9.5px;font-weight:600;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.thg button.on{border-color:#EF9F02;box-shadow:0 0 0 2px #FDD117}
 #read .card{border:0;border-radius:0;margin:0;padding:18px var(--mg,18px) 80vh;background:var(--bg);touch-action:pan-y}
 #reader{max-width:720px;margin:0 auto;font-family:var(--ff,inherit);line-height:var(--lh,1.65)!important}
 body.reading.ffr #reader{letter-spacing:.02em;word-spacing:.12em}
@@ -148,6 +169,20 @@ body.selon #gMenu{display:none}
 #selBar{position:fixed;left:8px;right:8px;bottom:calc(122px + env(safe-area-inset-bottom));z-index:9;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:var(--card);border:2px solid var(--acc2);border-radius:16px;box-shadow:0 6px 20px #0003;padding:6px}
 #selBar button{min-height:46px;padding:4px;flex-direction:column;gap:0;font-size:18px;line-height:1.1;background:transparent;border:1px solid var(--line);color:var(--ink)}
 #selBar button small{font-size:10.5px;font-weight:600;color:var(--soft)}
+/* «Οι εφαρμογές μας»: μαζεμένα πλακίδια σε τρεις στήλες */
+#efmPage{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+#efmPage>*:not(.efm-card){grid-column:1/-1}
+#efmPage .efm-card{position:relative;margin:0;padding:8px 4px 6px;gap:0;border-radius:12px}
+#efmPage .efm-go{flex-direction:column;gap:4px;text-align:center;align-items:center}
+#efmPage .efm-ic{width:34px;height:34px;font-size:26px}
+#efmPage .efm-tx{align-items:center;width:100%}
+#efmPage .efm-tx>*:first-child{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#efmPage .efm-tx>*:not(:first-child){font-size:10.5px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#efmPage .efm-arr{display:none}
+#efmPage .efm-tg{position:absolute;top:0;right:0;width:26px;height:26px;padding:0;font-size:0;text-decoration:none;opacity:.5}
+#efmPage .efm-tg::after{content:'✕';font-size:12px}
+#efmPage .efm-off .efm-tg::after{content:'↺'}
+#efmPage .efm-note{font-size:11.5px;margin:4px 2px}
 #zoomHint{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9;background:#000b;color:#fff;border-radius:12px;padding:4px 10px;font-size:13px;pointer-events:none}
 main{max-width:760px;margin:0 auto;padding:16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
@@ -388,7 +423,7 @@ details summary{cursor:pointer;font-weight:600}
     </details>
     <details class="cat" data-cat="look"><summary><span class="ci">Aa</span><span class="ct"><b>Εμφάνιση κειμένου</b><small>Μέγεθος, θέμα, γραμματοσειρά, διάστιχο</small></span><span class="cv">›</span></summary>
     <div class="opt"><span>Μέγεθος</span><div class="seg"><button id="fsMinus">Α−</button><button id="fsVal" disabled>19</button><button id="fsPlus">Α+</button></div></div>
-    <div class="opt"><span>Θέμα</span><div class="seg" data-k="th"><button data-v="light">☀️ Φωτεινό</button><button data-v="sepia">📜 Σέπια</button><button data-v="night">🌙 Νύχτα</button></div></div>
+    <div class="opt thopt"><span>Θέμα</span><div class="seg thg" data-k="th"><button data-v="light" style="background:#fffdf5;color:#1d1d1b" title="Φωτεινό">Αα<small>Φωτεινό</small></button><button data-v="sepia" style="background:#f4ecd8;color:#5b4636" title="Σέπια">Αα<small>Σέπια</small></button><button data-v="paper" style="background:#fbfaf6;color:#2b2b2b" title="Χαρτί">Αα<small>Χαρτί</small></button><button data-v="mint" style="background:#e9f5ee;color:#1f3a2b" title="Μέντα">Αα<small>Μέντα</small></button><button data-v="gray" style="background:#e6e6e6;color:#222" title="Γκρι">Αα<small>Γκρι</small></button><button data-v="contrast" style="background:#ffffff;color:#000000" title="Υψηλή αντίθεση">Αα<small>Αντίθεση</small></button><button data-v="night" style="background:#121212;color:#dcdcdc" title="Νύχτα">Αα<small>Νύχτα</small></button><button data-v="navy" style="background:#0f1b2d;color:#d6e2f0" title="Μπλε νύχτας">Αα<small>Μπλε</small></button><button data-v="amoled" style="background:#000000;color:#c8c8c8" title="Απόλυτο μαύρο">Αα<small>Μαύρο</small></button><button data-v="yellow" style="background:#000000;color:#ffe14d" title="Κίτρινο σε μαύρο">Αα<small>Κίτρινο</small></button></div></div>
     <div class="opt"><span>Γραμματοσειρά</span><div class="seg" data-k="ff"><button data-v="s">Απλή</button><button data-v="r" style="font-family:Georgia,serif">Κλασική</button><button data-v="e">Ευανάγνωστη</button></div></div>
     <div class="opt"><span>Διάστιχο</span><div class="seg" data-k="lh"><button data-v="1.4">Πυκνό</button><button data-v="1.65">Κανονικό</button><button data-v="2">Αραιό</button></div></div>
     <div class="opt"><span>Περιθώρια</span><div class="seg" data-k="mg"><button data-v="10">Στενά</button><button data-v="18">Κανονικά</button><button data-v="34">Φαρδιά</button></div></div>
@@ -451,7 +486,7 @@ details summary{cursor:pointer;font-weight:600}
 <script src="antigrafa.js"></script>
 <script src="efarmoges-mas.js"></script>
 <script>
-const VERSION='2.15';
+const VERSION='2.16';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -1360,12 +1395,13 @@ addEventListener('resize',setHH);setHH();setTimeout(setHH,500);
 // ---------- Πάνω μπάρα: ο χρήστης διαλέγει τα κουμπιά ----------
 const QB_ALL=[...document.querySelectorAll('#qbar [data-q]')].map(b=>[b.dataset.q,b.querySelector('small').textContent,b.querySelector('span').textContent]);
 const NOPIN=['draw','save','menu']; // υπάρχουν ήδη στην κάτω μπάρα/στο μενού — όχι διπλά στην πάνω
-let QB=['back','find','view','tr','speak','fsm','fsp'];try{const v=JSON.parse(localStorage.getItem('glenread-qb')||'null');if(Array.isArray(v))QB=v}catch(e){}
+const IOS_DEV=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+let QB=IOS_DEV?['back','find','view','tr','speak','fsm','fsp']:['find','view','tr','speak','fsm','fsp','bm'];try{const v=JSON.parse(localStorage.getItem('glenread-qb')||'null');if(Array.isArray(v))QB=v}catch(e){}
 QB=QB.filter(k=>!NOPIN.includes(k));
 function qbApply(){const bar=$('#qbar');QB.forEach(k=>{const b=bar.querySelector(`[data-q="${k}"]`);if(b)bar.appendChild(b)});bar.querySelectorAll('[data-q]').forEach(b=>{b.classList.toggle('off',!QB.includes(b.dataset.q));if(!QB.includes(b.dataset.q))bar.appendChild(b)})}
 qbApply();
 const QB_ACT={find:()=>openFind(),view:()=>toggleView(),tr:()=>openTranslate(),speak:()=>$('#mSpeak').onclick(),fsm:()=>$('#fsMinus').onclick(),fsp:()=>$('#fsPlus').onclick(),
-  theme:()=>{RD.th={light:'sepia',sepia:'night',night:'light'}[RD.th]||'light';rdApply();toast({light:'Φωτεινό θέμα',sepia:'Σέπια',night:'Νυχτερινό θέμα'}[RD.th])},
+  theme:()=>{const T=["light", "sepia", "paper", "mint", "gray", "contrast", "night", "navy", "amoled", "yellow"],N={"light": "Φωτεινό", "sepia": "Σέπια", "paper": "Χαρτί", "mint": "Μέντα", "gray": "Γκρι", "contrast": "Υψηλή αντίθεση", "night": "Νύχτα", "navy": "Μπλε νύχτας", "amoled": "Απόλυτο μαύρο", "yellow": "Κίτρινο σε μαύρο"};RD.th=T[(T.indexOf(RD.th)+1)%T.length];rdApply();toast('Θέμα: '+N[RD.th])},
   bm:()=>$('#mBm').onclick(),draw:()=>$('#mDraw').onclick(),share:()=>$('#mShare').onclick(),copy:()=>$('#mCopy').onclick(),save:()=>$('#mAnnPdf').onclick(),full:()=>$('#mFull').onclick(),menu:()=>openSheet()};
 document.querySelectorAll('#qbar [data-q]').forEach(b=>{if(QB_ACT[b.dataset.q])b.onclick=QB_ACT[b.dataset.q]});
 // πλέγμα «Γρήγορα κουμπιά» στην κορυφή του μενού: πάτημα = ενέργεια, 📌 = μπαίνει/βγαίνει από την πάνω μπάρα (αποθηκεύεται αμέσως)
