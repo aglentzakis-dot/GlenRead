@@ -18,6 +18,16 @@ header h1{font-size:22px;margin:0;flex:1;display:flex;align-items:center;gap:8px
 header h1 img{width:34px;height:34px;border-radius:9px;background:#fff;padding:3px}
 .wm-a{color:#0d1b2a}.wm-b{background:linear-gradient(90deg,#1e88e5,#1e88e5 45%,#ff7a00);-webkit-background-clip:text;background-clip:text;color:transparent}
 header small{opacity:.75;font-size:12px}
+.hdr{position:sticky;top:0;z-index:5}
+.hdr header{position:static}
+#promo{display:flex;align-items:center;gap:10px;background:#0d1b2a;color:#fff;padding:6px 12px;text-decoration:none;min-height:44px;overflow:hidden}
+#promo img{width:30px;height:30px;border-radius:8px;flex:0 0 auto;background:#fff}
+#promo .pt{flex:1;overflow:hidden;white-space:nowrap;font-size:14px}
+#promo .pt span{display:inline-block;padding-left:100%;animation:run 22s linear infinite}
+#promo b{color:#FDD117}
+#promo .go{flex:0 0 auto;background:#FDD117;color:#1d1d1b;border-radius:10px;padding:6px 10px;font-weight:700;font-size:13px}
+@keyframes run{to{transform:translateX(-100%)}}
+@media (prefers-reduced-motion:reduce){#promo .pt span{animation:none;padding-left:0}#promo .pt{text-overflow:ellipsis}}
 main{max-width:760px;margin:0 auto;padding:16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
 .big{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -35,7 +45,7 @@ button:disabled{opacity:.45}
 #reader mark{background:#ffe066;color:#000;border-radius:3px}
 #reader mark.cur{background:var(--acc2)}
 .pg{color:var(--soft);font-size:13px;border-top:1px dashed var(--line);margin:18px 0 6px;padding-top:6px}
-.tools{position:sticky;top:64px;z-index:4;background:var(--bg);padding:8px 0}
+.tools{position:sticky;top:var(--hh,64px);z-index:4;background:var(--bg);padding:8px 0}
 input[type=search],select{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);min-height:46px}
 input[type=search]{flex:1;min-width:0}
 .thumbs{display:flex;gap:8px;overflow-x:auto;padding:4px 0}
@@ -54,10 +64,17 @@ details summary{cursor:pointer;font-weight:600}
 </style>
 </head>
 <body>
+<div class="hdr">
 <header>
   <h1><img src="icon-192.png" alt=""><span><span class="wm-a">Glen</span><span class="wm-b">Read</span></span></h1>
   <small id="ver"></small>
 </header>
+<a id="promo" href="https://aglentzakis-dot.github.io/dromologio/" target="_blank" rel="noopener">
+  <img src="https://aglentzakis-dot.github.io/dromologio/icon-192.png" alt="" onerror="this.style.display='none'">
+  <div class="pt"><span><b>Δρομολόγιο</b> — Πελάτες, δουλειές, υπενθυμίσεις και ταμείο για μάστορες, με διαδρομή που πιάνει τις κοντινές δουλειές.</span></div>
+  <span class="go">Άνοιγμα</span>
+</a>
+</div>
 <main>
 
 <!-- ΑΡΧΙΚΗ -->
@@ -85,7 +102,7 @@ details summary{cursor:pointer;font-weight:600}
     <input type="file" id="fPdf" accept="application/pdf" hidden>
     <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
     <input type="file" id="fImg" accept="image/*" multiple hidden>
-    <p class="muted" style="margin:12px 0 0">Χωρίς διαφημίσεις, χωρίς συνδρομή, χωρίς ανέβασμα: τα έγγραφά σου δεν φεύγουν ποτέ από το κινητό.</p>
+    <p class="muted" style="margin:12px 0 0">Χωρίς διαφημιστικές εταιρείες, χωρίς συνδρομή, χωρίς ανέβασμα: τα έγγραφά σου δεν φεύγουν ποτέ από το κινητό.</p>
   </div>
 
   <div class="card hidden" id="scanBox">
@@ -118,7 +135,6 @@ details summary{cursor:pointer;font-weight:600}
       <p class="muted">Την πρώτη φορά η αναγνώριση κατεβάζει τα λεξικά γλώσσας (μία φορά, χρειάζεται σύνδεση). Μετά δουλεύει και χωρίς ίντερνετ.</p>
     </details>
   </div>
-  <div id="efmSlot"></div>
   <div class="card">
     <details id="appsBox">
       <summary>✨ Οι εφαρμογές μας</summary>
@@ -204,7 +220,7 @@ details summary{cursor:pointer;font-weight:600}
 <script src="antigrafa.js"></script>
 <script src="efarmoges-mas.js"></script>
 <script>
-const VERSION='1.5';
+const VERSION='1.7';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -302,7 +318,7 @@ $('#gdList').onclick=async()=>{
 // ---------- Οι εφαρμογές μας (κοινό efarmoges-mas.js) ----------
 const EFM=()=>window.EfarmogesMas;
 try{EFM()&&EFM().init({app:'glenread',isPro:()=>false,lang:()=>'el',canShow:()=>docsCache.length>0})}catch(e){}
-function efmShow(){try{EFM()&&$('#home')&&!$('#home').classList.contains('hidden')&&EFM().mount($('#efmSlot'))}catch(e){}}
+function efmShow(){}
 $('#appsBox').addEventListener('toggle',()=>{if($('#appsBox').open)try{EFM()?EFM().page($('#efmPage')):$('#efmPage').innerHTML='<p class="muted">Η λίστα δεν φορτώθηκε. Χρειάζεται σύνδεση στο διαδίκτυο.</p>'}catch(e){}});
 allDocs().then(d=>{docsCache=d||[];efmShow()}).catch(()=>{});
 
@@ -501,8 +517,39 @@ $('#bOcrImgs').onclick=ocrShots;$('#bMakePdf').onclick=makePdf;
 $('#bCancel').onclick=()=>{cancelled=true;prog(0,'Ακύρωση μετά την τρέχουσα σελίδα…')};
 ['lang'].forEach(k=>{const el=$('#'+k);try{el.value=localStorage.getItem('glenread-'+k)||el.value}catch(e){}el.onchange=()=>{try{localStorage.setItem('glenread-'+k,el.value)}catch(e){}}});
 
+// αρχεία από «Κοινοποίηση → GlenRead» (Ανδροειδές)
+(async()=>{
+  const q=new URLSearchParams(location.search);if(!q.has('shared'))return;
+  history.replaceState(null,'',location.pathname);
+  try{
+    const c=await caches.open('glenread-share');const keys=await c.keys();const files=[];
+    for(const k of keys){const r=await c.match(k);const b=await r.blob();files.push(new File([b],decodeURIComponent(r.headers.get('x-name')||'arxeio'),{type:r.headers.get('content-type')||b.type}))}
+    for(const k of keys)await c.delete(k);
+    if(!files.length)return toast('Δεν ήρθε κανένα αρχείο');
+    const pdf=files.find(f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name));
+    if(pdf)return openPdf(pdf);
+    const imgs=files.filter(f=>f.type.startsWith('image/'));
+    if(imgs.length){addImages(imgs);toast('Οι φωτογραφίες μπήκαν — πάτα «Αναγνώριση κειμένου»')}else toast('Αυτό το αρχείο δεν υποστηρίζεται');
+  }catch(e){toast('Το αρχείο δεν άνοιξε')}
+})();
+
 // άνοιγμα PDF που «μοιράστηκε» προς την εφαρμογή
 if('launchQueue' in window)launchQueue.setConsumer(async p=>{if(p.files&&p.files[0])openPdf(await p.files[0].getFile())});
+
+// ---------- Διαφήμιση Δρομολογίου (πάντα πάνω) ----------
+// τα στοιχεία έρχονται από το κοινό efarmoges.json, ώστε να αλλάζουν χωρίς αναβάθμιση
+function promoPaint(a){
+  if(!a)return;const p=$('#promo');p.href=a.url;
+  const img=p.querySelector('img');img.src=a.icon;img.style.display='';
+  p.querySelector('.pt span').innerHTML='<b>'+esc(a.name)+'</b> — '+esc(a.text||'');
+}
+try{promoPaint(JSON.parse(localStorage.getItem('glenread-promo')||'null'))}catch(e){}
+fetch('https://aglentzakis-dot.github.io/efarmoges.json',{cache:'no-cache'}).then(r=>r.json()).then(j=>{
+  const a=(j.apps||j||[]).find(x=>x.id==='dromologio'&&x.active!==false);
+  if(a){promoPaint(a);try{localStorage.setItem('glenread-promo',JSON.stringify({id:a.id,name:a.name,icon:a.icon,text:a.text,url:a.url}))}catch(e){}}
+}).catch(()=>{});
+const setHH=()=>document.documentElement.style.setProperty('--hh',$('.hdr').offsetHeight+'px');
+addEventListener('resize',setHH);setHH();setTimeout(setHH,500);
 
 // ---------- Εγκατάσταση στο κινητό ----------
 let instEvt=null;
