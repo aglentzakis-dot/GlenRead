@@ -489,7 +489,7 @@ details summary{cursor:pointer;font-weight:600}
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.21';
+const VERSION='2.22';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -497,17 +497,18 @@ if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudfl
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2600)};
 const show=id=>{if(id!=='home'&&history.state&&history.state.v!=='view')history.pushState({v:'view'},'');['home','work','read'].forEach(s=>$('#'+s).classList.toggle('hidden',s!==id));document.body.classList.toggle('reading',id==='read');if(id==='read'){if(typeof pinApply==='function'){pinApply();rdApply();if(RD.awake)awake(true)}}else{document.body.removeAttribute('data-th');if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}scrollTo(0,0);if(typeof setHH==='function')setHH();if(id==='home'&&typeof efmShow==='function')efmShow()};
 const prog=(p,m)=>{if(p!=null)$('#prog i').style.width=Math.round(p*100)+'%';if(m)$('#wMsg').textContent=m};
-let cancelled=false, doc=null; // doc = {id,name,pages:[{text,conf,ocr}],date}
+let cancelled=false, doc=null, trOrig=null, trDoc=null; // doc = {id,name,pages:[{text,conf,ocr}],date}
 
 // ---------- Αποθήκευση (IndexedDB) ----------
 const db=new Promise((ok,no)=>{const r=indexedDB.open('glenread',1);r.onupgradeneeded=()=>r.result.createObjectStore('docs',{keyPath:'id'});r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
-async function store(mode,fn){const d=await db;return new Promise((ok,no)=>{const tx=d.transaction('docs',mode);const r=fn(tx.objectStore('docs'));tx.oncomplete=()=>ok(r&&r.result);tx.onerror=()=>no(tx.error)})}
-const saveDoc=d=>store('readwrite',s=>s.put(d)).then(changed).catch(()=>{});
+async function store(mode,fn){const d=await db;return new Promise((ok,no)=>{const tx=d.transaction('docs',mode);const r=fn(tx.objectStore('docs'));tx.oncomplete=()=>ok(r&&r.result);tx.onerror=()=>no(tx.error);tx.onabort=()=>no(tx.error||new Error('abort'))})}
+let saveErrAt=0;
+const saveDoc=d=>store('readwrite',s=>s.put(d===trDoc&&trOrig?Object.assign({},d,{pages:trOrig}):d)).then(changed).catch(e=>{console.warn(e);if(Date.now()-saveErrAt>15000){saveErrAt=Date.now();toast('⚠️ Δεν αποθηκεύτηκε — ο χώρος του κινητού ίσως γέμισε')}});
 let docsCache=[];
 const allDocs=()=>store('readonly',s=>s.getAll());
 // πρόχειρο: οι φωτογραφίες που περιμένουν αναγνώριση, για να μη χαθούν αν κλείσει η εφαρμογή
 const ddb=new Promise((ok,no)=>{const r=indexedDB.open('glenread-draft',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
-async function draftSet(k,v){try{const d=await ddb;d.transaction('kv','readwrite').objectStore('kv').put(v,k)}catch(e){}}
+async function draftSet(k,v){try{const d=await ddb;return await new Promise(ok=>{const tx=d.transaction('kv','readwrite');tx.objectStore('kv').put(v,k);tx.oncomplete=()=>ok(true);tx.onerror=tx.onabort=()=>{console.warn(tx.error);ok(false)}})}catch(e){return false}}
 async function draftGet(k){try{const d=await ddb;return await new Promise(ok=>{const r=d.transaction('kv').objectStore('kv').get(k);r.onsuccess=()=>ok(r.result);r.onerror=()=>ok(null)})}catch(e){return null}}
 const delDoc=id=>store('readwrite',s=>s.delete(id)).then(changed);
 
@@ -546,22 +547,26 @@ $('#bkPick').onclick=async()=>{
 $('#bkForget').onclick=async()=>{if(confirm('Αποσύνδεση φακέλου; Τα αρχεία που υπάρχουν ΔΕΝ σβήνονται.')){await hset(null);bkUI();$('#bkList').innerHTML=''}};
 $('#bkNow').onclick=async()=>{
   if(await autoBackup(true))return toast('Το αντίγραφο γράφτηκε στο GlenApps › GlenRead');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([await backupData()],{type:'application/json'}));a.download=`${BK.prefix}-${today()}.json`;a.click();toast('Το αντίγραφο κατέβηκε στις Λήψεις');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([await backupData()],{type:'application/json'}));a.download=`${BK.prefix}-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),60000);toast('Το αντίγραφο κατέβηκε στις Λήψεις');
 };
 $('#bkRestore').onclick=async()=>{
   const dir=await appDir(true).catch(()=>null);
   if(!dir)return $('#bkFile').click();
   const files=[];for await(const [n,h] of dir.entries())if(h.kind==='file'&&n.startsWith(BK.prefix)&&n.endsWith('.json'))files.push([n,h]);
   files.sort((a,b)=>b[0].localeCompare(a[0]));const top=files.slice(0,10);
-  $('#bkList').innerHTML=(top.length?top.map(([n],i)=>`<div class="it"><div><strong>${n.replace(BK.prefix+'-','').replace('.json','')}</strong>${i===0?'<span class="muted">νεότερο</span>':''}</div><button class="sec" data-f="${n}">Επαναφορά</button></div>`).join(''):'<p class="muted">Δεν βρέθηκαν αντίγραφα στον φάκελο.</p>')+'<p><button class="sec" id="bkOther">Άλλο αρχείο…</button></p>';
+  $('#bkList').innerHTML=(top.length?top.map(([n],i)=>`<div class="it"><div><strong>${esc(n.replace(BK.prefix+'-','').replace('.json',''))}</strong>${i===0?'<span class="muted">νεότερο</span>':''}</div><button class="sec" data-f="${esc(n)}">Επαναφορά</button></div>`).join(''):'<p class="muted">Δεν βρέθηκαν αντίγραφα στον φάκελο.</p>')+'<p><button class="sec" id="bkOther">Άλλο αρχείο…</button></p>';
   $('#bkOther').onclick=()=>$('#bkFile').click();
   $('#bkList').querySelectorAll('[data-f]').forEach(b=>b.onclick=async()=>{const h=await dir.getFileHandle(b.dataset.f);restore(await (await h.getFile()).text())});
 };
 $('#bkFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(f)restore(await f.text())};
 async function restore(txt){
   try{const o=JSON.parse(txt);if(![BK.app,'gdoc'].includes(o.app)||!Array.isArray(o.docs))throw 0;
-    if(!confirm(`Επαναφορά ${o.docs.length} εγγράφων από ${new Date(o.date).toLocaleString('el-GR')}; Τα έγγραφα που έχεις τώρα δεν σβήνονται, προστίθενται.`))return;
-    await store('readwrite',s=>{o.docs.forEach(d=>s.put(d))});toast('Η επαναφορά έγινε');changed();
+    const ok=o.docs.filter(d=>d&&typeof d==='object'&&(typeof d.id==='number'||typeof d.id==='string')&&Array.isArray(d.pages)).map(d=>Object.assign({},d,{name:String(d.name||'Έγγραφο'),pages:d.pages.filter(x=>x&&typeof x==='object').map(x=>Object.assign({},x,{text:String(x.text||'')}))}));
+    if(!ok.length)throw 0;
+    const have=new Set((await allDocs()).map(d=>d.id));const nu=ok.filter(d=>!have.has(d.id));
+    if(!nu.length)return toast('Όλα τα έγγραφα του αντιγράφου υπάρχουν ήδη');
+    if(!confirm(`Επαναφορά ${nu.length} εγγράφων από ${new Date(o.date).toLocaleString('el-GR')}; Τα έγγραφα που έχεις τώρα δεν αλλάζουν, προστίθενται μόνο όσα λείπουν.`+(ok.length>nu.length?` (${ok.length-nu.length} υπάρχουν ήδη και μένουν όπως είναι.)`:'')))return;
+    await store('readwrite',s=>{nu.forEach(d=>s.put(d))});toast('Η επαναφορά έγινε');changed();
   }catch(e){toast('Αυτό δεν είναι αντίγραφο του GlenRead')}
 }
 bkUI();
@@ -606,7 +611,7 @@ function toGray(src){
   x.putImageData(im,0,0);return {c,g,w:c.width,h:c.height};
 }
 function adaptive(G){
-  const {w,h,g}=G,I=new Float64Array((w+1)*(h+1));
+  const {w,h,g}=G,I=new Uint32Array((w+1)*(h+1)); // Uint32: μισή μνήμη, αρκεί για 2400×2400
   for(let y=0;y<h;y++){let row=0;for(let x=0;x<w;x++){row+=g[y*w+x];I[(y+1)*(w+1)+x+1]=I[y*(w+1)+x+1]+row}}
   const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d'),im=x.createImageData(w,h),d=im.data,s=Math.max(8,Math.round(w/16))>>1,t=.15;
   for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){
@@ -615,8 +620,9 @@ function adaptive(G){
     const v=g[yy*w+xx]*cnt<=sum*(1-t)?0:255,o=(yy*w+xx)*4;d[o]=d[o+1]=d[o+2]=v;d[o+3]=255}
   x.putImageData(im,0,0);return c;
 }
+function small(src,max){const k=max/Math.max(src.width,src.height);if(k>=1)return src;const c=document.createElement('canvas');c.width=Math.round(src.width*k);c.height=Math.round(src.height*k);c.getContext('2d').drawImage(src,0,0,c.width,c.height);return c}
 function rotated(src,deg){const c=document.createElement('canvas'),r=deg%180!==0;c.width=r?src.height:src.width;c.height=r?src.width:src.height;const x=c.getContext('2d');x.translate(c.width/2,c.height/2);x.rotate(deg*Math.PI/180);x.drawImage(src,-src.width/2,-src.height/2);return c}
-function imgToCanvas(img,maxSide=3000){
+function imgToCanvas(img,maxSide=2400){
   let w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
   // μικρές φωτογραφίες: μεγέθυνση για καλύτερη αναγνώριση
   const scale=Math.min(maxSide/Math.max(w,h), Math.max(1,1600/Math.max(w,h)));
@@ -632,7 +638,7 @@ async function getWorker(){
   if(worker&&workerLang===lang)return worker;
   if(worker){await worker.terminate();worker=null}
   prog(0,'Φόρτωση λεξικών γλώσσας (μόνο την πρώτη φορά αργεί)…');
-  worker=await Tesseract.createWorker(lang,1,{logger:m=>{if(m.status&&m.status.includes('loading'))prog(m.progress||0,'Φόρτωση λεξικών… '+Math.round((m.progress||0)*100)+'%')}});
+  worker=await Tesseract.createWorker(lang,1,{logger:m=>{if(m.status==='recognizing text'&&ocrLbl){prog(null,ocrLbl+' — '+Math.round((m.progress||0)*100)+'%');return}if(m.status&&m.status.includes('loading'))prog(m.progress||0,'Φόρτωση λεξικών… '+Math.round((m.progress||0)*100)+'%')}});
   workerLang=lang;return worker;
 }
 // κρατά μόνο τις γραμμές που αναγνωρίστηκαν με σιγουριά (πετά «σκουπίδια» από γραμμές πινάκων, σκιές κ.λπ.)
@@ -645,22 +651,31 @@ function cleanResult(data){
   const kept=good.reduce((a,l)=>a+l.text.length,0),all=lines.reduce((a,l)=>a+(l.text||'').length,0)||1;
   return {text:good.map(l=>l.text.replace(/\n$/,'')).join('\n'),conf:conf*Math.min(1,kept/all+.3)};
 }
-async function ocrOnce(w,canvas){const {data}=await w.recognize(canvas,{},{text:true,blocks:true});return cleanResult(data)}
+// κάθε ανάγνωση έχει όριο χρόνου και σταματά αμέσως με «Ακύρωση» — ποτέ δεν μένει «κολλημένη»
+let ocrLbl='',ocrStop=null;const OCR_MAX=150000;
+async function ocrOnce(w,canvas){
+  let tm;const guard=new Promise((_,no)=>{ocrStop=()=>no(new Error('cancel'));tm=setTimeout(()=>no(new Error('timeout')),OCR_MAX)});
+  try{const {data}=await Promise.race([w.recognize(canvas,{},{text:true,blocks:true}),guard]);return cleanResult(data)}
+  catch(e){if(e.message==='timeout'||e.message==='cancel'){try{worker&&worker.terminate()}catch(x){}worker=null}throw e}
+  finally{clearTimeout(tm);ocrStop=null}
+}
 async function ocrCanvas(src){
   const w=await getWorker();
   const G=toGray(src);
   // 1η προσπάθεια: καθαρισμένη (ή απλή γκρι) εικόνα
-  let best=await ocrOnce(w,$('#pre').checked?adaptive(G):G.c);best.rot=0;
+  const free=c=>{try{c.width=c.height=0}catch(e){}};
+  let A=null;const ad=()=>A||(A=adaptive(G));
+  let best=await ocrOnce(w,$('#pre').checked?ad():G.c);best.rot=0;
   // αν δεν είναι καθαρή, δοκιμάζει χωρίς καθαρισμό και με τη σελίδα γυρισμένη
-  if(best.conf<70){const r=await ocrOnce(w,$('#pre').checked?G.c:adaptive(G));if(r.conf>best.conf){r.rot=0;best=r}}
+  if(best.conf<70){const l0=ocrLbl;ocrLbl=l0+' (2η προσπάθεια)';const r=await ocrOnce(w,$('#pre').checked?G.c:ad());ocrLbl=l0;if(r.conf>best.conf){r.rot=0;best=r}}
+  if(A)free(A);free(G.c);G.g=null;
   if(best.conf<55){
     for(const deg of [90,270,180]){
-      prog(null,'Η σελίδα φαίνεται γυρισμένη — δοκιμή '+deg+'°…');
-      const r=await ocrOnce(w,adaptive(toGray(rotated(src,deg))));if(r.conf>best.conf+5){r.rot=deg;best=r}
+      prog(null,(ocrLbl?ocrLbl+' — ':'')+'η σελίδα φαίνεται γυρισμένη, δοκιμή '+deg+'°…');const sm=small(src,1600),ro=rotated(sm,deg);if(sm!==src)free(sm);const g2=toGray(ro);free(ro);const a2=adaptive(g2);free(g2.c);
+      const r=await ocrOnce(w,a2);free(a2);if(r.conf>best.conf+5){r.rot=deg;best=r}
       if(best.conf>=70)break;
     }
   }
-  G.c.width=G.c.height=0;
   return {text:fixText(best.text),conf:Math.round(best.conf),ocr:true};
 }
 // συνένωση λέξεων που κόπηκαν με παύλα στο τέλος γραμμής και καθαρές παράγραφοι
@@ -670,15 +685,18 @@ function fixText(t){
 }
 
 // ---------- PDF ----------
+// κλείνει ένα PDF και τον βοηθό του, για να ελευθερωθεί η μνήμη
+const pdfFree=x=>{try{const t=x&&x.loadingTask?x.loadingTask:x;const r=t&&t.destroy&&t.destroy();r&&r.catch&&r.catch(()=>{})}catch(e){}};
 async function openPdf(file){
   cancelled=false;show('work');$('#wTitle').textContent=file.name;prog(0,'Άνοιγμα αρχείου…');
+  let pdf=null,part=null;const pages=[];
   try{
     if(!window.pdfjsLib)throw new Error('nolib');
     const buf=await file.arrayBuffer();const orig=buf.slice(0);
-    const pdf=await pdfjsLib.getDocument({data:buf}).promise;
-    const pages=[];const part={id:Date.now(),date:new Date().toISOString(),name:file.name.replace(/\.pdf$/i,''),pages,partial:pdf.numPages};
+    pdf=await pdfjsLib.getDocument({data:buf}).promise;
+    part={id:Date.now(),date:new Date().toISOString(),name:file.name.replace(/\.pdf$/i,''),pages,partial:pdf.numPages};
     for(let p=1;p<=pdf.numPages;p++){
-      if(cancelled){if(pages.length)saveDoc(part);return goHome()}
+      if(cancelled){if(pages.length)saveDoc(part);pdfFree(pdf);return goHome()}
       if(pages.length)saveDoc(part);
       prog((p-1)/pdf.numPages,`Σελίδα ${p} από ${pdf.numPages}`);
       const page=await pdf.getPage(p);
@@ -693,16 +711,21 @@ async function openPdf(file){
       }
       if(text.replace(/\s/g,'').length>20){pages.push({text,conf:100,ocr:false});continue}
       // σκαναρισμένη σελίδα: εικόνα → αναγνώριση
-      prog((p-1)/pdf.numPages,`Σελίδα ${p} από ${pdf.numPages} — σκαναρισμένη, αναγνώριση κειμένου…`);
+      ocrLbl=`Σελίδα ${p} από ${pdf.numPages} — σκαναρισμένη, αναγνώριση κειμένου`;prog((p-1)/pdf.numPages,ocrLbl+'…');
       const vp=page.getViewport({scale:1});const sc=Math.min(3,2200/Math.max(vp.width,vp.height));
       const v2=page.getViewport({scale:sc});const c=document.createElement('canvas');c.width=v2.width;c.height=v2.height;
       await page.render({canvasContext:c.getContext('2d'),viewport:v2}).promise;
-      pages.push(await ocrCanvas(c));
+      pages.push(await ocrCanvas(c));c.width=c.height=0;try{page.cleanup()}catch(e){}
     }
-    await draftSet('file-'+part.id,{pdf:orig});
+    pdfFree(pdf);ocrLbl='';
+    if(!await draftSet('file-'+part.id,{pdf:orig}))toast('⚠️ Το πρωτότυπο PDF δεν χώρεσε στη μνήμη — το κείμενο κρατήθηκε');
     delete part.partial;finish(part);
   }catch(e){
-    console.error(e);show('home');
+    if(e.message!=='cancel')console.error(e);ocrLbl='';if(pdf)pdfFree(pdf);
+    if(part&&pages.length)saveDoc(part);
+    if(e.message==='cancel')return goHome();
+    failHome();
+    if(e.message==='timeout')return toast(pages.length?'Μια σκαναρισμένη σελίδα άργησε πολύ — κρατήθηκαν οι '+pages.length+' πρώτες στα «Πρόσφατα».':'Η αναγνώριση άργησε πολύ. Δοκίμασε ξανά ή με λιγότερες σελίδες.');
     toast(e.message==='nolib'?'Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.':/password/i.test(e.name+e.message)?'Το PDF έχει κωδικό — δεν μπορεί να ανοίξει.':'Δεν άνοιξε το αρχείο. Ίσως είναι κατεστραμμένο.');
   }
 }
@@ -788,12 +811,12 @@ async function openAny(file){
     else if(ext==='pptx'||t.includes('presentationml'))pages=await pptxPages(buf);
     else if(['html','htm','xhtml'].includes(ext)||t==='text/html')pages=[{text:htmlText(decodeText(buf))}];
     else{const txt=decodeText(buf);const bad=(txt.slice(0,4000).match(/[\u0000-\u0008\u000E-\u001F�]/g)||[]).length;
-      if(bad>40){show('home');return toast('Αυτό το αρχείο δεν είναι κείμενο που μπορώ να διαβάσω')}
+      if(bad>40){failHome();return toast('Αυτό το αρχείο δεν είναι κείμενο που μπορώ να διαβάσω')}
       pages=[{text:ext==='srt'||ext==='vtt'?txt.replace(/^\d+\s*$/gm,'').replace(/^[\d:.,]+ --> .*$/gm,'').replace(/^WEBVTT.*$/m,'').replace(/\n{3,}/g,'\n\n').trim():txt}]}
     pages=pages.map(p=>({text:(p.text||'').replace(/\r\n?/g,'\n'),conf:100,ocr:false}));
-    if(!pages.length||pages.every(p=>!p.text.trim())){show('home');return toast('Δεν βρέθηκε κείμενο μέσα στο αρχείο')}
+    if(!pages.length||pages.every(p=>!p.text.trim())){failHome();return toast('Δεν βρέθηκε κείμενο μέσα στο αρχείο')}
     prog(1);finish({name:name.replace(/\.[^.]+$/,''),pages,kind:KIND[ext]||'κείμενο'});
-  }catch(e){console.error(e);show('home');toast(e.message==='nolib'?'Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.':'Δεν άνοιξε το αρχείο. Ίσως είναι κατεστραμμένο ή με κωδικό.')}
+  }catch(e){console.error(e);failHome();toast(e.message==='nolib'?'Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.':'Δεν άνοιξε το αρχείο. Ίσως είναι κατεστραμμένο ή με κωδικό.')}
 }
 
 // ---------- Φωτογραφίες ----------
@@ -801,7 +824,7 @@ let shots=[]; // dataURL
 // μικραίνει κάθε φωτογραφία (έως 2000 εικονοστοιχεία, αρκετά για καθαρή αναγνώριση) για να χωράει στη μνήμη του κινητού
 async function shrink(src,max=3000){
   let bmp;
-  try{bmp=await createImageBitmap(src)}catch(e){bmp=await loadImg(URL.createObjectURL(src))}
+  try{bmp=await createImageBitmap(src)}catch(e){const u=URL.createObjectURL(src);try{bmp=await loadImg(u)}finally{setTimeout(()=>URL.revokeObjectURL(u),1000)}}
   const w=bmp.width,h=bmp.height,k=Math.min(1,max/Math.max(w,h));
   const c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);
   c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);try{bmp.close&&bmp.close()}catch(e){}
@@ -823,17 +846,21 @@ draftGet('shots').then(s=>{if(Array.isArray(s)&&s.length){shots=s;drawThumbs();t
 const loadImg=src=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=src});
 async function ocrShots(){
   if(!shots.length)return;cancelled=false;show('work');$('#wTitle').textContent='Φωτογραφίες';
+  const pages=[];const d0=new Date();const part={id:Date.now(),date:d0.toISOString(),name:'Σάρωση '+d0.toLocaleDateString('el-GR')+' '+d0.toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'}),pages,partial:shots.length};
   try{
-    const pages=[];const d0=new Date();const part={id:Date.now(),date:d0.toISOString(),name:'Σάρωση '+d0.toLocaleDateString('el-GR')+' '+d0.toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'}),pages,partial:shots.length};
     for(let i=0;i<shots.length;i++){
       if(cancelled){if(pages.length)saveDoc(part);return goHome()}
       if(pages.length)saveDoc(part);
-      prog(i/shots.length,`Αναγνώριση σελίδας ${i+1} από ${shots.length}…`);
-      pages.push(await ocrCanvas(imgToCanvas(await loadImg(shots[i]))));
+      ocrLbl=`Αναγνώριση σελίδας ${i+1} από ${shots.length}`;prog(i/shots.length,ocrLbl+'…');
+      const cv=imgToCanvas(await loadImg(shots[i]));try{pages.push(await ocrCanvas(cv))}finally{cv.width=cv.height=0}
     }
-    await draftSet('file-'+part.id,{images:shots.slice()});
+    ocrLbl='';
+    if(!await draftSet('file-'+part.id,{images:shots.slice()}))toast('⚠️ Οι φωτογραφίες δεν χώρεσαν στη μνήμη — το κείμενο κρατήθηκε');
     delete part.partial;shots=[];drawThumbs();draftSet('shots',[]);finish(part);
-  }catch(e){console.error(e);show('home');toast('Η αναγνώριση απέτυχε. Χρειάζεται σύνδεση την πρώτη φορά.')}
+  }catch(e){if(e.message!=='cancel')console.error(e);ocrLbl='';
+    if(e.message==='cancel'){if(pages.length)saveDoc(part);return goHome()}
+    if(pages.length){saveDoc(part);toast('Η σελίδα '+(pages.length+1)+' δεν διαβάστηκε — κρατήθηκαν οι '+pages.length+' πρώτες στα «Πρόσφατα». Οι φωτογραφίες είναι ακόμη εδώ.')}
+    failHome();if(!pages.length)toast(e.message==='timeout'?'Η αναγνώριση άργησε πολύ. Δοκίμασε φωτογραφία πιο κοντά και με καλό φως, ή μία-μία σελίδα.':'Η αναγνώριση απέτυχε. Χρειάζεται σύνδεση την πρώτη φορά.')}
 }
 async function makePdf(){
   if(!shots.length)return;
@@ -894,9 +921,10 @@ $('#camShot').onclick=async()=>{
   // πραγματική φωτογραφία σε πλήρη ανάλυση (όχι στιγμιότυπο από το βίντεο)
   if(camIC&&camIC.takePhoto){try{const pc=await camIC.getPhotoCapabilities().catch(()=>null);const opt=pc&&pc.imageWidth?{imageWidth:pc.imageWidth.max,imageHeight:pc.imageHeight.max}:{};
     if(torchOn)opt.fillLightMode='flash';const blob=await camIC.takePhoto(opt).catch(()=>camIC.takePhoto());url=await shrink(blob,3000)}catch(e){url=null}}
-  if(!url){const c=document.createElement('canvas');const k=Math.min(1,3000/Math.max(v.videoWidth,v.videoHeight));
-    c.width=Math.round(v.videoWidth*k);c.height=Math.round(v.videoHeight*k);c.getContext('2d').drawImage(v,0,0,c.width,c.height);url=c.toDataURL('image/jpeg',0.9);c.width=c.height=0}
-  shots.push(url);shooting=false;
+  if(!url){try{const c=document.createElement('canvas');const k=Math.min(1,3000/Math.max(v.videoWidth,v.videoHeight));
+    c.width=Math.round(v.videoWidth*k);c.height=Math.round(v.videoHeight*k);c.getContext('2d').drawImage(v,0,0,c.width,c.height);url=c.toDataURL('image/jpeg',0.9);c.width=c.height=0}catch(e){url=null}}
+  shooting=false;if(!url||url.length<100)return toast('Η φωτογραφία δεν τραβήχτηκε — δοκίμασε ξανά');
+  shots.push(url);
   drawThumbs();camCount();draftSet('shots',shots);
 };
 $('#camClose').onclick=()=>closeCam(false);
@@ -910,13 +938,17 @@ function finish(d){
   if(d.pages.every(p=>!p.text.trim()))toast('Δεν βρέθηκε κείμενο. Δοκίμασε πιο καθαρή φωτογραφία.');
   openReader();
 }
-const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function openReader(){
+  flushAll();trReset();if(tapMode)tapEnd();if(editing){editing=false;$('#reader').contentEditable=false;$('#mEditT').textContent='Διόρθωση κειμένου'}
   show('read');$('#q').value='';$('#hits').textContent='';
   render();
-  try{const l=JSON.parse(localStorage.getItem('glenread-last')||'null');if(l&&l.id===doc.id&&l.y>0)setTimeout(()=>scrollTo(0,l.y*(document.body.scrollHeight-innerHeight)),60)}catch(e){}
-  try{localStorage.setItem('glenread-last',JSON.stringify({id:doc.id,y:0}))}catch(e){}
-  pvClose();viewLabels();try{if(localStorage.getItem('glenread-view')==='page')pvOpen()}catch(e){}
+  let l=null;try{l=JSON.parse(localStorage.getItem('glenread-last')||'null')}catch(e){}
+  const same=l&&l.id===doc.id;posT=null;
+  if(!same){try{localStorage.setItem('glenread-last',JSON.stringify({id:doc.id,y:0}))}catch(e){}}
+  pvClose();viewLabels();let wantPage=false;try{wantPage=localStorage.getItem('glenread-view')==='page'&&!doc.kind}catch(e){}
+  if(wantPage)pvOpen().then(()=>{if(same&&l.v==='page'&&pv.on)setTimeout(()=>{const el=$(`.pvp[data-i="${l.p||0}"]`);if(el){const r=el.getBoundingClientRect();scrollTo(0,scrollY+r.top+r.height*(l.f||0)-80)}},60)});
+  else if(same&&l.y>0)setTimeout(()=>scrollTo(0,l.y*(document.body.scrollHeight-innerHeight)),60);
   if(doc.partial)toast('Αυτό το έγγραφο είχε διακοπεί — έχει μόνο τις σελίδες που πρόλαβαν');
   const low=doc.pages.map((p,i)=>p.ocr&&p.conf<70?i+1:0).filter(Boolean);
   const bad=doc.pages.length&&doc.pages.every(p=>p.ocr&&(p.conf<50||!p.text.trim()));
@@ -928,8 +960,8 @@ function openReader(){
 function render(q){
   let n=0;
   $('#reader').innerHTML=doc.pages.map((p,i)=>{
-    let t=esc(p.text||'(κενή σελίδα)');
-    if(q){const re=new RegExp(norm(q).split('').map(ch=>accentClass(ch)).join(''),'gi');t=t.replace(re,m=>`<mark data-n="${n++}">${m}</mark>`)}
+    const raw=p.text||'(κενή σελίδα)';let t;
+    if(q){const re=new RegExp(norm(q).split('').map(ch=>accentClass(ch)).join(''),'gi');t='';let last=0,m;while((m=re.exec(raw))){if(!m[0].length){re.lastIndex++;continue}t+=esc(raw.slice(last,m.index))+`<mark data-n="${n++}">${esc(m[0])}</mark>`;last=m.index+m[0].length}t+=esc(raw.slice(last))}else t=esc(raw);
     return (doc.pages.length>1?`<div class="pg">Σελίδα ${i+1}${p.ocr?' · αναγνώριση '+p.conf+'%':''}</div>`:'')+t;
   }).join('');
   return n;
@@ -970,11 +1002,17 @@ $('#mCopy').onclick=async()=>{const sel=getSelection().toString();closeSheet();t
 $('#mShare').onclick=async()=>{closeSheet();if(navigator.share){try{await navigator.share({title:doc.name,text:fullText()})}catch(e){}}else $('#mCopy').onclick()};
 $('#mTxt').onclick=()=>{closeSheet();saveToFolder(new Blob([fullText()],{type:'text/plain;charset=utf-8'}),doc.name+'.txt')};
 let editing=false,editT=null;
-$('#reader').addEventListener('input',()=>{if(!editing)return;clearTimeout(editT);editT=setTimeout(()=>{doc.pages=[{text:$('#reader').innerText,conf:100,ocr:false}];saveDoc(doc)},800)});
+// διόρθωση: κάθε σελίδα χωριστά, ώστε να κρατιούνται οι σελίδες του εγγράφου
+let editDoc=null;
+function editCommit(){const d=editDoc;if(!d)return;const els=[...$('#reader').querySelectorAll('.pge')];if(!els.length)return;
+  d.pages=els.map((el,i)=>Object.assign({},d.pages[i]||{},{text:el.innerText.replace(/\n$/,''),conf:100,ocr:false}));saveDoc(d)}
+$('#reader').addEventListener('input',()=>{if(!editing)return;clearTimeout(editT);editT=setTimeout(()=>{editT=null;if(editing&&doc===editDoc)editCommit()},800)});
 function toggleEdit(){
-  const r=$('#reader');
-  if(!editing){if(pv.on)viewText();render();r.textContent=fullText();r.contentEditable=true;r.focus();editing=true;$('#mEditT').textContent='Τέλος διόρθωσης';toast('Γράψε κατευθείαν στο κείμενο. Αποθηκεύεται μόνο του.')}
-  else{doc.pages=[{text:r.innerText,conf:100,ocr:false}];r.contentEditable=false;editing=false;$('#mEditT').textContent='Διόρθωση κειμένου';saveDoc(doc);$('#lowConf').classList.add('hidden');render();toast('Αποθηκεύτηκε')}
+  const r=$('#reader');clearTimeout(editT);editT=null;
+  if(!editing){if(pv.on)viewText();if(tapMode)tapEnd();if(trReset())toast('Η διόρθωση γίνεται στο πρωτότυπο κείμενο');editDoc=doc;
+    const multi=doc.pages.length>1;r.innerHTML=doc.pages.map((p,i)=>(multi?`<div class="pg" contenteditable="false">Σελίδα ${i+1}</div>`:'')+`<div class="pge" data-i="${i}" contenteditable="true">${esc(p.text)}</div>`).join('');
+    const f=r.querySelector('.pge');f&&f.focus();editing=true;$('#mEditT').textContent='Τέλος διόρθωσης';toast('Γράψε κατευθείαν στο κείμενο. Αποθηκεύεται μόνο του.')}
+  else{editCommit();editing=false;editDoc=null;$('#mEditT').textContent='Διόρθωση κειμένου';$('#lowConf').classList.add('hidden');render();toast('Αποθηκεύτηκε')}
 }
 $('#mEdit').onclick=()=>{closeSheet();toggleEdit()};
 // εκφώνηση
@@ -992,12 +1030,15 @@ $('#mSpeak').onclick=()=>{
   speaking=true;speakUI();toast('Διαβάζω… (Μενού → Σταμάτα την ανάγνωση)');
 };
 function goHome(){
-  const st=history.state&&history.state.v;$('#sheet').classList.add('hidden');pvClose();closeFind();stopSpeak();awake(false);
-  if(editing)toggleEdit();if(tapMode)tapEnd();
+  const st=history.state&&history.state.v;flushAll();$('#sheet').classList.add('hidden');if(!$('#dlg').classList.contains('hidden'))dlgClose();pvClose();closeFind();stopSpeak();awake(false);
+  if(editing)toggleEdit();if(tapMode)tapEnd();if(trReset())$('#lowConf').classList.add('hidden');
   if(!$('#work').classList.contains('hidden'))cancelled=true;
   show('home');drawLast();
   if(st==='sheet')history.go(-2);else if(st==='view')history.back();
+  if(updPending)setTimeout(updReload,400);
 }
+// επιστροφή στην αρχική μετά από σφάλμα: καθαρίζει και το βήμα «πίσω»
+function failHome(){const st=history.state&&history.state.v;show('home');if(st==='view')history.back()}
 $('#bBack').onclick=goHome;$('#mHome').onclick=goHome;
 // κουμπί «πίσω» του κινητού: γυρίζει στην αρχική αντί να κλείνει την εφαρμογή
 let backAt=0;
@@ -1015,8 +1056,14 @@ addEventListener('popstate',e=>{
   }
 });
 // αποθήκευση θέσης ανάγνωσης
-let posT=null;
-addEventListener('scroll',()=>{if(!doc||$('#read').classList.contains('hidden'))return;clearTimeout(posT);posT=setTimeout(()=>{const h=document.body.scrollHeight-innerHeight;try{localStorage.setItem('glenread-last',JSON.stringify({id:doc.id,y:h>0?scrollY/h:0}))}catch(e){}},400)},{passive:true});
+let posT=null,posV=null;
+function posNow(){const h=document.body.scrollHeight-innerHeight,o={id:doc.id,y:h>0?Math.min(1,scrollY/h):0};
+  if(pv.on){const els=[...document.querySelectorAll('.pvp')];const k=Math.max(0,els.findIndex(el=>el.getBoundingClientRect().bottom>80));const r=els[k]&&els[k].getBoundingClientRect();o.v='page';o.p=k;o.f=r?Math.min(.98,Math.max(0,(80-r.top)/r.height)):0}
+  return o}
+function posFlush(){if(posT){clearTimeout(posT);posT=null;try{localStorage.setItem('glenread-last',JSON.stringify(posV))}catch(e){}}}
+addEventListener('scroll',()=>{if(!doc||$('#read').classList.contains('hidden'))return;posV=posNow();clearTimeout(posT);posT=setTimeout(posFlush,400)},{passive:true});
+function flushAll(){posFlush();flushAnn();if(editing&&editT){clearTimeout(editT);editT=null;editCommit()}}
+addEventListener('pagehide',flushAll);document.addEventListener('visibilitychange',()=>{if(document.hidden)flushAll()});
 // «Συνέχεια ανάγνωσης» στην αρχική
 async function drawLast(){
   let l=null;try{l=JSON.parse(localStorage.getItem('glenread-last')||'null')}catch(e){}
@@ -1024,7 +1071,7 @@ async function drawLast(){
   const d=(await allDocs().catch(()=>[])).find(x=>x.id===l.id);
   if(!d){box.classList.add('hidden');return}
   $('#lastName').textContent=d.name+(l.y>0.02?' · '+Math.round(l.y*100)+'%':'');box.classList.remove('hidden');
-  $('#lastOpen').onclick=()=>{doc=d;openReader()};
+  $('#lastOpen').onclick=async()=>{flushAll();const f=(await allDocs().catch(()=>[])).find(x=>x.id===l.id)||d;doc=f;openReader()};
 }
 drawLast();
 
@@ -1032,25 +1079,30 @@ drawLast();
 const PEN_COLORS=['#1e5eff','#e53935','#111111','#2e7d32','#8e24aa','#ff6d00'],HL_COLORS=['#ffe600','#7cfc00','#ff80ab','#4fc3f7','#ffab40'];
 const WIDTHS={pen:[.0025,.0045,.008],hl:[.018,.028,.04]};
 const SHAPES={line:['╱','Γραμμή'],arrow:['➚','Βέλος'],rect:['⬜','Ορθογώνιο'],oval:['⭕','Κύκλος']};
-const pv={on:false,tool:'pan',pen:0,hl:0,pw:1,hw:1,ts:1,shape:'rect',file:null,pdf:null,pages:[],undo:[],redo:[],obs:null,z:1,pinch:null,ptrs:new Map()};
+const pv={gen:0,on:false,tool:'pan',pen:0,hl:0,pw:1,hw:1,ts:1,shape:'rect',file:null,pdf:null,pages:[],undo:[],redo:[],obs:null,z:1,pinch:null,ptrs:new Map()};
 let gid=1;const newG=()=>Date.now().toString(36)+(gid++);
 async function pvOpen(){
+  if(editing)toggleEdit();if(tapMode)tapEnd();if(trReset())$('#lowConf').classList.add('hidden');
+  if(pv.on)pvClose();const tok=++pv.gen,d=doc,stale=()=>tok!==pv.gen||doc!==d||!pv.on;
   pv.on=true;document.body.classList.add('pv');$('#pagesView').classList.remove('hidden');$('#inkBar').classList.remove('hidden');closeFind();
   viewLabels();try{localStorage.setItem('glenread-view','page')}catch(e){}
   const box=$('#pagesView');box.innerHTML='<p class="muted" style="text-align:center;padding:30px">Φόρτωση σελίδων…</p>';
-  pv.file=await draftGet('file-'+doc.id);
+  const file=await draftGet('file-'+d.id);if(stale())return;pv.file=file;
   if(!pv.file&&doc.kind){box.innerHTML='<div class="card" style="margin:16px">Για αρχεία «'+esc(doc.kind)+'» υπάρχει μόνο η προβολή κειμένου. Για να γράψεις πάνω σε σελίδες, άνοιξε PDF ή φωτογραφίες.</div>';return}
   if(!pv.file){box.innerHTML='<div class="card" style="margin:16px">Το πρωτότυπο αυτού του εγγράφου δεν κρατήθηκε (ανοίχτηκε πριν την έκδοση 2.3). Άνοιξέ το ξανά από το «Άνοιγμα PDF» για να γράψεις πάνω του.</div>';return}
   doc.ann=doc.ann||{};pv.undo=[];pv.redo=[];pv.pages=[];pv.z=1;box.style.setProperty('--z',1);
   try{
     if(pv.file.pdf){
       if(!window.pdfjsLib)throw new Error('nolib');
-      pv.pdf=await pdfjsLib.getDocument({data:pv.file.pdf.slice(0)}).promise;
-      for(let i=1;i<=pv.pdf.numPages;i++){const vp=(await pv.pdf.getPage(i)).getViewport({scale:1});pv.pages.push({w:vp.width,h:vp.height})}
+      const pdf=await pdfjsLib.getDocument({data:pv.file.pdf.slice(0)}).promise;
+      if(stale()){pdfFree(pdf);return}pv.pdf=pdf;const sizes=[];
+      for(let i=1;i<=pdf.numPages;i++){const vp=(await pdf.getPage(i)).getViewport({scale:1});if(stale())return;sizes.push({w:vp.width,h:vp.height})}
+      pv.pages=sizes;
     }else{
-      for(const src of pv.file.images){const im=await loadImg(src);pv.pages.push({w:im.naturalWidth,h:im.naturalHeight})}
+      const sizes=[];for(const src of pv.file.images){const im=await loadImg(src);if(stale())return;sizes.push({w:im.naturalWidth,h:im.naturalHeight})}
+      pv.pages=sizes;
     }
-  }catch(e){box.innerHTML='<div class="card" style="margin:16px">Οι σελίδες δεν φόρτωσαν. Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.</div>';return}
+  }catch(e){if(stale())return;box.innerHTML='<div class="card" style="margin:16px">Οι σελίδες δεν φόρτωσαν. Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.</div>';return}
   box.innerHTML=pv.pages.map((p,i)=>`<div class="pvp" data-i="${i}" style="aspect-ratio:${p.w}/${p.h}"><canvas class="img"></canvas><canvas class="ink"></canvas><span class="pvn">${i+1}/${pv.pages.length}</span></div>`).join('');
   if(pv.obs)pv.obs.disconnect();
   // σχεδιάζει μόνο τις σελίδες κοντά στην οθόνη και ελευθερώνει τις μακρινές, για να μη γεμίζει η μνήμη
@@ -1061,21 +1113,23 @@ async function pvOpen(){
 function pvClose(){
   pv.sel=null;$('#selBar').classList.add('hidden');document.body.classList.remove('selon');
   pv.on=false;document.body.classList.remove('pv','drawing');$('#pagesView').classList.add('hidden');$('#inkBar').classList.add('hidden');$('#inkPop').classList.add('hidden');
-  if(pv.obs){pv.obs.disconnect();pv.obs=null}$('#pagesView').innerHTML='';pv.pdf=null;pv.file=null;viewLabels();
+  pv.gen++;document.querySelectorAll('.pvp').forEach(el=>{try{el._task&&el._task.cancel()}catch(e){}});
+  if(pv.obs){pv.obs.disconnect();pv.obs=null}$('#pagesView').innerHTML='';if(pv.pdf){const p=pv.pdf;setTimeout(()=>pdfFree(p),0)}pv.pdf=null;pv.file=null;viewLabels();
 }
 async function pvDrawPage(el){
-  if(el._drawn)return;el._drawn=true;
+  if(el._drawn)return;el._drawn=true;const g=el._g=(el._g||0)+1,pdf=pv.pdf,file=pv.file;
+  if(el._task){try{el._task.cancel()}catch(e){}el._task=null}
   const i=+el.dataset.i,img=el.querySelector('.img'),ink=el.querySelector('.ink');
   // ανάλυση ανάλογη με τη μεγέθυνση, με όριο για να μη γεμίζει η μνήμη
   const W=Math.round(Math.min(2600,el.clientWidth*Math.min(2,devicePixelRatio||1))),H=Math.round(W*pv.pages[i].h/pv.pages[i].w);
   img.width=ink.width=W;img.height=ink.height=H;
   try{
-    if(pv.pdf){const pg=await pv.pdf.getPage(i+1);const vp=pg.getViewport({scale:W/pv.pages[i].w});await pg.render({canvasContext:img.getContext('2d'),viewport:vp}).promise}
-    else{const im=await loadImg(pv.file.images[i]);img.getContext('2d').drawImage(im,0,0,W,H)}
-  }catch(e){}
-  pvInk(i);
+    if(pdf){const pg=await pdf.getPage(i+1);if(g!==el._g)return;const vp=pg.getViewport({scale:W/pv.pages[i].w});const t=el._task=pg.render({canvasContext:img.getContext('2d'),viewport:vp});await t.promise;if(el._task===t)el._task=null}
+    else if(file){const im=await loadImg(file.images[i]);if(g!==el._g)return;img.getContext('2d').drawImage(im,0,0,W,H)}
+  }catch(e){if(g!==el._g)return}
+  if(g===el._g)pvInk(i);
 }
-function pvFree(el){if(!el._drawn)return;el._drawn=false;el.querySelectorAll('canvas').forEach(c=>{c.width=c.height=0})}
+function pvFree(el){if(!el._drawn)return;el._drawn=false;el._g=(el._g||0)+1;if(el._task){try{el._task.cancel()}catch(e){}el._task=null}el.querySelectorAll('canvas').forEach(c=>{c.width=c.height=0})}
 // ζωγραφίζει στυλό/μαρκαδόρο/σχήματα και κείμενα πάνω σε έναν καμβά
 function drawAnn(x,W,H,list){
   for(const s of list){
@@ -1123,7 +1177,8 @@ function hitObj(i,p,R){
   return null;
 }
 const groupOf=(i,s)=>s.g?(doc.ann[i]||[]).filter(o=>o.g===s.g):[s];
-let annT=null;const annSave=()=>{clearTimeout(annT);annT=setTimeout(()=>saveDoc(doc),600)};
+let annT=null,annDoc=null;const annSave=()=>{if(annT&&annDoc!==doc)flushAnn();annDoc=doc;clearTimeout(annT);annT=setTimeout(()=>{annT=null;saveDoc(annDoc)},600)};
+function flushAnn(){if(annT){clearTimeout(annT);annT=null;if(annDoc)saveDoc(annDoc)}}
 function pushAct(a){pv.undo.push(a);pv.redo=[];annSave()}
 // σχήματα: γίνονται κανονικές γραμμές, ώστε να σβήνονται/μετακινούνται/αποθηκεύονται όπως όλα
 function shapeStrokes(kind,a,b,asp,c,w){
@@ -1169,8 +1224,8 @@ function pvBind(el){
   const end=()=>{
     if(pv.tool==='er'){if(erased.length)pushAct({i,del:erased});erased=[];return}
     if(mv){if(mv.dx||mv.dy)pushAct({i,mv:mv.objs,dx:mv.dx,dy:mv.dy});mv=null;pvInk(i);return}
-    if(shape){const st=shapeStrokes(pv.shape,shape.a,shape.b,asp(),PEN_COLORS[pv.pen],WIDTHS.pen[pv.pw]);shape=null;
-      if(Math.hypot(st[0].pts[0][0]-st[0].pts[st[0].pts.length-1][0],st[0].pts[0][1]-st[0].pts[st[0].pts.length-1][1])<.01&&pv.shape!=='rect'&&pv.shape!=='oval'){pvInk(i);return}
+    if(shape){const tiny=Math.hypot(shape.b[0]-shape.a[0],shape.b[1]-shape.a[1])<.012;const st=shapeStrokes(pv.shape,shape.a,shape.b,asp(),PEN_COLORS[pv.pen],WIDTHS.pen[pv.pw]);shape=null;
+      if(tiny){pvInk(i);toast('Σύρε το δάχτυλο για να φτιάξεις το σχήμα');return}
       (doc.ann[i]=doc.ann[i]||[]).push(...st);pushAct({i,add:st});pvInk(i);return}
     if(!cur)return;cur.pts=cur.pts.map(q=>[+q[0].toFixed(4),+q[1].toFixed(4)]);
     (doc.ann[i]=doc.ann[i]||[]).push(cur);pushAct({i,add:[cur]});cur=null;pvInk(i);
@@ -1236,7 +1291,7 @@ $('#inkRedo').onclick=()=>{const a=pv.redo.pop();if(a){pvApply(a,true);pv.undo.p
 function textDialog(i,obj,p){
   dlgOpen(obj?'Αλλαγή κειμένου':'Γράψε κείμενο',`<textarea id="txIn" placeholder="π.χ. υπογραφή εδώ, ημερομηνία, σχόλιο…">${obj?esc(obj.text):''}</textarea>`+(obj?'<div class="row" style="justify-content:flex-start"><button class="sec" id="txDel">🗑 Σβήσε αυτό το κείμενο</button></div>':''),()=>{
     const v=$('#txIn').value.replace(/\s+$/,'');
-    if(obj){if(!v){const k=doc.ann[i].indexOf(obj);doc.ann[i].splice(k,1);pushAct({i,del:[obj]})}else{const before={text:obj.text};obj.text=v;pushAct({i,ed:{o:obj,a:before,b:{text:v}}})}}
+    if(obj){if(!v){const L=doc.ann[i]||[],k=L.indexOf(obj);if(k>=0){L.splice(k,1);pushAct({i,del:[obj]})}}else{const before={text:obj.text};obj.text=v;pushAct({i,ed:{o:obj,a:before,b:{text:v}}})}}
     else if(v){const s={t:'tx',x:p[0],y:p[1],s:[.022,.032,.048][pv.ts],c:PEN_COLORS[pv.pen],text:v};(doc.ann[i]=doc.ann[i]||[]).push(s);pushAct({i,add:[s]})}
     pvInk(i)});
   setTimeout(()=>{$('#txIn').focus();const d=$('#txDel');if(d)d.onclick=()=>{$('#txIn').value='';$('#dlgOk').click()}},50);
@@ -1284,7 +1339,7 @@ $('#mAnnPdf').onclick=async()=>{
   try{
     let bytes;
     if(file.pdf&&window.PDFLib){
-      const P=PDFLib,pd=await P.PDFDocument.load(file.pdf.slice(0),{ignoreEncryption:true});
+      const P=PDFLib,pd=await P.PDFDocument.load(file.pdf.slice(0),{ignoreEncryption:true});if(pd.isEncrypted)throw new Error('enc');
       const pages=pd.getPages();
       for(let i=0;i<pages.length;i++){
         const page=pages[i],L=ann[i];if(!L||!L.length)continue;
@@ -1314,6 +1369,7 @@ $('#mAnnPdf').onclick=async()=>{
         const o=W>H?'l':'p';if(!out)out=new jsPDF({unit:'px',format:[W,H],orientation:o,hotfixes:['px_scaling']});else out.addPage([W,H],o);
         out.addImage(c.toDataURL('image/jpeg',.85),'JPEG',0,0,W,H);c.width=c.height=0;
       }
+      if(pdfjs)pdfFree(pdfjs);
       shareOrSave(out.output('blob'),doc.name+' (σημειώσεις).pdf');
     }catch(e2){console.error(e2);toast('Δεν έγινε το PDF')}
   }
@@ -1337,7 +1393,7 @@ async function saveToFolder(blob,name){
       toast('Αποθηκεύτηκε: GlenApps › GlenRead › Έγγραφα › '+final);return true;
     }catch(e){console.warn(e)}
   }
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();toast('Αποθηκεύτηκε στις Λήψεις: '+name);return true;
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),60000);toast('Αποθηκεύτηκε στις Λήψεις: '+name);return true;
 }
 async function shareFile(blob,name){
   const f=new File([blob],safeName(name),{type:blob.type});
@@ -1354,11 +1410,11 @@ async function shareOrSave(blob,name){
 // ---------- Πρόσφατα ----------
 async function drawHist(){
   const list=(await allDocs()||[]).sort((a,b)=>b.id-a.id);
-  $('#histList').innerHTML=list.length?list.map(d=>`<div class="it"><div data-open="${d.id}"><strong>${esc(d.name)}</strong><span class="muted">${new Date(d.date).toLocaleString('el-GR')} · ${d.pages.length}${d.partial?' από '+d.partial:''} σελ.${d.partial?' · διακόπηκε':''}</span></div><button class="sec" data-del="${d.id}">🗑</button></div>`).join(''):'<p class="muted">Δεν υπάρχουν ακόμη έγγραφα.</p>';
+  $('#histList').innerHTML=list.length?list.map(d=>`<div class="it"><div data-open="${esc(d.id)}"><strong>${esc(d.name)}</strong><span class="muted">${esc(new Date(d.date).toLocaleString('el-GR'))} · ${(d.pages||[]).length}${d.partial?' από '+esc(d.partial):''} σελ.${d.partial?' · διακόπηκε':''}</span></div><button class="sec" data-del="${esc(d.id)}">🗑</button></div>`).join(''):'<p class="muted">Δεν υπάρχουν ακόμη έγγραφα.</p>';
 }
 $('#histList').onclick=async e=>{
   const o=e.target.closest('[data-open]'),x=e.target.closest('[data-del]');
-  if(x){if(confirm('Διαγραφή αυτού του εγγράφου;')){await delDoc(+x.dataset.del);draftSet('file-'+x.dataset.del,null);drawHist()}return}
+  if(x){if(confirm('Διαγραφή αυτού του εγγράφου;')){const id=x.dataset.del,k=isNaN(+id)?id:+id;await delDoc(k);draftSet('file-'+id,null);drawHist()}return}
   if(o){doc=(await allDocs()).find(d=>d.id==o.dataset.open);if(doc)openReader()}
 };
 
@@ -1371,13 +1427,13 @@ $('#bHistClose').onclick=()=>$('#histBox').classList.add('hidden');
 $('#fPdf').onchange=e=>{const f=e.target.files[0];e.target.value='';f&&openAny(f)};
 $('#fCam').onchange=$('#fImg').onchange=e=>{try{sessionStorage.removeItem('glenread-cam')}catch(x){}const f=[...e.target.files];e.target.value='';addImages(f)};
 $('#bOcrImgs').onclick=ocrShots;$('#bMakePdf').onclick=makePdf;
-$('#bCancel').onclick=()=>{cancelled=true;prog(0,'Ακύρωση μετά την τρέχουσα σελίδα… οι σελίδες που έγιναν κρατιούνται')};
+$('#bCancel').onclick=()=>{cancelled=true;prog(null,'Ακύρωση… οι σελίδες που έγιναν κρατιούνται');if(ocrStop)ocrStop()};
 ['lang'].forEach(k=>{const el=$('#'+k);try{el.value=localStorage.getItem('glenread-'+k)||el.value}catch(e){}el.onchange=()=>{try{localStorage.setItem('glenread-'+k,el.value)}catch(e){}}});
 
 // αρχεία από «Κοινοποίηση → GlenRead» (Ανδροειδές)
 (async()=>{
   const q=new URLSearchParams(location.search);if(!q.has('shared'))return;
-  history.replaceState(null,'',location.pathname);
+  history.replaceState({v:'home'},'',location.pathname);
   try{
     const c=await caches.open('glenread-share');const keys=await c.keys();const files=[];
     for(const k of keys){const r=await c.match(k);const b=await r.blob();files.push(new File([b],decodeURIComponent(r.headers.get('x-name')||'arxeio'),{type:r.headers.get('content-type')||b.type}))}
@@ -1385,7 +1441,7 @@ $('#bCancel').onclick=()=>{cancelled=true;prog(0,'Ακύρωση μετά την
     if(!files.length)return toast('Δεν ήρθε κανένα αρχείο');
     const imgs=files.filter(f=>f.type.startsWith('image/'));
     if(imgs.length===files.length){addImages(imgs);return toast('Οι φωτογραφίες μπήκαν — πάτα «Αναγνώριση κειμένου»')}
-    openAny(files.find(f=>!f.type.startsWith('image/')));
+    const docs=files.filter(f=>!f.type.startsWith('image/'));openAny(docs[0]);if(files.length>1)setTimeout(()=>toast('Ήρθαν '+files.length+' αρχεία — άνοιξε το πρώτο. Τα άλλα άνοιξέ τα ένα-ένα.'),2800);
   }catch(e){toast('Το αρχείο δεν άνοιξε')}
 })();
 
@@ -1430,8 +1486,7 @@ $('#qGrid').onclick=e=>{
     if(QB.includes(k)&&!pinned){pinned=true;try{localStorage.setItem('glenread-pin','1')}catch(x){}pinApply()}
     toast(QB.includes(k)?'«'+name(k)+'» μπήκε στην πάνω μπάρα':'«'+name(k)+'» βγήκε από την πάνω μπάρα');return}
   if(qEditing)return;
-  const t=e.target.closest('[data-k]');if(!t)return;const k=t.dataset.k;closeSheet();
-  if(k==='back')return goHome();setTimeout(()=>QB_ACT[k]&&QB_ACT[k](),60);
+  const t=e.target.closest('[data-k]');if(!t)return;const k=t.dataset.k;if(k==='back')return goHome();closeSheet();setTimeout(()=>QB_ACT[k]&&QB_ACT[k](),60);
 };
 // μόνο μία κατηγορία ανοιχτή τη φορά
 document.querySelectorAll('#sheet details.cat').forEach(d=>d.addEventListener('toggle',()=>{if(d.open){document.querySelectorAll('#sheet details.cat').forEach(o=>{if(o!==d)o.open=false});setTimeout(()=>d.scrollIntoView({block:'nearest',behavior:'smooth'}),60)}}));
@@ -1490,8 +1545,12 @@ makeSortable($('#inkBar'),'#inkBar > button',inkKey,order=>{INK=order;try{localS
 
 // ---------- Μετάφραση ----------
 const LANGS=[['el','Ελληνικά'],['en','Αγγλικά'],['de','Γερμανικά'],['fr','Γαλλικά'],['it','Ιταλικά'],['es','Ισπανικά'],['sq','Αλβανικά'],['bg','Βουλγαρικά'],['ro','Ρουμανικά'],['ru','Ρωσικά'],['uk','Ουκρανικά'],['tr','Τουρκικά'],['ar','Αραβικά'],['zh','Κινέζικα'],['pl','Πολωνικά'],['nl','Ολλανδικά'],['pt','Πορτογαλικά']];
-const guessLang=t=>{const g=(t.match(/[Ͱ-Ͽἀ-῿]/g)||[]).length,l=(t.match(/[A-Za-z]/g)||[]).length;return g>l?'el':'en'};
-let trOrig=null;
+// αναγνώριση γλώσσας: από το αλφάβητο και από συχνές μικρές λέξεις
+const LW={en:'the and of to is in that for with this are',de:'der die und das ist nicht ein eine mit sich auf für',fr:'le la les et est des une pour dans pas que qui',it:'il la che di è per non una sono gli della',es:'el la que de los las por una para con está',pt:'que não uma para com os das são está você',nl:'de het een en van niet dat is op zijn met',pl:'się nie jest że na do to jak ale w',tr:'ve bir bu için ile da de değil çok olarak',ro:'și este în nu cu pentru care sunt mai la',sq:'dhe është në një për që të me nuk janë'};
+const guessLang=t=>{const c=r=>(t.match(r)||[]).length,g=c(/[Ͱ-Ͽἀ-῿]/g),cy=c(/[Ѐ-ӿ]/g),ar=c(/[؀-ۿ]/g),zh=c(/[一-鿿]/g),l=c(/[A-Za-zÀ-ž]/g),mx=Math.max(g,cy,ar,zh,l);
+  if(!mx)return'el';if(mx===g)return'el';if(mx===cy)return/[іїєґ]/i.test(t)?'uk':/[ъ]/.test(t)&&/\bсе\b/.test(t)?'bg':'ru';if(mx===ar)return'ar';if(mx===zh)return'zh';
+  const w=t.toLowerCase().split(/[^a-zà-ž]+/).slice(0,600);let best='en',bs=0;for(const k in LW){const set=LW[k].split(' ');const n=w.filter(x=>set.includes(x)).length;if(n>bs){bs=n;best=k}}return best};
+
 // θυμόμαστε την τελευταία επιλογή κειμένου, γιατί στο κινητό σβήνει μόλις πατήσεις κουμπί
 let lastSel='',lastSelAt=0;
 document.addEventListener('selectionchange',()=>{const t=String(getSelection()||'').trim();if(t&&document.body.classList.contains('reading')){lastSel=t;lastSelAt=Date.now()}});
@@ -1555,12 +1614,14 @@ async function doTranslate(text,from,to,isSel,how){
   if(how==='app'&&navigator.share){try{await navigator.share({text});toast('Διάλεξε «Μετάφραση» από τη λίστα');return}catch(e){if(e.name==='AbortError')return}}
   window.open('https://translate.google.com/?sl=auto&tl='+to+'&op=translate&text='+encodeURIComponent(text.slice(0,5000)),'_blank','noopener');
 }
+// επιστροφή στο πρωτότυπο κείμενο (η μετάφραση δεν αποθηκεύεται ποτέ στη θέση του)
+function trReset(){if(trDoc&&trOrig)trDoc.pages=trOrig;const was=!!trOrig;trOrig=null;trDoc=null;return was}
 function showTranslation(t,to,isSel){
   const name=(LANGS.find(l=>l[0]===to)||[,''])[1];
   if(isSel){dlgOpen('Μετάφραση σε '+name,`<div style="white-space:pre-wrap;max-height:50vh;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:10px">${esc(t)}</div><div class="row" style="justify-content:flex-start"><button class="sec" id="trCopy">📋 Αντιγραφή</button></div>`,null,true);setTimeout(()=>{$('#trCopy').onclick=()=>navigator.clipboard.writeText(t).then(()=>toast('Αντιγράφηκε'))},30);return}
-  if(pv.on)viewText();trOrig=trOrig||doc.pages;doc.pages=[{text:t,conf:100,ocr:false}];render();
+  if(pv.on)viewText();if(!trOrig||trDoc!==doc){trReset();trOrig=doc.pages;trDoc=doc}doc.pages=[{text:t,conf:100,ocr:false}];render();
   $('#lowConf').classList.remove('hidden');$('#lowConf').innerHTML=`🌐 Βλέπεις μετάφραση στα ${esc(name)}. <button class="sec" id="trBack" style="min-height:34px;margin-left:6px">Επιστροφή στο πρωτότυπο</button>`;
-  $('#trBack').onclick=()=>{doc.pages=trOrig;trOrig=null;render();$('#lowConf').classList.add('hidden')};scrollTo(0,0);
+  $('#trBack').onclick=()=>{trReset();render();$('#lowConf').classList.add('hidden')};scrollTo(0,0);
 }
 $('#mTr').onclick=openTranslate;
 
@@ -1613,7 +1674,7 @@ const toggleView=()=>{closeSheet();if(pv.on)viewText();else pvOpen()};
 $('#mView').onclick=toggleView;$('#qView').onclick=toggleView;
 $('#mDraw').onclick=async()=>{closeSheet();if(!pv.on)await pvOpen();if(pv.on&&pv.file)pvTool('pen')};
 $('#mClear').onclick=()=>{closeSheet();const n=Object.values(doc.ann||{}).reduce((a,l)=>a+l.length,0);if(!n)return toast('Δεν υπάρχουν σημειώσεις');
-  if(!confirm('Να σβηστούν όλες οι σημειώσεις ('+n+') από όλες τις σελίδες;'))return;doc.ann={};pv.undo=[];pv.redo=[];saveDoc(doc);document.querySelectorAll('.pvp').forEach(el=>pvInk(+el.dataset.i));toast('Σβήστηκαν')};
+  if(!confirm('Να σβηστούν όλες οι σημειώσεις ('+n+') από όλες τις σελίδες;'))return;doc.ann={};selClear();pv.undo=[];pv.redo=[];saveDoc(doc);document.querySelectorAll('.pvp').forEach(el=>pvInk(+el.dataset.i));toast('Σβήστηκαν')};
 // αναζήτηση
 function openFind(){closeSheet();if(pv.on)viewText();$('#findBar').classList.remove('hidden');$('#q').focus()}
 function closeFind(){$('#findBar').classList.add('hidden');if($('#q').value){$('#q').value='';$('#hits').textContent='';if(doc&&!pv.on)render()}}
@@ -1711,13 +1772,18 @@ $('#instYes').onclick=async()=>{
 $('#instNo').onclick=()=>{try{localStorage.setItem('glenread-inst-later',Date.now()+7*864e5)}catch(e){}$('#instBox').classList.add('hidden')};
 
 // ---------- Αναβάθμιση ----------
+// η νέα έκδοση φορτώνει μόνο όταν είσαι στην αρχική και δεν γίνεται κάποια δουλειά (ποτέ στη μέση της ανάγνωσης ή της αναγνώρισης)
+var updPending=false,updDone=false;
+function updReload(){if(updDone)return;const idle=!$('#home').classList.contains('hidden')&&$('#work').classList.contains('hidden')&&$('#dlg').classList.contains('hidden')&&$('#cam').classList.contains('hidden');
+  if(!idle){toast('Νέα έκδοση έτοιμη — θα μπει όταν γυρίσεις στην αρχική');return}updDone=true;flushAll();setTimeout(()=>location.reload(),300)}
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').then(reg=>{
+    if(!reg)return;
     $('#bUpd').onclick=async()=>{toast('Έλεγχος…');await reg.update();if(!reg.waiting&&!reg.installing)toast('Έχεις την τελευταία έκδοση ('+VERSION+')')};
     reg.addEventListener('updatefound',()=>{const w=reg.installing;w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller){toast('Νέα έκδοση — αναβάθμιση…');w.postMessage('skip')}})});
   });
   // ξαναφόρτωση μόνο όταν αντικαθίσταται παλιά έκδοση — όχι στο πρώτο άνοιγμα της εφαρμογής
-  const hadCtl=!!navigator.serviceWorker.controller;let reloaded=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadCtl&&!reloaded){reloaded=true;location.reload()}});
+  const hadCtl=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadCtl){updPending=true;updReload()}});
 }else $('#bUpd').onclick=()=>location.reload();
 </script>
 </body>
