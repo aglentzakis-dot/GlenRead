@@ -173,17 +173,6 @@ body.selon #gMenu{display:none}
 #selBar button{min-height:46px;padding:4px;flex-direction:column;gap:0;font-size:18px;line-height:1.1;background:transparent;border:1px solid var(--line);color:var(--ink)}
 #selBar button small{font-size:10.5px;font-weight:600;color:var(--soft)}
 /* «Οι εφαρμογές μας»: μαζεμένα πλακίδια σε τρεις στήλες */
-#efmPage{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-#efmPage>*:not(.efm-card){grid-column:1/-1}
-#efmPage .efm-card{position:relative;margin:0;padding:8px 4px 6px;gap:0;border-radius:12px}
-#efmPage .efm-go{flex-direction:column;gap:4px;text-align:center;align-items:center}
-#efmPage .efm-ic{width:34px;height:34px;font-size:26px}
-#efmPage .efm-tx{align-items:center;width:100%}
-#efmPage .efm-tx>*:first-child{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-#efmPage .efm-tx>*:not(:first-child){font-size:10.5px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-#efmPage .efm-arr{display:none}
-#efmPage .efm-tg{display:none}
-#efmPage .efm-note{font-size:11.5px;margin:4px 2px}
 .trws,.trhow{display:flex;flex-direction:column;gap:4px;margin:0 0 10px}
 .trhow{margin-top:10px}
 .trw{display:flex;gap:10px;align-items:flex-start;padding:8px;border:1px solid var(--line);border-radius:12px}
@@ -497,9 +486,10 @@ details summary{cursor:pointer;font-weight:600}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="antigrafa.js"></script>
-<script src="efarmoges-mas.js"></script>
+<script src="/efarmoges-mas.js"></script>
+<script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.20';
+const VERSION='2.21';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';

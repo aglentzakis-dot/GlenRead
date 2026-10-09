@@ -1,5 +1,5 @@
-const CACHE='glenread-2.20';
-const CORE=['./','index.html','manifest.json','icon-192.png','icon-512.png','icon-512-maskable.png','apple-touch-icon.png','privacy.html','G-glenapps.png','antigrafa.js','efarmoges-mas.js'];
+const CACHE='glenread-2.21';
+const CORE=['./','index.html','manifest.json','icon-192.png','icon-512.png','icon-512-maskable.png','apple-touch-icon.png','privacy.html','G-glenapps.png','antigrafa.js','efarmoges-mas.js','/efarmoges-mas.js'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE))));
 self.addEventListener('message',e=>{if(e.data==='skip')self.skipWaiting()});
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>(k.startsWith('diavaseto-')||k.startsWith('gdoc-')||k.startsWith('glenread-'))&&k!==CACHE&&k!=='glenread-lib'&&k!=='glenread-share').map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
@@ -20,7 +20,7 @@ self.addEventListener('fetch',e=>{
   const u=new URL(e.request.url);
   // δική μας σελίδα: πρώτα δίκτυο (για αναβαθμίσεις), αλλιώς αποθηκευμένη
   if(u.origin===location.origin){
-    e.respondWith(fetch(e.request).then(r=>{const c=r.clone();caches.open(CACHE).then(x=>x.put(e.request,c));return r}).catch(()=>caches.match(e.request,{ignoreSearch:true}).then(r=>r||caches.match('index.html'))));
+    e.respondWith(Promise.race([fetch(e.request),new Promise((_,j)=>u.pathname==='/efarmoges-mas.js'&&setTimeout(j,4000))]).then(r=>{const c=r.clone();caches.open(CACHE).then(x=>x.put(e.request,c));return r}).catch(()=>caches.match(e.request,{ignoreSearch:true}).then(r=>r||caches.match('index.html'))));
     return;
   }
   // βιβλιοθήκες και λεξικά γλώσσας: αποθήκευση για χρήση χωρίς ίντερνετ
