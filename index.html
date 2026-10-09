@@ -111,6 +111,13 @@ details.cat[open]>:last-child{margin-bottom:8px}
 #sheet h3{font-size:12px;letter-spacing:.06em;text-transform:none;color:var(--acc2);margin:16px 4px 6px;font-weight:800}
 .mi{display:flex;width:100%;justify-content:flex-start;align-items:center;gap:12px;background:transparent;border:0;border-radius:14px;padding:10px 8px;color:var(--ink);text-align:left;font-weight:500}
 .mi:active{background:var(--line)}
+/* Pro: σήμα στις λειτουργίες που θα είναι Pro (τώρα δωρεάν, προσφορά γνωριμίας) */
+.pb{display:inline-block;font-style:normal;font-size:10px;font-weight:900;letter-spacing:.3px;background:linear-gradient(#FDD117,#EF9F02);color:#1d1d1b;border-radius:6px;padding:1px 5px;margin-left:6px;vertical-align:2px;line-height:14px}
+#inkBar button.pro{position:relative}#inkBar button.pro::after{content:'PRO';position:absolute;top:1px;right:4px;font-size:8px;font-weight:900;background:linear-gradient(#FDD117,#EF9F02);color:#1d1d1b;border-radius:4px;padding:0 3px;line-height:12px}
+.procard{background:linear-gradient(135deg,#fff7d1,#ffe9a8);border-color:#EF9F02;color:#1d1d1b}
+.procard .row{display:flex;align-items:center;gap:10px}.procard b{font-size:16px}.procard small{display:block;font-size:13px;opacity:.85;margin-top:2px}
+.procard button{flex:0 0 auto;min-height:38px;padding:4px 12px}
+.proli{margin:6px 0 0;padding-left:20px}.proli li{margin:5px 0}
 .mi .ic{font-size:22px;width:34px;text-align:center;flex:0 0 auto}
 .mi .tx{flex:1;display:flex;flex-direction:column}
 .mi .tx b{font-size:15.5px}
@@ -320,7 +327,7 @@ details summary{cursor:pointer;font-weight:600}
       <p><label>Ταχύτητα αναγνώρισης<br>
         <select id="ocrMode">
           <option value="fast">Γρήγορη (προτείνεται)</option>
-          <option value="careful">Προσεκτική — πιο αργή, για μικρά ή θολά γράμματα</option>
+          <option value="careful">Προσεκτική — πιο αργή, για μικρά ή θολά γράμματα (Pro)</option>
         </select></label></p>
       <p><label><input type="checkbox" id="pre" checked> Καθαρισμός φωτογραφίας πριν την αναγνώριση (ασπρόμαυρο, αντίθεση)</label></p>
       <p><label><input type="checkbox" id="forceOcr"> Αναγνώριση ακόμη κι όταν το PDF έχει ήδη κείμενο</label></p>
@@ -328,6 +335,7 @@ details summary{cursor:pointer;font-weight:600}
     </details>
   </div>
   <div id="efmSlot"></div>
+  <div class="card procard" id="proBox"><div class="row"><span style="font-size:28px">⭐</span><div style="flex:1"><b>GlenRead Pro</b><small id="proTxt"></small></div><button class="sec" id="proMore">Τι περιλαμβάνει</button></div></div>
   <div class="card">
     <details id="appsBox">
       <summary>✨ Οι εφαρμογές μας</summary>
@@ -415,14 +423,14 @@ details summary{cursor:pointer;font-weight:600}
     <button data-tool="pen"><span>🖊️</span><small>Στυλό</small></button>
     <button data-tool="hl"><span>🖍️</span><small>Μαρκαδόρος</small></button>
     <button data-tool="tx"><span>🔤</span><small>Κείμενο</small></button>
-    <button data-tool="sh"><span id="shIc">⬜</span><small>Σχήμα</small></button>
-    <button data-tool="sig"><span>✍️</span><small>Υπογραφή</small></button>
+    <button data-tool="sh" class="pro"><span id="shIc">⬜</span><small>Σχήμα</small></button>
+    <button data-tool="sig" class="pro"><span>✍️</span><small>Υπογραφή</small></button>
     <button data-tool="mv"><span>✥</span><small>Μετακίνηση</small></button>
     <button data-tool="er"><span>🧽</span><small>Γόμα</small></button>
     <button id="inkColor"><span class="dot"></span><small>Χρώμα</small></button>
     <button id="inkUndo"><span>↶</span><small>Αναίρεση</small></button>
     <button id="inkRedo"><span>↷</span><small>Επανάληψη</small></button>
-    <button id="inkSave"><span>📑</span><small>Αποθήκευση</small></button>
+    <button id="inkSave" class="pro"><span>📑</span><small>Αποθήκευση</small></button>
   </div>
   <div id="inkPop" class="hidden"></div>
   <div id="selBar" class="hidden">
@@ -465,12 +473,12 @@ details summary{cursor:pointer;font-weight:600}
     </details>
     <details class="cat" data-cat="note"><summary><span class="ci">🖊️</span><span class="ct"><b>Σημειώσεις και υπογραφή</b><small>Γράψε, υπογραφή, διόρθωση κειμένου</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mDraw"><span class="ic">🖊️</span><span class="tx"><b>Γράψε πάνω στη σελίδα</b><small>Στυλό, μαρκαδόρος, κείμενο, σχήματα, υπογραφή</small></span></button>
-    <button class="mi" id="mSig"><span class="ic">✍️</span><span class="tx"><b>Η υπογραφή μου</b><small id="mSigS">Φτιάξε ή άλλαξε την υπογραφή σου</small></span></button>
+    <button class="mi" id="mSig"><span class="ic">✍️</span><span class="tx"><b>Η υπογραφή μου<i class="pb">PRO</i></b><small id="mSigS">Φτιάξε ή άλλαξε την υπογραφή σου</small></span></button>
     <button class="mi" id="mEdit"><span class="ic">✏️</span><span class="tx"><b id="mEditT">Διόρθωση κειμένου</b><small>Διόρθωσε λάθη της αναγνώρισης</small></span></button>
     <button class="mi" id="mClear"><span class="ic">🗑️</span><span class="tx"><b>Σβήσε όλες τις σημειώσεις</b><small>Καθαρίζει ό,τι έγραψες πάνω στις σελίδες</small></span></button>
     </details>
     <details class="cat" data-cat="file"><summary><span class="ci">📁</span><span class="ct"><b>Αρχείο</b><small>Αποθήκευση, αποστολή, αντιγραφή, όνομα</small></span><span class="cv">›</span></summary>
-    <button class="mi" id="mAnnPdf"><span class="ic">📑</span><span class="tx"><b>Αποθήκευση PDF με τις σημειώσεις</b><small>Για να το στείλεις ή να το κρατήσεις</small></span></button>
+    <button class="mi" id="mAnnPdf"><span class="ic">📑</span><span class="tx"><b>Αποθήκευση PDF με τις σημειώσεις<i class="pb">PRO</i></b><small>Για να το στείλεις ή να το κρατήσεις</small></span></button>
     <button class="mi" id="mShare"><span class="ic">📤</span><span class="tx"><b>Αποστολή κειμένου</b><small>Σε μήνυμα, ταχυδρομείο κ.λπ.</small></span></button>
     <button class="mi" id="mCopy"><span class="ic">📋</span><span class="tx"><b>Αντιγραφή κειμένου</b><small>Όλου, ή μόνο όσου έχεις επιλέξει</small></span></button>
     <button class="mi" id="mTxt"><span class="ic">💾</span><span class="tx"><b>Αποθήκευση ως κείμενο</b><small>Αρχείο .txt στο GlenApps › GlenRead › Έγγραφα</small></span></button>
@@ -516,7 +524,7 @@ details summary{cursor:pointer;font-weight:600}
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.27';
+const VERSION='2.28';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -1369,6 +1377,7 @@ const TOOL_TIPS={pan:'Κύλιση: μετακινείσαι στη σελίδα
   tx:'Κείμενο: πάτα στο σημείο που θέλεις να γράψεις. Πάτα σε υπάρχον κείμενο για αλλαγή.',sh:'Σχήμα: σύρε από τη μία γωνία στην άλλη. Ξαναπάτα «Σχήμα» για άλλο σχήμα.',
   sig:'Υπογραφή: πάτα στο σημείο που θέλεις να μπει η υπογραφή σου.',mv:'Μετακίνηση: πάτα μια σημείωση για να τη μετακινήσεις, να τη μεγαλώσεις ή να τη μικρύνεις.',er:'Γόμα: πέρνα πάνω από ό,τι θέλεις να σβήσεις.'};
 function pvTool(t,silent){
+  if(t==='sig')proTouch('sig','Υπογραφή');else if(t==='sh')proTouch('sh','Σχήματα');
   const again=pv.tool===t&&!silent;if(t!=='mv')selClear();pv.tool=t;document.body.classList.toggle('drawing',t!=='pan');
   document.querySelectorAll('#inkBar [data-tool]').forEach(b=>b.classList.toggle('on',b.dataset.tool===t));
   $('#inkColor .dot').style.background=t==='hl'?HL_COLORS[pv.hl]:PEN_COLORS[pv.pen];
@@ -1448,7 +1457,7 @@ const hex2rgb=h=>{const n=parseInt(h.slice(1),16);return[(n>>16&255)/255,(n>>8&2
 function txPng(s,W){const sc=3,fz=s.s*W*sc,lines=(s.text||'').split('\n');const c=document.createElement('canvas'),x=c.getContext('2d');x.font=`600 ${fz}px system-ui,sans-serif`;
   c.width=Math.ceil(Math.max(...lines.map(l=>x.measureText(l).width))+4);c.height=Math.ceil(lines.length*fz*1.25+4);x.font=`600 ${fz}px system-ui,sans-serif`;x.fillStyle=s.c;x.textBaseline='top';lines.forEach((l,k)=>x.fillText(l,0,k*fz*1.25));return{url:c.toDataURL('image/png'),w:c.width/sc,h:c.height/sc}}
 $('#mAnnPdf').onclick=async()=>{
-  closeSheet();
+  closeSheet();proTouch('annpdf','Αποθήκευση PDF με σημειώσεις');
   const file=pv.file||await draftGet('file-'+doc.id);
   if(!file)return toast('Το πρωτότυπο δεν κρατήθηκε — άνοιξε ξανά το PDF για να γράψεις πάνω του');
   const ann=doc.ann||{};toast('Ετοιμάζεται το PDF…');
@@ -1544,7 +1553,7 @@ $('#fPdf').onchange=e=>{const f=e.target.files[0];e.target.value='';f&&openAny(f
 $('#fCam').onchange=$('#fImg').onchange=e=>{try{sessionStorage.removeItem('glenread-cam')}catch(x){}const f=[...e.target.files];e.target.value='';addImages(f)};
 $('#bOcrImgs').onclick=ocrShots;$('#bMakePdf').onclick=makePdf;
 $('#bCancel').onclick=()=>{cancelled=true;prog(null,'Ακύρωση… οι σελίδες που έγιναν κρατιούνται');if(ocrStop)ocrStop()};
-['lang','ocrMode'].forEach(k=>{const el=$('#'+k);try{el.value=localStorage.getItem('glenread-'+k)||el.value}catch(e){}el.onchange=()=>{try{localStorage.setItem('glenread-'+k,el.value);if(k==='ocrMode')localStorage.removeItem('glenread-lowmem')}catch(e){}}});
+['lang','ocrMode'].forEach(k=>{const el=$('#'+k);try{el.value=localStorage.getItem('glenread-'+k)||el.value}catch(e){}el.onchange=()=>{try{localStorage.setItem('glenread-'+k,el.value);if(k==='ocrMode'){localStorage.removeItem('glenread-lowmem');if(el.value==='careful')proTouch('careful','Προσεκτική αναγνώριση')}}catch(e){}}});
 
 // αρχεία από «Κοινοποίηση → GlenRead» (Ανδροειδές)
 (async()=>{
@@ -1704,8 +1713,8 @@ function openTranslate(){
   dlgOpen('🌐 Μετάφραση',`<div class="trws">
       ${sel?R('sel','Το κείμενο που επέλεξα','«'+esc(sel.slice(0,60))+(sel.length>60?'…':'')+'»',true):''}
       ${R('tap','Πατάω παραγράφους','Πατάς όσες θέλεις και γίνονται κίτρινες',!sel)}
-      ${doc.pages.length>1?R('page','Αυτή τη σελίδα',''):''}
-      ${R('all','Όλο το έγγραφο','')}
+      ${doc.pages.length>1?R('page','Αυτή τη σελίδα <i class="pb">PRO</i>',''):''}
+      ${R('all','Όλο το έγγραφο <i class="pb">PRO</i>','')}
     </div>
     <label>Μετάφραση σε<br><select id="trTo" style="width:100%;margin-top:4px">${LANGS.map(([c,n])=>`<option value="${c}" ${c===to?'selected':''}>${n}</option>`).join('')}</select></label>
     ${local?'<p class="muted" style="margin:10px 0 0">✅ Η μετάφραση γίνεται μέσα στη συσκευή.</p>':
@@ -1714,6 +1723,7 @@ function openTranslate(){
      <p class="muted" style="margin:6px 0 0;font-size:12.5px">⚠️ Στο κινητό σου δεν υπάρχει ακόμη ενσωματωμένος μεταφραστής, οπότε το κείμενο πηγαίνει στη Μετάφραση Google.</p></div>`}`,
     ()=>{const t=$('#trTo').value,w=(document.querySelector('input[name=trW]:checked')||{}).value||'all',h=(document.querySelector('input[name=trH]:checked')||{}).value||'web';
       try{localStorage.setItem('glenread-trto',t)}catch(e){}
+      if(w==='page'||w==='all')proTouch('trall','Μετάφραση σελίδας ή εγγράφου');
       if(w==='tap')return tapPick(t,h);
       const text=w==='sel'?sel:w==='page'?curPageText():fullText();
       doTranslate(text,guessLang(text.slice(0,3000)),t,w!=='all',h)});
@@ -1904,6 +1914,23 @@ $('#instYes').onclick=async()=>{
   if(r.outcome==='accepted')$('#instBox').classList.add('hidden');
 };
 $('#instNo').onclick=()=>{try{localStorage.setItem('glenread-inst-later',Date.now()+7*864e5)}catch(e){}$('#instBox').classList.add('hidden')};
+
+// ---------- GlenRead Pro ----------
+// Όλα είναι ανοιχτά: προσφορά γνωριμίας. Η ημερομηνία αλλάζει εδώ, σε ένα σημείο.
+// Μετά τη λήξη ΔΕΝ κλειδώνει τίποτα μόνο του — μόνο όταν μπει αγορά μέσω Google Play.
+const PRO_UNTIL=new Date('2027-03-31T23:59:59');
+const PRO_UNTIL_TXT='31 Μαρτίου 2027';
+const PRO_LIST=[['✍️','Υπογραφή πάνω στο PDF'],['📑','Αποθήκευση PDF με σημειώσεις και υπογραφές'],['⬜','Σχήματα: γραμμές, βέλη, πλαίσια, κύκλοι'],['🌐','Μετάφραση ολόκληρης σελίδας ή εγγράφου'],['🔬','«Προσεκτική» αναγνώριση για μικρά ή θολά γράμματα']];
+const PRO_SOON=['PDF με αναζήτηση από φωτογραφίες','Ένωση, διαχωρισμός και σειρά σελίδων PDF','Συμπλήρωση εντύπων PDF','Πολλές υπογραφές, μονογραφή και σφραγίδα','Εξαγωγή σε Word και πίνακες σε Excel','Αυτόματο κόψιμο και ίσιωμα σελίδας'];
+const proOffer=()=>Date.now()<=PRO_UNTIL.getTime();
+function proPaint(){const t=$('#proTxt');if(!t)return;t.textContent=proOffer()?`Προσφορά γνωριμίας: όλες οι λειτουργίες Pro 100% δωρεάν έως ${PRO_UNTIL_TXT}.`:'Η προσφορά γνωριμίας έληξε — οι λειτουργίες Pro μένουν ανοιχτές προς το παρόν.'}
+function proInfo(){dlgOpen('⭐ GlenRead Pro',`<p style="margin:0 0 6px">${proOffer()?`<b>Προσφορά γνωριμίας: 100% δωρεάν έως ${PRO_UNTIL_TXT}.</b> Δεν χρειάζεται εγγραφή ούτε κάρτα.`:'Η προσφορά γνωριμίας έληξε.'}</p>
+  <b>Λειτουργίες Pro</b><ul class="proli">${PRO_LIST.map(([i,t])=>`<li>${i} ${t}</li>`).join('')}</ul>
+  <b style="display:block;margin-top:10px">Έρχονται στο Pro</b><ul class="proli">${PRO_SOON.map(t=>`<li>${t}</li>`).join('')}</ul>
+  <p class="muted" style="margin:10px 0 0;font-size:13px">Όλα τα υπόλοιπα (άνοιγμα όλων των αρχείων, ανάγνωση, αναγνώριση κειμένου, φωτογράφιση, στυλό, μαρκαδόρος, σημειώσεις κειμένου, αναζήτηση, θέματα, αντίγραφα ασφαλείας) μένουν δωρεάν. Τα έγγραφά σου είναι πάντα δικά σου και ανοίγουν πάντα, ό,τι κι αν γίνει με το Pro.</p>`,null,true)}
+function proTouch(k,name){try{const K='glenread-pro-seen';const S=JSON.parse(localStorage.getItem(K)||'[]');if(S.includes(k))return;S.push(k);localStorage.setItem(K,JSON.stringify(S))}catch(e){return}
+  if(proOffer())setTimeout(()=>toast(`⭐ «${name}» είναι λειτουργία Pro — δωρεάν για σένα έως ${PRO_UNTIL_TXT}`),900)}
+$('#proMore').onclick=proInfo;proPaint();
 
 // ---------- Αναβάθμιση ----------
 // η νέα έκδοση φορτώνει μόνο όταν είσαι στην αρχική και δεν γίνεται κάποια δουλειά (ποτέ στη μέση της ανάγνωσης ή της αναγνώρισης)
