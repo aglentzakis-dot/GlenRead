@@ -237,6 +237,11 @@ details summary{cursor:pointer;font-weight:600}
 #cam .shot.busy{opacity:.5;transform:scale(.92)}
 #cam .shot{width:74px;height:74px;border-radius:50%;border:5px solid #fff;background:#FDD117;padding:0;min-height:0}
 #cam .cnt{color:#fff;font-size:14px;min-width:90px}
+#cam .hold{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);background:#000b;color:#fff;font-size:22px;font-weight:800;padding:18px 26px;border-radius:20px;text-align:center;pointer-events:none;display:none;z-index:3;border:3px solid #FDD117}
+#cam .hold.on{display:block}#cam .hold small{display:block;font-size:13px;font-weight:600;opacity:.85;margin-top:4px}
+#cam .hold i{display:block;height:5px;border-radius:3px;background:#FDD117;margin-top:10px;animation:holdbar 1.4s linear infinite;transform-origin:left}
+@keyframes holdbar{from{transform:scaleX(.05)}to{transform:scaleX(1)}}
+.thumbs div.blur img{outline:4px solid #e53935;outline-offset:-4px}.thumbs div.blur::after{content:'⚠️ θολή';position:absolute;left:4px;bottom:6px;background:#e53935;color:#fff;font-size:12px;font-weight:700;border-radius:6px;padding:1px 6px}
 #cam .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .15s}
 #cam .camtools{position:absolute;top:calc(64px + env(safe-area-inset-top));flex-wrap:wrap;left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
 #cam .camtools button{color:#fff;border-color:#777;background:#0006;min-height:40px}
@@ -489,10 +494,12 @@ details summary{cursor:pointer;font-weight:600}
   <div class="camtools">
     <button class="sec hidden" id="camTorch">🔦 Φλας</button>
     <span class="camres" id="camRes"></span>
+    <button class="sec hidden" id="camDel" style="color:#fff;border-color:#e53935">🗑 Σβήσε την τελευταία</button>
     <button class="sec" id="camNative" style="color:#fff;border-color:#555">📷 Κάμερα κινητού</button>
   </div>
   <div class="camzoom hidden" id="camZoomBox"><span>🔍</span><input type="range" id="camZoom" min="1" max="4" step="0.1" value="1"><span id="camZoomV">1×</span></div>
   <div class="flash" id="camF"></div>
+  <div class="hold" id="camHold">✋ Μην κουνάς<small id="camHoldT">τραβάω τη φωτογραφία…</small><i></i></div>
   <div class="bar">
     <button class="sec" id="camClose" style="color:#fff;border-color:#555">✕ Κλείσιμο</button>
     <button class="shot" id="camShot" aria-label="Φωτογραφία"></button>
@@ -509,7 +516,7 @@ details summary{cursor:pointer;font-weight:600}
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.26';
+const VERSION='2.27';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -868,6 +875,7 @@ async function openAny(file){
 
 // ---------- Φωτογραφίες ----------
 let shots=[]; // dataURL
+const shotBlur=new Set(); // φωτογραφίες που βγήκαν θολές (για σήμανση)
 // μικραίνει κάθε φωτογραφία (έως 2000 εικονοστοιχεία, αρκετά για καθαρή αναγνώριση) για να χωράει στη μνήμη του κινητού
 async function shrink(src,max=3600,info){
   let bmp;
@@ -878,15 +886,16 @@ async function shrink(src,max=3600,info){
   const url=c.toDataURL('image/jpeg',0.92);c.width=c.height=0;return url;
 }
 async function addImages(files){
-  const list=[...files];if(!list.length)return;
+  const list=[...files];if(!list.length)return;let blurN=0;
   for(const f of list){ // μία-μία, όχι όλες μαζί, για να μη γεμίζει η μνήμη
-    try{shots.push(await shrink(f));drawThumbs()}catch(e){toast('Μία φωτογραφία δεν διαβάστηκε — ίσως είναι πολύ μεγάλη')}
+    try{const u=await shrink(f);try{if(sharpness(await loadImg(u))<BLUR_LIMIT){shotBlur.add(u);blurN=(blurN||0)+1}}catch(x){}shots.push(u);drawThumbs()}catch(e){toast('Μία φωτογραφία δεν διαβάστηκε — ίσως είναι πολύ μεγάλη')}
   }
   draftSet('shots',shots);
+  if(blurN)toast(`⚠️ ${blurN===1?'Μία φωτογραφία φαίνεται θολή':blurN+' φωτογραφίες φαίνονται θολές'} (κόκκινο πλαίσιο). Για καλύτερη ανάγνωση, ξανατράβηξέ ${blurN===1?'την':'τες'}.`);
 }
 function drawThumbs(){
   $('#scanBox').classList.toggle('hidden',!shots.length);
-  $('#thumbs').innerHTML=shots.map((s,i)=>`<div><img src="${s}" alt="σελίδα ${i+1}"><b data-i="${i}">✕</b></div>`).join('');
+  $('#thumbs').innerHTML=shots.map((s,i)=>`<div${shotBlur.has(s)?' class="blur"':''}><img src="${s}" alt="σελίδα ${i+1}"><b data-i="${i}">✕</b></div>`).join('');
 }
 $('#thumbs').onclick=e=>{if(e.target.dataset.i!=null){shots.splice(+e.target.dataset.i,1);drawThumbs();draftSet('shots',shots)}};
 draftGet('shots').then(s=>{if(Array.isArray(s)&&s.length){shots=s;drawThumbs();toast('Οι φωτογραφίες σου είναι εδώ — συνέχισε από εκεί που είχες μείνει')}});
@@ -934,7 +943,7 @@ async function openCam(){
     // ζητάμε την πιο υψηλή ανάλυση που δίνει ο φακός, για να διαβάζονται και τα μικρά γράμματα
     camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:4096},height:{ideal:3072}},audio:false});
   }catch(e){toast('Δεν δόθηκε άδεια για την κάμερα — ανοίγει η κάμερα του κινητού');camFallback();return}
-  camTrack=camStream.getVideoTracks()[0];
+  camTrack=camStream.getVideoTracks()[0];motStart();
   try{const cp=camTrack.getCapabilities?camTrack.getCapabilities():{};const adv={};
     if(cp.width&&cp.height){await camTrack.applyConstraints({width:{ideal:cp.width.max},height:{ideal:cp.height.max}}).catch(()=>{})}
     if(cp.focusMode&&cp.focusMode.includes('continuous'))await camTrack.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(()=>{});
@@ -949,7 +958,7 @@ async function openCam(){
 function camFallback(){try{sessionStorage.setItem('glenread-cam','1')}catch(e){}$('#fCam').click()}
 function camCount(){$('#camCnt').textContent=shots.length+(shots.length===1?' σελίδα':' σελίδες')}
 function closeCam(fromPop){
-  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null}camTrack=null;camIC=null;torchOn=false;$('#camTorch').classList.remove('on');
+  motStop();if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null}camTrack=null;camIC=null;torchOn=false;$('#camTorch').classList.remove('on');
   $('#camV').srcObject=null;$('#cam').classList.add('hidden');
   if(!fromPop&&history.state&&history.state.v==='cam')history.back();
   if(shots.length)$('#scanBox').scrollIntoView({behavior:'smooth',block:'center'});
@@ -962,29 +971,64 @@ $('#camV').onclick=async e=>{if(!camTrack)return;const r=e.currentTarget.getBoun
   const f=document.createElement('div');f.style.cssText=`position:fixed;left:${e.clientX-30}px;top:${e.clientY-30}px;width:60px;height:60px;border:2px solid #FDD117;border-radius:50%;z-index:21;pointer-events:none;transition:opacity .6s`;document.body.appendChild(f);setTimeout(()=>f.style.opacity=0,500);setTimeout(()=>f.remove(),1100)};
 let shooting=false;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));let camLowWarned=false;
+// --- σταθερότητα: ο αισθητήρας κίνησης λέει πότε το χέρι σταμάτησε να κουνιέται ---
+let motBuf=[],motOn=false;
+function motStart(){if(motOn)return;const go=()=>{motOn=true;addEventListener('devicemotion',motH)};
+  try{if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function')DeviceMotionEvent.requestPermission().then(r=>{if(r==='granted')go()}).catch(()=>{});else if('DeviceMotionEvent' in window)go()}catch(e){}}
+function motStop(){motOn=false;removeEventListener('devicemotion',motH);motBuf=[]}
+function motH(e){const r=e.rotationRate,a=e.acceleration;let m=null;
+  if(r&&r.alpha!=null)m=Math.hypot(r.alpha||0,r.beta||0,r.gamma||0);else if(a&&a.x!=null)m=Math.hypot(a.x,a.y,a.z)*25;
+  if(m==null)return;const t=performance.now();motBuf.push([t,m]);while(motBuf.length&&t-motBuf[0][0]>1200)motBuf.shift()}
+async function waitSteady(maxMs){const t0=performance.now();
+  while(performance.now()-t0<maxMs){const t=performance.now(),r=motBuf.filter(x=>t-x[0]<350);if(!motOn||(!r.length&&t-t0>300))return null;if(r.length>=3&&Math.max(...r.map(x=>x[1]))<7)return true;
+    $('#camHoldT').textContent='κράτα το κινητό ακίνητο…';await sleep(40)}
+  return false}
+// --- έλεγχος θολούρας: πόσο «απότομες» είναι οι άκρες των γραμμάτων (σε μικρό αντίγραφο) ---
+function sharpness(src){try{const w=1000,k=w/(src.naturalWidth||src.width),h=Math.round((src.naturalHeight||src.height)*k);if(k>1.2)return 1;
+  const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.imageSmoothingQuality='high';x.drawImage(src,0,0,w,h);
+  const d=x.getImageData(0,0,w,h).data;c.width=c.height=0;const n=w*h,g=new Uint8Array(n),H=new Uint32Array(256),Hx=new Uint32Array(256),Hy=new Uint32Array(256);
+  for(let i=0;i<n;i++){const v=(d[i*4]*.299+d[i*4+1]*.587+d[i*4+2]*.114)|0;g[i]=v;H[v]++}
+  for(let y=0;y<h-1;y++)for(let xx=0;xx<w-1;xx++){const i=y*w+xx;Hx[Math.abs(g[i+1]-g[i])]++;Hy[Math.abs(g[i+w]-g[i])]++}
+  const pct=(A,p,tot)=>{let acc=0,lim=tot*p;for(let v=0;v<256;v++){acc+=A[v];if(acc>=lim)return v}return 255};
+  const rng=pct(H,.99,n)-pct(H,.01,n)+1,m=(w-1)*(h-1);
+  // αν δεν φαίνονται αρκετά γράμματα (λευκή σελίδα, όχι έγγραφο), δεν κρίνουμε
+  let ed=0;const thr=Math.max(8,rng*.12|0);for(let v=thr;v<256;v++)ed+=Hx[v]+Hy[v];if(ed<m*.01)return 1;
+  return Math.min(pct(Hx,.995,m),pct(Hy,.995,m))/rng}catch(e){return 1}}
+const BLUR_LIMIT=.24;
 $('#camShot').onclick=async()=>{
   const v=$('#camV');if(!v.videoWidth||shooting)return;shooting=true;$('#camShot').classList.add('busy');
+  const hold=$('#camHold');$('#camHoldT').textContent='τραβάω τη φωτογραφία…';hold.classList.add('on');$('#camDel').classList.add('hidden');
+  let foc=false;
   try{
-    // 1) εστίαση στο κέντρο και μικρή αναμονή, ώστε να μη «κουνηθεί» από το πάτημα
-    $('#camRes').textContent='📸 Κράτα σταθερά…';
-    let foc=false;try{const cp=camTrack&&camTrack.getCapabilities?camTrack.getCapabilities():{};if(cp.focusMode&&cp.focusMode.includes('single-shot')){await camTrack.applyConstraints({advanced:[{focusMode:'single-shot',pointsOfInterest:[{x:.5,y:.5}]}]});foc=true}}catch(e){}
-    await sleep(foc?500:300);
-    const fl=$('#camF');fl.style.opacity=.8;setTimeout(()=>fl.style.opacity=0,120);
-    try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}
-    // 2) πραγματική φωτογραφία στη μέγιστη ανάλυση του φακού (όχι στιγμιότυπο από το βίντεο)
-    let url=null,info={},how='';
+    // 1) εστίαση στο κέντρο
+    try{const cp=camTrack&&camTrack.getCapabilities?camTrack.getCapabilities():{};if(cp.focusMode&&cp.focusMode.includes('single-shot')){await camTrack.applyConstraints({advanced:[{focusMode:'single-shot',pointsOfInterest:[{x:.5,y:.5}]}]});foc=true}}catch(e){}
+    await sleep(foc?450:250);
+    // 2) περιμένουμε να ακινητοποιηθεί το χέρι (έως 1,5 δευτ.)
+    await waitSteady(1500);$('#camHoldT').textContent='τραβάω τη φωτογραφία…';
+    // 3) πραγματική φωτογραφία στη μέγιστη ανάλυση — το μήνυμα «Μην κουνάς» μένει μέχρι να τελειώσει πραγματικά
+    let url=null,info={},how='',blob=null;
     if(camIC&&camIC.takePhoto){try{const pc=await camIC.getPhotoCapabilities().catch(()=>null);const opt=pc&&pc.imageWidth?{imageWidth:pc.imageWidth.max,imageHeight:pc.imageHeight.max}:{};
-      if(torchOn)opt.fillLightMode='flash';const blob=await camIC.takePhoto(opt).catch(()=>camIC.takePhoto());url=await shrink(blob,3600,info);how='photo'}catch(e){url=null}}
-    if(!url){try{const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);info={w:c.width,h:c.height};url=c.toDataURL('image/jpeg',0.92);c.width=c.height=0;how='video'}catch(e){url=null}}
-    if(foc)camTrack&&camTrack.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(()=>{});
+      if(torchOn)opt.fillLightMode='flash';blob=await camIC.takePhoto(opt).catch(()=>camIC.takePhoto())}catch(e){blob=null}}
+    let frame=null;if(!blob){try{frame=document.createElement('canvas');frame.width=v.videoWidth;frame.height=v.videoHeight;frame.getContext('2d').drawImage(v,0,0)}catch(e){frame=null}}
+    // 4) ΤΩΡΑ τραβήχτηκε: τώρα το «κλικ» (φλας + δόνηση) — από εδώ μπορείς να κουνήσεις το κινητό
+    hold.classList.remove('on');const fl=$('#camF');fl.style.opacity=.8;setTimeout(()=>fl.style.opacity=0,120);try{navigator.vibrate&&navigator.vibrate(40)}catch(e){}
+    $('#camRes').textContent='✓ τραβήχτηκε — επεξεργασία…';
+    if(blob){try{url=await shrink(blob,3600,info);how='photo'}catch(e){url=null}}
+    if(!url&&frame){info={w:frame.width,h:frame.height};url=frame.toDataURL('image/jpeg',0.92);how='video'}
+    if(frame)frame.width=frame.height=0;
     if(!url||url.length<100)return toast('Η φωτογραφία δεν τραβήχτηκε — δοκίμασε ξανά');
+    // 5) έλεγχος θολούρας
+    let sh=1;try{sh=sharpness(await loadImg(url))}catch(e){}
+    const blurry=sh<BLUR_LIMIT;if(blurry)shotBlur.add(url);
     shots.push(url);drawThumbs();camCount();draftSet('shots',shots);
-    // 3) τι ανάλυση πήραμε
     const mp=((info.w||0)*(info.h||0)/1e6).toFixed(1);
-    $('#camRes').textContent=how==='photo'?`✓ ${info.w}×${info.h} (${mp} MP)`:`⚠️ ${info.w}×${info.h} — από το βίντεο`;
+    if(blurry){$('#camRes').textContent='⚠️ Θολή φωτογραφία — ξανατράβα';$('#camDel').classList.remove('hidden');try{navigator.vibrate&&navigator.vibrate([90,70,90])}catch(e){}
+      toast('⚠️ Η φωτογραφία βγήκε θολή ή κουνημένη. Πάτα «🗑 Σβήσε την τελευταία» και ξανατράβα, κρατώντας σταθερά.')}
+    else $('#camRes').textContent=how==='photo'?`✓ ${info.w}×${info.h} (${mp} MP) · καθαρή`:`✓ ${info.w}×${info.h} — από το βίντεο`;
     if(how==='video'&&!camLowWarned){camLowWarned=true;toast('Το κινητό δεν έδωσε φωτογραφία πλήρους ανάλυσης. Για πιο καθαρή, πάτα «📷 Κάμερα κινητού».')}
-  }finally{shooting=false;$('#camShot').classList.remove('busy')}
+  }finally{hold.classList.remove('on');if(foc)camTrack&&camTrack.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(()=>{});shooting=false;$('#camShot').classList.remove('busy')}
 };
+$('#camDel').onclick=()=>{const u=shots.pop();if(u)shotBlur.delete(u);drawThumbs();camCount();draftSet('shots',shots);$('#camDel').classList.add('hidden');$('#camRes').textContent='Σβήστηκε — τράβα ξανά';};
 $('#camClose').onclick=()=>closeCam(false);
 // η κάμερα του ίδιου του κινητού: η καλύτερη ποιότητα (σταθεροποίηση, HDR) — οι φωτογραφίες που έχεις ήδη τραβήξει μένουν
 $('#camNative').onclick=()=>{closeCam(false);setTimeout(camFallback,250)};
