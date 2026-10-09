@@ -298,6 +298,11 @@ details summary{cursor:pointer;font-weight:600}
           <option value="ell">Μόνο Ελληνικά</option>
           <option value="eng">Μόνο Αγγλικά</option>
         </select></label></p>
+      <p><label>Ταχύτητα αναγνώρισης<br>
+        <select id="ocrMode">
+          <option value="fast">Γρήγορη (προτείνεται)</option>
+          <option value="careful">Προσεκτική — πιο αργή, για μικρά ή θολά γράμματα</option>
+        </select></label></p>
       <p><label><input type="checkbox" id="pre" checked> Καθαρισμός φωτογραφίας πριν την αναγνώριση (ασπρόμαυρο, αντίθεση)</label></p>
       <p><label><input type="checkbox" id="forceOcr"> Αναγνώριση ακόμη κι όταν το PDF έχει ήδη κείμενο</label></p>
       <p class="muted">Την πρώτη φορά η αναγνώριση κατεβάζει τα λεξικά γλώσσας (μία φορά, χρειάζεται σύνδεση). Μετά δουλεύει και χωρίς ίντερνετ.</p>
@@ -489,7 +494,7 @@ details summary{cursor:pointer;font-weight:600}
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.22';
+const VERSION='2.23';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -622,7 +627,7 @@ function adaptive(G){
 }
 function small(src,max){const k=max/Math.max(src.width,src.height);if(k>=1)return src;const c=document.createElement('canvas');c.width=Math.round(src.width*k);c.height=Math.round(src.height*k);c.getContext('2d').drawImage(src,0,0,c.width,c.height);return c}
 function rotated(src,deg){const c=document.createElement('canvas'),r=deg%180!==0;c.width=r?src.height:src.width;c.height=r?src.width:src.height;const x=c.getContext('2d');x.translate(c.width/2,c.height/2);x.rotate(deg*Math.PI/180);x.drawImage(src,-src.width/2,-src.height/2);return c}
-function imgToCanvas(img,maxSide=2400){
+function imgToCanvas(img,maxSide=3000){
   let w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
   // μικρές φωτογραφίες: μεγέθυνση για καλύτερη αναγνώριση
   const scale=Math.min(maxSide/Math.max(w,h), Math.max(1,1600/Math.max(w,h)));
@@ -634,12 +639,15 @@ function imgToCanvas(img,maxSide=2400){
 let worker=null, workerLang='';
 async function getWorker(){
   if(!window.Tesseract)throw new Error('nolib');
-  const lang=$('#lang').value;
-  if(worker&&workerLang===lang)return worker;
-  if(worker){await worker.terminate();worker=null}
-  prog(0,'Φόρτωση λεξικών γλώσσας (μόνο την πρώτη φορά αργεί)…');
-  worker=await Tesseract.createWorker(lang,1,{logger:m=>{if(m.status==='recognizing text'&&ocrLbl){prog(null,ocrLbl+' — '+Math.round((m.progress||0)*100)+'%');return}if(m.status&&m.status.includes('loading'))prog(m.progress||0,'Φόρτωση λεξικών… '+Math.round((m.progress||0)*100)+'%')}});
-  workerLang=lang;return worker;
+  const lang=$('#lang').value,key=lang+(ocrFast()?'|fast':'|best');
+  if(worker&&workerLang===key)return worker;
+  if(worker){try{await worker.terminate()}catch(e){}worker=null}
+  prog(null,(ocrLbl?ocrLbl+' — ':'')+'ετοιμάζεται ο αναγνώστης…');
+  const opt={logger:m=>{if(m.status==='recognizing text'&&ocrLbl){prog(null,ocrLbl+' — '+Math.round((m.progress||0)*100)+'%');return}if(m.status&&m.status.includes('loading')&&m.progress<1)prog(null,'Φόρτωση λεξικών (μόνο την πρώτη φορά αργεί)… '+Math.round((m.progress||0)*100)+'%')}};
+  // γρήγορα λεξικά: φιλοξενούνται στη δική μας σελίδα
+  if(ocrFast())opt.langPath=new URL('tessdata/fast',location.href).href;
+  worker=await Tesseract.createWorker(lang,1,opt);
+  workerLang=key;return worker;
 }
 // κρατά μόνο τις γραμμές που αναγνωρίστηκαν με σιγουριά (πετά «σκουπίδια» από γραμμές πινάκων, σκιές κ.λπ.)
 function cleanResult(data){
@@ -656,28 +664,48 @@ let ocrLbl='',ocrStop=null;const OCR_MAX=150000;
 async function ocrOnce(w,canvas){
   let tm;const guard=new Promise((_,no)=>{ocrStop=()=>no(new Error('cancel'));tm=setTimeout(()=>no(new Error('timeout')),OCR_MAX)});
   try{const {data}=await Promise.race([w.recognize(canvas,{},{text:true,blocks:true}),guard]);return cleanResult(data)}
-  catch(e){if(e.message==='timeout'||e.message==='cancel'){try{worker&&worker.terminate()}catch(x){}worker=null}throw e}
+  catch(e){if(e.message==='timeout'||e.message==='cancel'){try{worker&&worker.terminate()}catch(x){}worker=null;workerLang=''}throw e}
   finally{clearTimeout(tm);ocrStop=null}
 }
+// Ταχύτητα και μνήμη: η ανάλυση ορίζει σχεδόν όλο τον χρόνο και τη μνήμη της αναγνώρισης.
+// «Γρήγορη»: ελαφριά λεξικά + έως 2000 εικονοστοιχεία. «Προσεκτική»: πλήρη λεξικά + έως 2400.
+// Σε κινητό με λίγη μνήμη (ή αν έκλεισε απότομα την προηγούμενη φορά) κατεβαίνουμε στα 1600.
+const lowMem=()=>{try{if(localStorage.getItem('glenread-lowmem')==='1')return true}catch(e){}return !!(navigator.deviceMemory&&navigator.deviceMemory<=3)};
+const ocrFast=()=>($('#ocrMode')||{}).value!=='careful';
+const ocrMax=()=>lowMem()?1600:ocrFast()?2000:2400;
 async function ocrCanvas(src){
   const w=await getWorker();
-  const G=toGray(src);
-  // 1η προσπάθεια: καθαρισμένη (ή απλή γκρι) εικόνα
   const free=c=>{try{c.width=c.height=0}catch(e){}};
+  // όριο μεγέθους για την αναγνώριση (η φωτογραφία κρατιέται ολόκληρη για την προβολή)
+  const s0=small(src,ocrMax());const G=toGray(s0);if(s0!==src)free(s0);
   let A=null;const ad=()=>A||(A=adaptive(G));
+  // 1η προσπάθεια: καθαρισμένη (ή απλή γκρι) εικόνα
   let best=await ocrOnce(w,$('#pre').checked?ad():G.c);best.rot=0;
-  // αν δεν είναι καθαρή, δοκιμάζει χωρίς καθαρισμό και με τη σελίδα γυρισμένη
-  if(best.conf<70){const l0=ocrLbl;ocrLbl=l0+' (2η προσπάθεια)';const r=await ocrOnce(w,$('#pre').checked?G.c:ad());ocrLbl=l0;if(r.conf>best.conf){r.rot=0;best=r}}
-  if(A)free(A);free(G.c);G.g=null;
-  if(best.conf<55){
+  // 2η μόνο αν η 1η βγήκε αδύναμη (όχι απλώς μέτρια)
+  if(best.conf<(ocrFast()?50:65)){if(A&&$('#pre').checked){free(A);A=null}const l0=ocrLbl;ocrLbl=l0+' (2η προσπάθεια)';const r=await ocrOnce(w,$('#pre').checked?G.c:ad());ocrLbl=l0;if(r.conf>best.conf){r.rot=0;best=r}}
+  if(A)free(A);A=null;G.g=null;
+  // γυρισμένη σελίδα: μόνο αν το αποτέλεσμα είναι σχεδόν άχρηστο, σε μικρό αντίγραφο
+  if(best.conf<35){
+    const sm=small(G.c,1400),keep=sm!==G.c;
     for(const deg of [90,270,180]){
-      prog(null,(ocrLbl?ocrLbl+' — ':'')+'η σελίδα φαίνεται γυρισμένη, δοκιμή '+deg+'°…');const sm=small(src,1600),ro=rotated(sm,deg);if(sm!==src)free(sm);const g2=toGray(ro);free(ro);const a2=adaptive(g2);free(g2.c);
+      prog(null,(ocrLbl?ocrLbl+' — ':'')+'η σελίδα φαίνεται γυρισμένη, δοκιμή '+deg+'°…');
+      const ro=rotated(sm,deg),g2=toGray(ro);free(ro);const a2=adaptive(g2);free(g2.c);
       const r=await ocrOnce(w,a2);free(a2);if(r.conf>best.conf+5){r.rot=deg;best=r}
-      if(best.conf>=70)break;
+      if(best.conf>=60)break;
     }
+    if(keep)free(sm);
   }
+  free(G.c);
+  // ο αναγνώστης κρατά μνήμη που δεν επιστρέφει: τον ξαναξεκινάμε συχνά για να μη γεμίσει το κινητό
+  ocrPages++;if(ocrPages>=(lowMem()?1:3))await ocrRecycle();
   return {text:fixText(best.text),conf:Math.round(best.conf),ocr:true};
 }
+let ocrPages=0;
+function ocrRunning(on){try{on?localStorage.setItem('glenread-ocr-run',String(Date.now())):localStorage.removeItem('glenread-ocr-run')}catch(e){}}
+// αν η εφαρμογή έκλεισε απότομα στη μέση της αναγνώρισης (γέμισε η μνήμη), από εδώ και πέρα δουλεύουμε με λιγότερη μνήμη
+try{if(localStorage.getItem('glenread-ocr-run')){localStorage.removeItem('glenread-ocr-run');localStorage.setItem('glenread-lowmem','1');
+  setTimeout(()=>toast('Η αναγνώριση είχε διακοπεί απότομα (μάλλον γέμισε η μνήμη). Από τώρα δουλεύει πιο ελαφριά — ξαναπάτα «Αναγνώριση κειμένου».'),1500)}}catch(e){}
+async function ocrRecycle(){ocrPages=0;const w=worker;worker=null;workerLang='';if(w){try{await w.terminate()}catch(e){}}}
 // συνένωση λέξεων που κόπηκαν με παύλα στο τέλος γραμμής και καθαρές παράγραφοι
 function fixText(t){
   return t.replace(/\r/g,'').replace(/(\p{L})-\n(\p{Ll})/gu,'$1$2')
@@ -696,7 +724,7 @@ async function openPdf(file){
     pdf=await pdfjsLib.getDocument({data:buf}).promise;
     part={id:Date.now(),date:new Date().toISOString(),name:file.name.replace(/\.pdf$/i,''),pages,partial:pdf.numPages};
     for(let p=1;p<=pdf.numPages;p++){
-      if(cancelled){if(pages.length)saveDoc(part);pdfFree(pdf);return goHome()}
+      if(cancelled){ocrRunning(false);if(pages.length)saveDoc(part);pdfFree(pdf);return goHome()}
       if(pages.length)saveDoc(part);
       prog((p-1)/pdf.numPages,`Σελίδα ${p} από ${pdf.numPages}`);
       const page=await pdf.getPage(p);
@@ -711,17 +739,17 @@ async function openPdf(file){
       }
       if(text.replace(/\s/g,'').length>20){pages.push({text,conf:100,ocr:false});continue}
       // σκαναρισμένη σελίδα: εικόνα → αναγνώριση
-      ocrLbl=`Σελίδα ${p} από ${pdf.numPages} — σκαναρισμένη, αναγνώριση κειμένου`;prog((p-1)/pdf.numPages,ocrLbl+'…');
+      ocrRunning(true);ocrLbl=`Σελίδα ${p} από ${pdf.numPages} — σκαναρισμένη, αναγνώριση κειμένου`;prog((p-1)/pdf.numPages,ocrLbl+'…');
       const vp=page.getViewport({scale:1});const sc=Math.min(3,2200/Math.max(vp.width,vp.height));
       const v2=page.getViewport({scale:sc});const c=document.createElement('canvas');c.width=v2.width;c.height=v2.height;
       await page.render({canvasContext:c.getContext('2d'),viewport:v2}).promise;
       pages.push(await ocrCanvas(c));c.width=c.height=0;try{page.cleanup()}catch(e){}
     }
-    pdfFree(pdf);ocrLbl='';
+    pdfFree(pdf);ocrLbl='';ocrRunning(false);
     if(!await draftSet('file-'+part.id,{pdf:orig}))toast('⚠️ Το πρωτότυπο PDF δεν χώρεσε στη μνήμη — το κείμενο κρατήθηκε');
     delete part.partial;finish(part);
   }catch(e){
-    if(e.message!=='cancel')console.error(e);ocrLbl='';if(pdf)pdfFree(pdf);
+    if(e.message!=='cancel')console.error(e);ocrLbl='';ocrRunning(false);if(pdf)pdfFree(pdf);
     if(part&&pages.length)saveDoc(part);
     if(e.message==='cancel')return goHome();
     failHome();
@@ -847,17 +875,18 @@ const loadImg=src=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);
 async function ocrShots(){
   if(!shots.length)return;cancelled=false;show('work');$('#wTitle').textContent='Φωτογραφίες';
   const pages=[];const d0=new Date();const part={id:Date.now(),date:d0.toISOString(),name:'Σάρωση '+d0.toLocaleDateString('el-GR')+' '+d0.toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'}),pages,partial:shots.length};
+  ocrRunning(true);
   try{
     for(let i=0;i<shots.length;i++){
-      if(cancelled){if(pages.length)saveDoc(part);return goHome()}
+      if(cancelled){ocrRunning(false);if(pages.length)saveDoc(part);return goHome()}
       if(pages.length)saveDoc(part);
       ocrLbl=`Αναγνώριση σελίδας ${i+1} από ${shots.length}`;prog(i/shots.length,ocrLbl+'…');
       const cv=imgToCanvas(await loadImg(shots[i]));try{pages.push(await ocrCanvas(cv))}finally{cv.width=cv.height=0}
     }
-    ocrLbl='';
+    ocrLbl='';ocrRunning(false);
     if(!await draftSet('file-'+part.id,{images:shots.slice()}))toast('⚠️ Οι φωτογραφίες δεν χώρεσαν στη μνήμη — το κείμενο κρατήθηκε');
     delete part.partial;shots=[];drawThumbs();draftSet('shots',[]);finish(part);
-  }catch(e){if(e.message!=='cancel')console.error(e);ocrLbl='';
+  }catch(e){if(e.message!=='cancel')console.error(e);ocrLbl='';ocrRunning(false);
     if(e.message==='cancel'){if(pages.length)saveDoc(part);return goHome()}
     if(pages.length){saveDoc(part);toast('Η σελίδα '+(pages.length+1)+' δεν διαβάστηκε — κρατήθηκαν οι '+pages.length+' πρώτες στα «Πρόσφατα». Οι φωτογραφίες είναι ακόμη εδώ.')}
     failHome();if(!pages.length)toast(e.message==='timeout'?'Η αναγνώριση άργησε πολύ. Δοκίμασε φωτογραφία πιο κοντά και με καλό φως, ή μία-μία σελίδα.':'Η αναγνώριση απέτυχε. Χρειάζεται σύνδεση την πρώτη φορά.')}
@@ -1428,7 +1457,7 @@ $('#fPdf').onchange=e=>{const f=e.target.files[0];e.target.value='';f&&openAny(f
 $('#fCam').onchange=$('#fImg').onchange=e=>{try{sessionStorage.removeItem('glenread-cam')}catch(x){}const f=[...e.target.files];e.target.value='';addImages(f)};
 $('#bOcrImgs').onclick=ocrShots;$('#bMakePdf').onclick=makePdf;
 $('#bCancel').onclick=()=>{cancelled=true;prog(null,'Ακύρωση… οι σελίδες που έγιναν κρατιούνται');if(ocrStop)ocrStop()};
-['lang'].forEach(k=>{const el=$('#'+k);try{el.value=localStorage.getItem('glenread-'+k)||el.value}catch(e){}el.onchange=()=>{try{localStorage.setItem('glenread-'+k,el.value)}catch(e){}}});
+['lang','ocrMode'].forEach(k=>{const el=$('#'+k);try{el.value=localStorage.getItem('glenread-'+k)||el.value}catch(e){}el.onchange=()=>{try{localStorage.setItem('glenread-'+k,el.value);if(k==='ocrMode')localStorage.removeItem('glenread-lowmem')}catch(e){}}});
 
 // αρχεία από «Κοινοποίηση → GlenRead» (Ανδροειδές)
 (async()=>{
