@@ -49,6 +49,10 @@ body.reading[data-th=contrast] #reader,body.reading[data-th=yellow] #reader{font
 .seg.thg button{min-width:0;flex-direction:column;gap:0;min-height:58px;padding:4px 2px;border-radius:12px;border:2px solid var(--line);font-size:17px;font-weight:800;line-height:1.1}
 .thg button small{font-size:9.5px;font-weight:600;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .thg button.on{border-color:#EF9F02;box-shadow:0 0 0 2px #FDD117}
+#thPop{position:fixed;left:8px;right:8px;z-index:9;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 28px #0005;padding:8px 8px 10px;max-width:520px;margin:0 auto;animation:thIn .15s ease}
+@keyframes thIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+#thPop .tht{display:flex;align-items:center;justify-content:space-between;font-weight:800;padding:2px 6px 6px}
+#thPop .tht button{min-height:36px;padding:4px 12px}
 #read .card{border:0;border-radius:0;margin:0;padding:18px var(--mg,18px) 80vh;background:var(--bg);touch-action:pan-y}
 #reader{max-width:720px;margin:0 auto;font-family:var(--ff,inherit);line-height:var(--lh,1.65)!important}
 body.reading.ffr #reader{letter-spacing:.02em;word-spacing:.12em}
@@ -148,6 +152,15 @@ body.pv #read>.card{display:none}
 .pvp canvas{position:absolute;inset:0;width:100%;height:100%}
 body.drawing .pvp .ink{touch-action:none}
 body:not(.drawing) .pvp .ink{pointer-events:none}
+.pvp canvas.ink{z-index:2}
+/* αόρατο στρώμα κειμένου πάνω στη σελίδα PDF: για μαρκάρισμα λέξεων, αντιγραφή, μετάφραση */
+.pvp .textLayer{position:absolute;left:0;top:0;overflow:hidden;line-height:1;-webkit-text-size-adjust:none;text-size-adjust:none;forced-color-adjust:none;transform-origin:0 0;z-index:1;opacity:1}
+.pvp .textLayer :is(span,br){color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0% 0%}
+.pvp .textLayer span.markedContent{top:0;height:0}
+.pvp .textLayer ::selection{background:rgba(30,94,255,.35)}
+.pvp .textLayer br::selection{background:transparent}
+.pvp .textLayer .endOfContent{display:block;position:absolute;inset:100% 0 0;z-index:-1;cursor:default;-webkit-user-select:none;user-select:none}
+body.drawing .pvp .textLayer{-webkit-user-select:none;user-select:none}
 .pvn{position:absolute;right:8px;bottom:6px;font-size:11px;color:#888;z-index:1}
 #inkBar{position:fixed;left:0;right:0;bottom:0;z-index:8;display:grid;grid-template-columns:repeat(6,1fr);gap:3px;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -2px 10px #0001;padding:5px 6px calc(5px + env(safe-area-inset-bottom))}
 #inkBar .ibgrip{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:0 0 2px;touch-action:none;cursor:grab}
@@ -221,16 +234,17 @@ details summary{cursor:pointer;font-weight:600}
 #cam{position:fixed;inset:0;z-index:20;background:#000;display:flex;flex-direction:column}
 #cam video{flex:1;min-height:0;width:100%;object-fit:contain;background:#000}
 #cam .bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:#000}
+#cam .shot.busy{opacity:.5;transform:scale(.92)}
 #cam .shot{width:74px;height:74px;border-radius:50%;border:5px solid #fff;background:#FDD117;padding:0;min-height:0}
 #cam .cnt{color:#fff;font-size:14px;min-width:90px}
 #cam .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .15s}
-#cam .camtools{position:absolute;top:calc(48px + env(safe-area-inset-top));left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+#cam .camtools{position:absolute;top:calc(64px + env(safe-area-inset-top));flex-wrap:wrap;left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
 #cam .camtools button{color:#fff;border-color:#777;background:#0006;min-height:40px}
 #cam .camtools button.on{background:#FDD117;color:#000}
 #cam .camres{color:#fff;font-size:12px;background:#0006;border-radius:8px;padding:2px 8px}
 #cam .camzoom{position:absolute;left:16px;right:16px;bottom:calc(120px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;color:#fff;background:#0006;border-radius:14px;padding:8px 12px}
 #cam .camzoom input{flex:1}
-#cam .hint{position:absolute;top:calc(12px + env(safe-area-inset-top));left:0;right:0;text-align:center;color:#fff;font-size:14px;text-shadow:0 1px 3px #000}
+#cam .hint{position:absolute;top:calc(10px + env(safe-area-inset-top));left:8px;right:8px;text-align:center;color:#fff;font-size:13px;line-height:1.35;text-shadow:0 1px 3px #000}
 </style>
 </head>
 <body>
@@ -475,6 +489,7 @@ details summary{cursor:pointer;font-weight:600}
   <div class="camtools">
     <button class="sec hidden" id="camTorch">🔦 Φλας</button>
     <span class="camres" id="camRes"></span>
+    <button class="sec" id="camNative" style="color:#fff;border-color:#555">📷 Κάμερα κινητού</button>
   </div>
   <div class="camzoom hidden" id="camZoomBox"><span>🔍</span><input type="range" id="camZoom" min="1" max="4" step="0.1" value="1"><span id="camZoomV">1×</span></div>
   <div class="flash" id="camF"></div>
@@ -494,7 +509,7 @@ details summary{cursor:pointer;font-weight:600}
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.23';
+const VERSION='2.26';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -625,14 +640,18 @@ function adaptive(G){
     const v=g[yy*w+xx]*cnt<=sum*(1-t)?0:255,o=(yy*w+xx)*4;d[o]=d[o+1]=d[o+2]=v;d[o+3]=255}
   x.putImageData(im,0,0);return c;
 }
-function small(src,max){const k=max/Math.max(src.width,src.height);if(k>=1)return src;const c=document.createElement('canvas');c.width=Math.round(src.width*k);c.height=Math.round(src.height*k);c.getContext('2d').drawImage(src,0,0,c.width,c.height);return c}
+// σμίκρυνση με καλή ποιότητα: σε βήματα του μισού, ώστε τα γράμματα να μένουν καθαρά (όχι «σκαλοπάτια»)
+function drawScaled(src,W,H){let cur=src,cw=src.naturalWidth||src.width,ch=src.naturalHeight||src.height,tmp=null;
+  while(cw/2>=W*1.05&&ch/2>=H*1.05){const t=document.createElement('canvas');t.width=Math.round(cw/2);t.height=Math.round(ch/2);const x=t.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(cur,0,0,t.width,t.height);if(tmp)tmp.width=tmp.height=0;tmp=t;cur=t;cw=t.width;ch=t.height}
+  const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(cur,0,0,W,H);if(tmp)tmp.width=tmp.height=0;return c}
+function small(src,max){const k=max/Math.max(src.width,src.height);if(k>=1)return src;return drawScaled(src,Math.round(src.width*k),Math.round(src.height*k))}
 function rotated(src,deg){const c=document.createElement('canvas'),r=deg%180!==0;c.width=r?src.height:src.width;c.height=r?src.width:src.height;const x=c.getContext('2d');x.translate(c.width/2,c.height/2);x.rotate(deg*Math.PI/180);x.drawImage(src,-src.width/2,-src.height/2);return c}
 function imgToCanvas(img,maxSide=3000){
   let w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
   // μικρές φωτογραφίες: μεγέθυνση για καλύτερη αναγνώριση
   const scale=Math.min(maxSide/Math.max(w,h), Math.max(1,1600/Math.max(w,h)));
-  const c=document.createElement('canvas');c.width=Math.round(w*scale);c.height=Math.round(h*scale);
-  c.getContext('2d').drawImage(img,0,0,c.width,c.height);return c;
+  const W=Math.round(w*scale),H=Math.round(h*scale);if(scale<1)return drawScaled(img,W,H);
+  const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(img,0,0,W,H);return c;
 }
 
 // ---------- Αναγνώριση κειμένου ----------
@@ -850,13 +869,13 @@ async function openAny(file){
 // ---------- Φωτογραφίες ----------
 let shots=[]; // dataURL
 // μικραίνει κάθε φωτογραφία (έως 2000 εικονοστοιχεία, αρκετά για καθαρή αναγνώριση) για να χωράει στη μνήμη του κινητού
-async function shrink(src,max=3000){
+async function shrink(src,max=3600,info){
   let bmp;
   try{bmp=await createImageBitmap(src)}catch(e){const u=URL.createObjectURL(src);try{bmp=await loadImg(u)}finally{setTimeout(()=>URL.revokeObjectURL(u),1000)}}
-  const w=bmp.width,h=bmp.height,k=Math.min(1,max/Math.max(w,h));
-  const c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);
-  c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);try{bmp.close&&bmp.close()}catch(e){}
-  const url=c.toDataURL('image/jpeg',0.9);c.width=c.height=0;return url;
+  const w=bmp.width,h=bmp.height,k=Math.min(1,max/Math.max(w,h));if(info){info.w=w;info.h=h}
+  const c=k<1?drawScaled(bmp,Math.round(w*k),Math.round(h*k)):(()=>{const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(bmp,0,0);return c})();
+  try{bmp.close&&bmp.close()}catch(e){}
+  const url=c.toDataURL('image/jpeg',0.92);c.width=c.height=0;return url;
 }
 async function addImages(files){
   const list=[...files];if(!list.length)return;
@@ -881,7 +900,7 @@ async function ocrShots(){
       if(cancelled){ocrRunning(false);if(pages.length)saveDoc(part);return goHome()}
       if(pages.length)saveDoc(part);
       ocrLbl=`Αναγνώριση σελίδας ${i+1} από ${shots.length}`;prog(i/shots.length,ocrLbl+'…');
-      const cv=imgToCanvas(await loadImg(shots[i]));try{pages.push(await ocrCanvas(cv))}finally{cv.width=cv.height=0}
+      const cv=imgToCanvas(await loadImg(shots[i]),ocrMax());try{pages.push(await ocrCanvas(cv))}finally{cv.width=cv.height=0}
     }
     ocrLbl='';ocrRunning(false);
     if(!await draftSet('file-'+part.id,{images:shots.slice()}))toast('⚠️ Οι φωτογραφίες δεν χώρεσαν στη μνήμη — το κείμενο κρατήθηκε');
@@ -924,7 +943,7 @@ async function openCam(){
   }catch(e){}
   try{camIC='ImageCapture' in window?new ImageCapture(camTrack):null}catch(e){camIC=null}
   $('#camV').srcObject=camStream;$('#cam').classList.remove('hidden');camCount();
-  $('#camV').onloadedmetadata=()=>{const v=$('#camV');$('#camRes').textContent=Math.max(v.videoWidth,v.videoHeight)+' εικονοστοιχεία'};
+  $('#camV').onloadedmetadata=async()=>{let t='';try{const pc=camIC&&await camIC.getPhotoCapabilities();if(pc&&pc.imageWidth&&pc.imageWidth.max)t=`φωτογραφία έως ${pc.imageWidth.max}×${pc.imageHeight.max}`}catch(e){}const v=$('#camV');$('#camRes').textContent=t||('προεπισκόπηση '+v.videoWidth+'×'+v.videoHeight)};
   if(history.state&&history.state.v!=='cam')history.pushState({v:'cam'},'');
 }
 function camFallback(){try{sessionStorage.setItem('glenread-cam','1')}catch(e){}$('#fCam').click()}
@@ -942,21 +961,33 @@ $('#camV').onclick=async e=>{if(!camTrack)return;const r=e.currentTarget.getBoun
   try{await camTrack.applyConstraints({advanced:[{pointsOfInterest:[{x,y}],focusMode:'single-shot'}]});setTimeout(()=>camTrack&&camTrack.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(()=>{}),1500)}catch(x){}
   const f=document.createElement('div');f.style.cssText=`position:fixed;left:${e.clientX-30}px;top:${e.clientY-30}px;width:60px;height:60px;border:2px solid #FDD117;border-radius:50%;z-index:21;pointer-events:none;transition:opacity .6s`;document.body.appendChild(f);setTimeout(()=>f.style.opacity=0,500);setTimeout(()=>f.remove(),1100)};
 let shooting=false;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));let camLowWarned=false;
 $('#camShot').onclick=async()=>{
-  const v=$('#camV');if(!v.videoWidth||shooting)return;shooting=true;
-  const fl=$('#camF');fl.style.opacity=.8;setTimeout(()=>fl.style.opacity=0,120);
-  try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}
-  let url=null;
-  // πραγματική φωτογραφία σε πλήρη ανάλυση (όχι στιγμιότυπο από το βίντεο)
-  if(camIC&&camIC.takePhoto){try{const pc=await camIC.getPhotoCapabilities().catch(()=>null);const opt=pc&&pc.imageWidth?{imageWidth:pc.imageWidth.max,imageHeight:pc.imageHeight.max}:{};
-    if(torchOn)opt.fillLightMode='flash';const blob=await camIC.takePhoto(opt).catch(()=>camIC.takePhoto());url=await shrink(blob,3000)}catch(e){url=null}}
-  if(!url){try{const c=document.createElement('canvas');const k=Math.min(1,3000/Math.max(v.videoWidth,v.videoHeight));
-    c.width=Math.round(v.videoWidth*k);c.height=Math.round(v.videoHeight*k);c.getContext('2d').drawImage(v,0,0,c.width,c.height);url=c.toDataURL('image/jpeg',0.9);c.width=c.height=0}catch(e){url=null}}
-  shooting=false;if(!url||url.length<100)return toast('Η φωτογραφία δεν τραβήχτηκε — δοκίμασε ξανά');
-  shots.push(url);
-  drawThumbs();camCount();draftSet('shots',shots);
+  const v=$('#camV');if(!v.videoWidth||shooting)return;shooting=true;$('#camShot').classList.add('busy');
+  try{
+    // 1) εστίαση στο κέντρο και μικρή αναμονή, ώστε να μη «κουνηθεί» από το πάτημα
+    $('#camRes').textContent='📸 Κράτα σταθερά…';
+    let foc=false;try{const cp=camTrack&&camTrack.getCapabilities?camTrack.getCapabilities():{};if(cp.focusMode&&cp.focusMode.includes('single-shot')){await camTrack.applyConstraints({advanced:[{focusMode:'single-shot',pointsOfInterest:[{x:.5,y:.5}]}]});foc=true}}catch(e){}
+    await sleep(foc?500:300);
+    const fl=$('#camF');fl.style.opacity=.8;setTimeout(()=>fl.style.opacity=0,120);
+    try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}
+    // 2) πραγματική φωτογραφία στη μέγιστη ανάλυση του φακού (όχι στιγμιότυπο από το βίντεο)
+    let url=null,info={},how='';
+    if(camIC&&camIC.takePhoto){try{const pc=await camIC.getPhotoCapabilities().catch(()=>null);const opt=pc&&pc.imageWidth?{imageWidth:pc.imageWidth.max,imageHeight:pc.imageHeight.max}:{};
+      if(torchOn)opt.fillLightMode='flash';const blob=await camIC.takePhoto(opt).catch(()=>camIC.takePhoto());url=await shrink(blob,3600,info);how='photo'}catch(e){url=null}}
+    if(!url){try{const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);info={w:c.width,h:c.height};url=c.toDataURL('image/jpeg',0.92);c.width=c.height=0;how='video'}catch(e){url=null}}
+    if(foc)camTrack&&camTrack.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(()=>{});
+    if(!url||url.length<100)return toast('Η φωτογραφία δεν τραβήχτηκε — δοκίμασε ξανά');
+    shots.push(url);drawThumbs();camCount();draftSet('shots',shots);
+    // 3) τι ανάλυση πήραμε
+    const mp=((info.w||0)*(info.h||0)/1e6).toFixed(1);
+    $('#camRes').textContent=how==='photo'?`✓ ${info.w}×${info.h} (${mp} MP)`:`⚠️ ${info.w}×${info.h} — από το βίντεο`;
+    if(how==='video'&&!camLowWarned){camLowWarned=true;toast('Το κινητό δεν έδωσε φωτογραφία πλήρους ανάλυσης. Για πιο καθαρή, πάτα «📷 Κάμερα κινητού».')}
+  }finally{shooting=false;$('#camShot').classList.remove('busy')}
 };
 $('#camClose').onclick=()=>closeCam(false);
+// η κάμερα του ίδιου του κινητού: η καλύτερη ποιότητα (σταθεροποίηση, HDR) — οι φωτογραφίες που έχεις ήδη τραβήξει μένουν
+$('#camNative').onclick=()=>{closeCam(false);setTimeout(camFallback,250)};
 addEventListener('popstate',()=>{if(!$('#cam').classList.contains('hidden'))closeCam(true)});
 // αν το Ανδροειδές έκλεισε την εφαρμογή όσο ήταν ανοιχτή η κάμερα του κινητού
 try{if(sessionStorage.getItem('glenread-cam')){sessionStorage.removeItem('glenread-cam');setTimeout(()=>toast('Αν χάθηκε η φωτογραφία, χρησιμοποίησε την κάμερα της εφαρμογής ή «Από φωτογραφίες»'),1200)}}catch(e){}
@@ -1027,7 +1058,7 @@ $('#fsMinus').onclick=()=>{fs=Math.max(13,fs-2);setFs()};$('#fsPlus').onclick=()
   const up=e=>{P.delete(e.pointerId);if(P.size<2)d0=0};card.addEventListener('pointerup',up);card.addEventListener('pointercancel',up);})();
 
 const fullText=()=>doc.pages.map(p=>p.text).join('\n\n');
-$('#mCopy').onclick=async()=>{const sel=getSelection().toString();closeSheet();try{await navigator.clipboard.writeText(sel||fullText());toast(sel?'Αντιγράφηκε η επιλογή':'Αντιγράφηκε όλο το κείμενο')}catch(e){toast('Δεν επιτράπηκε η αντιγραφή')}};
+$('#mCopy').onclick=async()=>{const sel=getSelection().toString()||(Date.now()-lastSelAt<120000?lastSel:'');closeSheet();try{await navigator.clipboard.writeText(sel||fullText());toast(sel?'Αντιγράφηκε η επιλογή':'Αντιγράφηκε όλο το κείμενο')}catch(e){toast('Δεν επιτράπηκε η αντιγραφή')}};
 $('#mShare').onclick=async()=>{closeSheet();if(navigator.share){try{await navigator.share({title:doc.name,text:fullText()})}catch(e){}}else $('#mCopy').onclick()};
 $('#mTxt').onclick=()=>{closeSheet();saveToFolder(new Blob([fullText()],{type:'text/plain;charset=utf-8'}),doc.name+'.txt')};
 let editing=false,editT=null;
@@ -1059,7 +1090,7 @@ $('#mSpeak').onclick=()=>{
   speaking=true;speakUI();toast('Διαβάζω… (Μενού → Σταμάτα την ανάγνωση)');
 };
 function goHome(){
-  const st=history.state&&history.state.v;flushAll();$('#sheet').classList.add('hidden');if(!$('#dlg').classList.contains('hidden'))dlgClose();pvClose();closeFind();stopSpeak();awake(false);
+  const st=history.state&&history.state.v;flushAll();{const tp=$('#thPop');tp&&tp.remove()}$('#sheet').classList.add('hidden');if(!$('#dlg').classList.contains('hidden'))dlgClose();pvClose();closeFind();stopSpeak();awake(false);
   if(editing)toggleEdit();if(tapMode)tapEnd();if(trReset())$('#lowConf').classList.add('hidden');
   if(!$('#work').classList.contains('hidden'))cancelled=true;
   show('home');drawLast();
@@ -1132,7 +1163,7 @@ async function pvOpen(){
       pv.pages=sizes;
     }
   }catch(e){if(stale())return;box.innerHTML='<div class="card" style="margin:16px">Οι σελίδες δεν φόρτωσαν. Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.</div>';return}
-  box.innerHTML=pv.pages.map((p,i)=>`<div class="pvp" data-i="${i}" style="aspect-ratio:${p.w}/${p.h}"><canvas class="img"></canvas><canvas class="ink"></canvas><span class="pvn">${i+1}/${pv.pages.length}</span></div>`).join('');
+  box.innerHTML=pv.pages.map((p,i)=>`<div class="pvp" data-i="${i}" style="aspect-ratio:${p.w}/${p.h}"><canvas class="img"></canvas><div class="textLayer"></div><canvas class="ink"></canvas><span class="pvn">${i+1}/${pv.pages.length}</span></div>`).join('');
   if(pv.obs)pv.obs.disconnect();
   // σχεδιάζει μόνο τις σελίδες κοντά στην οθόνη και ελευθερώνει τις μακρινές, για να μη γεμίζει η μνήμη
   pv.obs=new IntersectionObserver(es=>es.forEach(e=>{const el=e.target;if(e.isIntersecting)pvDrawPage(el);else pvFree(el)}),{rootMargin:'1200px 0px'});
@@ -1145,6 +1176,18 @@ function pvClose(){
   pv.gen++;document.querySelectorAll('.pvp').forEach(el=>{try{el._task&&el._task.cancel()}catch(e){}});
   if(pv.obs){pv.obs.disconnect();pv.obs=null}$('#pagesView').innerHTML='';if(pv.pdf){const p=pv.pdf;setTimeout(()=>pdfFree(p),0)}pv.pdf=null;pv.file=null;viewLabels();
 }
+// στρώμα κειμένου (pdf.js): οι λέξεις του PDF μπαίνουν αόρατες ακριβώς πάνω στην εικόνα, ώστε να μαρκάρονται
+async function pvTextLayer(el,pg,g){
+  const tl=el.querySelector('.textLayer');if(!tl)return;
+  try{
+    const i=+el.dataset.i,css=el.clientWidth/pv.pages[i].w,vp=pg.getViewport({scale:css});
+    const tc=await pg.getTextContent();if(g!==el._g)return;
+    tl.innerHTML='';tl.style.setProperty('--scale-factor',css);tl.style.setProperty('--total-scale-factor',css);
+    if(pdfjsLib.renderTextLayer){const t=pdfjsLib.renderTextLayer({textContentSource:tc,container:tl,viewport:vp,textDivs:[]});await t.promise}
+    else if(pdfjsLib.TextLayer){await new pdfjsLib.TextLayer({textContentSource:tc,container:tl,viewport:vp}).render()}
+    tl.style.width=el.clientWidth+'px';tl.style.height=el.clientHeight+'px';
+  }catch(e){}
+}
 async function pvDrawPage(el){
   if(el._drawn)return;el._drawn=true;const g=el._g=(el._g||0)+1,pdf=pv.pdf,file=pv.file;
   if(el._task){try{el._task.cancel()}catch(e){}el._task=null}
@@ -1153,12 +1196,12 @@ async function pvDrawPage(el){
   const W=Math.round(Math.min(2600,el.clientWidth*Math.min(2,devicePixelRatio||1))),H=Math.round(W*pv.pages[i].h/pv.pages[i].w);
   img.width=ink.width=W;img.height=ink.height=H;
   try{
-    if(pdf){const pg=await pdf.getPage(i+1);if(g!==el._g)return;const vp=pg.getViewport({scale:W/pv.pages[i].w});const t=el._task=pg.render({canvasContext:img.getContext('2d'),viewport:vp});await t.promise;if(el._task===t)el._task=null}
+    if(pdf){const pg=await pdf.getPage(i+1);if(g!==el._g)return;const vp=pg.getViewport({scale:W/pv.pages[i].w});const t=el._task=pg.render({canvasContext:img.getContext('2d'),viewport:vp});await t.promise;if(el._task===t)el._task=null;pvTextLayer(el,pg,g)}
     else if(file){const im=await loadImg(file.images[i]);if(g!==el._g)return;img.getContext('2d').drawImage(im,0,0,W,H)}
   }catch(e){if(g!==el._g)return}
   if(g===el._g)pvInk(i);
 }
-function pvFree(el){if(!el._drawn)return;el._drawn=false;el._g=(el._g||0)+1;if(el._task){try{el._task.cancel()}catch(e){}el._task=null}el.querySelectorAll('canvas').forEach(c=>{c.width=c.height=0})}
+function pvFree(el){if(!el._drawn)return;el._drawn=false;{const tl=el.querySelector('.textLayer');if(tl)tl.innerHTML=''}el._g=(el._g||0)+1;if(el._task){try{el._task.cancel()}catch(e){}el._task=null}el.querySelectorAll('canvas').forEach(c=>{c.width=c.height=0})}
 // ζωγραφίζει στυλό/μαρκαδόρο/σχήματα και κείμενα πάνω σε έναν καμβά
 function drawAnn(x,W,H,list){
   for(const s of list){
@@ -1481,21 +1524,39 @@ const setHH=()=>document.documentElement.style.setProperty('--hh',(document.body
 addEventListener('resize',setHH);setHH();setTimeout(setHH,500);
 
 // ---------- Πάνω μπάρα: ο χρήστης διαλέγει τα κουμπιά ----------
+const IOS_DEV=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+// «Πίσω» μόνο στο iPhone (εκεί η εγκατεστημένη εφαρμογή δεν έχει κουμπί πίσω)· στο Android το κάνει το κινητό
+const NOBACK=!IOS_DEV;if(NOBACK){const bb=document.querySelector('#qbar [data-q=back]');bb&&bb.remove()}
 const QB_ALL=[...document.querySelectorAll('#qbar [data-q]')].map(b=>[b.dataset.q,b.querySelector('small').textContent,b.querySelector('span').textContent]);
 const NOPIN=['draw','save','menu']; // υπάρχουν ήδη στην κάτω μπάρα/στο μενού — όχι διπλά στην πάνω
-const IOS_DEV=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 let QB=IOS_DEV?['back','find','view','tr','speak','fsm','fsp']:['find','view','tr','speak','fsm','fsp','bm'];try{const v=JSON.parse(localStorage.getItem('glenread-qb')||'null');if(Array.isArray(v))QB=v}catch(e){}
-QB=QB.filter(k=>!NOPIN.includes(k));
+QB=QB.filter(k=>!NOPIN.includes(k)&&QB_ALL.some(x=>x[0]===k));
 function qbApply(){const bar=$('#qbar');QB.forEach(k=>{const b=bar.querySelector(`[data-q="${k}"]`);if(b)bar.appendChild(b)});bar.querySelectorAll('[data-q]').forEach(b=>{b.classList.toggle('off',!QB.includes(b.dataset.q));if(!QB.includes(b.dataset.q))bar.appendChild(b)})}
 qbApply();
 const QB_ACT={find:()=>openFind(),view:()=>toggleView(),tr:()=>openTranslate(),speak:()=>$('#mSpeak').onclick(),fsm:()=>$('#fsMinus').onclick(),fsp:()=>$('#fsPlus').onclick(),
-  theme:()=>{const T=["light", "sepia", "paper", "mint", "gray", "contrast", "night", "navy", "amoled", "yellow"],N={"light": "Φωτεινό", "sepia": "Σέπια", "paper": "Χαρτί", "mint": "Μέντα", "gray": "Γκρι", "contrast": "Υψηλή αντίθεση", "night": "Νύχτα", "navy": "Μπλε νύχτας", "amoled": "Απόλυτο μαύρο", "yellow": "Κίτρινο σε μαύρο"};RD.th=T[(T.indexOf(RD.th)+1)%T.length];rdApply();toast('Θέμα: '+N[RD.th])},
+  theme:()=>themePop(),
+
   bm:()=>$('#mBm').onclick(),draw:()=>$('#mDraw').onclick(),share:()=>$('#mShare').onclick(),copy:()=>$('#mCopy').onclick(),save:()=>$('#mAnnPdf').onclick(),full:()=>$('#mFull').onclick(),menu:()=>openSheet()};
 document.querySelectorAll('#qbar [data-q]').forEach(b=>{if(QB_ACT[b.dataset.q])b.onclick=QB_ACT[b.dataset.q]});
+// «Θέμα»: ανοίγει από κάτω οι επιλογές (ίδιες με του μενού) — πατάς και βλέπεις αμέσως το αποτέλεσμα
+function themePop(){
+  let p=$('#thPop');if(p){p.remove();return}
+  p=document.createElement('div');p.id='thPop';
+  const g=document.querySelector('#sheet .seg.thg').cloneNode(true);g.removeAttribute('data-k');
+  p.innerHTML='<div class="tht"><span>🎨 Θέμα ανάγνωσης</span><button class="sec" id="thDone">✓ Τέλος</button></div>';p.appendChild(g);
+  const mark=()=>g.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===RD.th));mark();
+  g.onclick=e=>{const b=e.target.closest('button[data-v]');if(!b)return;RD.th=b.dataset.v;rdApply();mark()};
+  const qb=$('#qbar'),top=qb&&getComputedStyle(qb).display!=='none'?qb.getBoundingClientRect().bottom+6:Math.max(12,innerHeight*.12);
+  p.style.top=top+'px';document.body.appendChild(p);
+  const close=()=>{p.remove();document.removeEventListener('pointerdown',out,true);removeEventListener('scroll',close)};
+  const out=e=>{if(!p.contains(e.target)&&!e.target.closest('#qbar [data-q=theme]'))close()};
+  setTimeout(()=>{document.addEventListener('pointerdown',out,true);addEventListener('scroll',close,{passive:true,once:true})},50);
+  $('#thDone').onclick=close;
+}
 // πλέγμα «Γρήγορα κουμπιά» στην κορυφή του μενού: πάτημα = ενέργεια, 📌 = μπαίνει/βγαίνει από την πάνω μπάρα (αποθηκεύεται αμέσως)
 const FAV_DEF=['find','view','tr','speak','fsm','fsp','theme','bm','share','copy'];
 let FAV=FAV_DEF.slice();try{const v=JSON.parse(localStorage.getItem('glenread-fav')||'null');if(Array.isArray(v))FAV=v}catch(e){}
-FAV=FAV.filter(k=>!NOPIN.includes(k));
+FAV=FAV.filter(k=>!NOPIN.includes(k)&&QB_ALL.some(x=>x[0]===k));
 let qEditing=false;
 function drawQGrid(){
   const g=$('#qGrid');g.classList.toggle('edit',qEditing);$('#qEditHelp').classList.toggle('hidden',!qEditing);$('#qEdit').textContent=qEditing?'✓ Τέλος':'✏️ Προσαρμογή';
