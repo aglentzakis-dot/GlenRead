@@ -111,13 +111,6 @@ details.cat[open]>:last-child{margin-bottom:8px}
 #sheet h3{font-size:12px;letter-spacing:.06em;text-transform:none;color:var(--acc2);margin:16px 4px 6px;font-weight:800}
 .mi{display:flex;width:100%;justify-content:flex-start;align-items:center;gap:12px;background:transparent;border:0;border-radius:14px;padding:10px 8px;color:var(--ink);text-align:left;font-weight:500}
 .mi:active{background:var(--line)}
-/* Pro: σήμα στις λειτουργίες που θα είναι Pro (τώρα δωρεάν, προσφορά γνωριμίας) */
-.pb{display:inline-block;font-style:normal;font-size:10px;font-weight:900;letter-spacing:.3px;background:linear-gradient(#FDD117,#EF9F02);color:#1d1d1b;border-radius:6px;padding:1px 5px;margin-left:6px;vertical-align:2px;line-height:14px}
-#inkBar button.pro{position:relative}#inkBar button.pro::after{content:'PRO';position:absolute;top:1px;right:4px;font-size:8px;font-weight:900;background:linear-gradient(#FDD117,#EF9F02);color:#1d1d1b;border-radius:4px;padding:0 3px;line-height:12px}
-.procard{background:linear-gradient(135deg,#fff7d1,#ffe9a8);border-color:#EF9F02;color:#1d1d1b}
-.procard .row{display:flex;align-items:center;gap:10px}.procard b{font-size:16px}.procard small{display:block;font-size:13px;opacity:.85;margin-top:2px}
-.procard button{flex:0 0 auto;min-height:38px;padding:4px 12px}
-.proli{margin:6px 0 0;padding-left:20px}.proli li{margin:5px 0}
 .mi .ic{font-size:22px;width:34px;text-align:center;flex:0 0 auto}
 .mi .tx{flex:1;display:flex;flex-direction:column}
 .mi .tx b{font-size:15.5px}
@@ -243,7 +236,19 @@ details summary{cursor:pointer;font-weight:600}
 #cam .bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:#000}
 #cam .shot.busy{opacity:.5;transform:scale(.92)}
 #cam .shot{width:74px;height:74px;border-radius:50%;border:5px solid #fff;background:#FDD117;padding:0;min-height:0}
-#cam .cnt{color:#fff;font-size:14px;min-width:90px}
+#cam .cnt{color:#fff;font-size:12px;text-align:center;margin-top:3px}
+#cam .tbox{min-width:90px;display:flex;flex-direction:column;align-items:center}
+#cam .thumb{width:64px;height:64px;border-radius:12px;border:3px solid #fff;padding:0;min-height:0;background:#222 center/cover no-repeat;position:relative;overflow:visible}
+#cam .thumb.empty{opacity:.35}#cam .thumb.bad{border-color:#e53935}
+#cam .thumb b{position:absolute;top:-8px;right:-8px;background:#FDD117;color:#1d1d1b;border-radius:12px;min-width:24px;height:24px;font-size:13px;display:grid;place-items:center;padding:0 5px}
+#cam .thumb.pop{animation:tpop .35s ease}@keyframes tpop{50%{transform:scale(1.18)}}
+#cam .fly{position:absolute;inset:0;z-index:4;background:#000 center/contain no-repeat;pointer-events:none;transition:transform .45s cubic-bezier(.5,0,.3,1),opacity .45s;transform-origin:85% 92%}
+#cam .fly.go{transform:scale(.12);opacity:.3}
+#camRev{position:absolute;inset:0;z-index:6;background:#000;display:flex;flex-direction:column}
+#camRev .rv{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y}
+#camRev .rv img{display:block;width:100%;height:auto;transition:width .2s}
+#camRev .rvbar{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:#111;color:#fff;flex-wrap:wrap}
+#camRev .rvbar button{min-height:44px;flex:1 1 0;padding:6px 4px;font-size:15px;white-space:nowrap}#camRev .rvmsg{width:100%;font-size:13px;text-align:center;opacity:.9}
 #cam .hold{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);background:#000b;color:#fff;font-size:22px;font-weight:800;padding:18px 26px;border-radius:20px;text-align:center;pointer-events:none;display:none;z-index:3;border:3px solid #FDD117}
 #cam .hold.on{display:block}#cam .hold small{display:block;font-size:13px;font-weight:600;opacity:.85;margin-top:4px}
 #cam .hold i{display:block;height:5px;border-radius:3px;background:#FDD117;margin-top:10px;animation:holdbar 1.4s linear infinite;transform-origin:left}
@@ -293,7 +298,7 @@ details summary{cursor:pointer;font-weight:600}
     <input type="file" id="fPdf" accept="application/pdf,.pdf,.docx,.dotx,.docm,.doc,.odt,.ott,.rtf,.txt,.text,.md,.markdown,.csv,.tsv,.log,.json,.xml,.html,.htm,.xhtml,.epub,.pptx,.srt,.vtt,.ini,text/*,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,application/rtf,application/epub+zip,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/json,application/xml" hidden>
     <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
     <input type="file" id="fImg" accept="image/*" multiple hidden>
-    <p class="muted" style="margin:12px 0 0">Χωρίς διαφημιστικές εταιρείες, χωρίς συνδρομή, χωρίς ανέβασμα: τα έγγραφά σου μένουν στο κινητό — φεύγουν μόνο αν το ζητήσεις εσύ (π.χ. μετάφραση Google ή αποστολή).</p>
+    <p class="muted" style="margin:12px 0 0"><b>100% δωρεάν, χωρίς διαφημίσεις</b>, χωρίς συνδρομή, χωρίς ανέβασμα: τα έγγραφά σου μένουν στο κινητό — φεύγουν μόνο αν το ζητήσεις εσύ (π.χ. μετάφραση Google ή αποστολή).</p>
   </div>
 
   <div class="card hidden" id="lastBox">
@@ -327,16 +332,15 @@ details summary{cursor:pointer;font-weight:600}
       <p><label>Ταχύτητα αναγνώρισης<br>
         <select id="ocrMode">
           <option value="fast">Γρήγορη (προτείνεται)</option>
-          <option value="careful">Προσεκτική — πιο αργή, για μικρά ή θολά γράμματα (Pro)</option>
+          <option value="careful">Προσεκτική — πιο αργή, για μικρά ή θολά γράμματα </option>
         </select></label></p>
       <p><label><input type="checkbox" id="pre" checked> Καθαρισμός φωτογραφίας πριν την αναγνώριση (ασπρόμαυρο, αντίθεση)</label></p>
       <p><label><input type="checkbox" id="forceOcr"> Αναγνώριση ακόμη κι όταν το PDF έχει ήδη κείμενο</label></p>
+      <p><label>🌐 Γλώσσα εφαρμογής · App language<br><select id="uiLang"><option value="el">Ελληνικά</option><option value="en">English</option></select></label></p>
       <p class="muted">Την πρώτη φορά η αναγνώριση κατεβάζει τα λεξικά γλώσσας (μία φορά, χρειάζεται σύνδεση). Μετά δουλεύει και χωρίς ίντερνετ.</p>
     </details>
   </div>
-  <div id="efmSlot"></div>
-  <div class="card procard" id="proBox"><div class="row"><span style="font-size:28px">⭐</span><div style="flex:1"><b>GlenRead Pro</b><small id="proTxt"></small></div><button class="sec" id="proMore">Τι περιλαμβάνει</button></div></div>
-  <div class="card">
+    <div class="card">
     <details id="appsBox">
       <summary>✨ Οι εφαρμογές μας</summary>
       <div id="efmPage" style="margin-top:10px"></div>
@@ -423,14 +427,14 @@ details summary{cursor:pointer;font-weight:600}
     <button data-tool="pen"><span>🖊️</span><small>Στυλό</small></button>
     <button data-tool="hl"><span>🖍️</span><small>Μαρκαδόρος</small></button>
     <button data-tool="tx"><span>🔤</span><small>Κείμενο</small></button>
-    <button data-tool="sh" class="pro"><span id="shIc">⬜</span><small>Σχήμα</small></button>
-    <button data-tool="sig" class="pro"><span>✍️</span><small>Υπογραφή</small></button>
+    <button data-tool="sh"><span id="shIc">⬜</span><small>Σχήμα</small></button>
+    <button data-tool="sig"><span>✍️</span><small>Υπογραφή</small></button>
     <button data-tool="mv"><span>✥</span><small>Μετακίνηση</small></button>
     <button data-tool="er"><span>🧽</span><small>Γόμα</small></button>
     <button id="inkColor"><span class="dot"></span><small>Χρώμα</small></button>
     <button id="inkUndo"><span>↶</span><small>Αναίρεση</small></button>
     <button id="inkRedo"><span>↷</span><small>Επανάληψη</small></button>
-    <button id="inkSave" class="pro"><span>📑</span><small>Αποθήκευση</small></button>
+    <button id="inkSave"><span>📑</span><small>Αποθήκευση</small></button>
   </div>
   <div id="inkPop" class="hidden"></div>
   <div id="selBar" class="hidden">
@@ -473,12 +477,12 @@ details summary{cursor:pointer;font-weight:600}
     </details>
     <details class="cat" data-cat="note"><summary><span class="ci">🖊️</span><span class="ct"><b>Σημειώσεις και υπογραφή</b><small>Γράψε, υπογραφή, διόρθωση κειμένου</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mDraw"><span class="ic">🖊️</span><span class="tx"><b>Γράψε πάνω στη σελίδα</b><small>Στυλό, μαρκαδόρος, κείμενο, σχήματα, υπογραφή</small></span></button>
-    <button class="mi" id="mSig"><span class="ic">✍️</span><span class="tx"><b>Η υπογραφή μου<i class="pb">PRO</i></b><small id="mSigS">Φτιάξε ή άλλαξε την υπογραφή σου</small></span></button>
+    <button class="mi" id="mSig"><span class="ic">✍️</span><span class="tx"><b>Η υπογραφή μου</b><small id="mSigS">Φτιάξε ή άλλαξε την υπογραφή σου</small></span></button>
     <button class="mi" id="mEdit"><span class="ic">✏️</span><span class="tx"><b id="mEditT">Διόρθωση κειμένου</b><small>Διόρθωσε λάθη της αναγνώρισης</small></span></button>
     <button class="mi" id="mClear"><span class="ic">🗑️</span><span class="tx"><b>Σβήσε όλες τις σημειώσεις</b><small>Καθαρίζει ό,τι έγραψες πάνω στις σελίδες</small></span></button>
     </details>
     <details class="cat" data-cat="file"><summary><span class="ci">📁</span><span class="ct"><b>Αρχείο</b><small>Αποθήκευση, αποστολή, αντιγραφή, όνομα</small></span><span class="cv">›</span></summary>
-    <button class="mi" id="mAnnPdf"><span class="ic">📑</span><span class="tx"><b>Αποθήκευση PDF με τις σημειώσεις<i class="pb">PRO</i></b><small>Για να το στείλεις ή να το κρατήσεις</small></span></button>
+    <button class="mi" id="mAnnPdf"><span class="ic">📑</span><span class="tx"><b>Αποθήκευση PDF με τις σημειώσεις</b><small>Για να το στείλεις ή να το κρατήσεις</small></span></button>
     <button class="mi" id="mShare"><span class="ic">📤</span><span class="tx"><b>Αποστολή κειμένου</b><small>Σε μήνυμα, ταχυδρομείο κ.λπ.</small></span></button>
     <button class="mi" id="mCopy"><span class="ic">📋</span><span class="tx"><b>Αντιγραφή κειμένου</b><small>Όλου, ή μόνο όσου έχεις επιλέξει</small></span></button>
     <button class="mi" id="mTxt"><span class="ic">💾</span><span class="tx"><b>Αποθήκευση ως κείμενο</b><small>Αρχείο .txt στο GlenApps › GlenRead › Έγγραφα</small></span></button>
@@ -489,8 +493,10 @@ details summary{cursor:pointer;font-weight:600}
     <button class="mi" id="mPin"><span class="ic">📌</span><span class="tx"><b>Σταθερή μπάρα πάνω</b><small>Τα κουμπιά που θέλεις, πάντα ορατά</small></span><span class="sw"></span></button>
     <button class="mi" id="mOrdTop"><span class="ic">↔️</span><span class="tx"><b>Σειρά κουμπιών πάνω μπάρας</b><small>Ποιο κουμπί έρχεται πρώτο</small></span></button>
     <button class="mi" id="mOrdInk"><span class="ic">↕️</span><span class="tx"><b>Σειρά εργαλείων κάτω μπάρας</b><small>Βάλε μπροστά όσα χρησιμοποιείς πιο συχνά</small></span></button>
+    <button class="mi" id="mUi"><span class="ic">🌐</span><span class="tx"><b>Γλώσσα εφαρμογής</b><small id="mUiS">Ελληνικά · English</small></span></button>
     <button class="mi" id="mGpos"><span class="ic">↘️</span><span class="tx"><b>Επαναφορά θέσης του G</b><small>Το κουμπί μενού γυρίζει κάτω δεξιά</small></span></button>
     </details>
+    <button class="mi" id="mApps"><span class="ic">✨</span><span class="tx"><b>Οι εφαρμογές μας</b><small>Κι άλλες δωρεάν εφαρμογές GlenApps</small></span></button>
     <button class="mi" id="mHelp"><span class="ic">❓</span><span class="tx"><b>Οδηγός χρήσης</b><small>Τι κάνει κάθε κουμπί</small></span></button>
     <button class="mi" id="mHome"><span class="ic">🏠</span><span class="tx"><b>Πίσω στην αρχική</b><small>Τα πάντα έχουν αποθηκευτεί</small></span></button>
   </div>
@@ -507,15 +513,24 @@ details summary{cursor:pointer;font-weight:600}
   </div>
   <div class="camzoom hidden" id="camZoomBox"><span>🔍</span><input type="range" id="camZoom" min="1" max="4" step="0.1" value="1"><span id="camZoomV">1×</span></div>
   <div class="flash" id="camF"></div>
+  <div class="fly hidden" id="camFly"></div>
+  <div id="camRev" class="hidden"><div class="rv" id="camRevBox"><img id="camRevImg" alt=""></div>
+    <div class="rvbar"><span class="rvmsg" id="camRevMsg"></span><button class="sec" id="camRevDel" style="color:#fff;border-color:#e53935">🗑 Σβήσε</button><button class="sec" id="camRevZ" style="color:#fff;border-color:#555">🔍 Μεγέθυνση</button><button id="camRevOk">✓ Εντάξει</button></div></div>
   <div class="hold" id="camHold">✋ Μην κουνάς<small id="camHoldT">τραβάω τη φωτογραφία…</small><i></i></div>
   <div class="bar">
     <button class="sec" id="camClose" style="color:#fff;border-color:#555">✕ Κλείσιμο</button>
     <button class="shot" id="camShot" aria-label="Φωτογραφία"></button>
-    <span class="cnt" id="camCnt">0 σελίδες</span>
+    <div class="tbox"><button class="thumb empty" id="camThumb" aria-label="Δες τη φωτογραφία"><b id="camThumbN">0</b></button><span class="cnt" id="camCnt">0 σελίδες</span></div>
   </div>
 </div>
 <div id="toast"></div>
 
+<script>
+// γλώσσα εφαρμογής: ό,τι διάλεξε ο χρήστης, αλλιώς η γλώσσα του κινητού (ελληνικά → ελληνικά, οτιδήποτε άλλο → αγγλικά)
+window.LANG_READY=false; // τα αγγλικά ενεργοποιούνται μόλις ολοκληρωθεί το lang-en.js
+window.UI=!LANG_READY?'el':(function(){try{var v=localStorage.getItem('glenread-ui');if(v==='el'||v==='en')return v}catch(e){}return /^el\b/i.test(navigator.language||'el')?'el':'en'})();
+document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-en.js"><\/script>');
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -524,7 +539,8 @@ details summary{cursor:pointer;font-weight:600}
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.29';
+const VERSION='2.30';
+const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -600,7 +616,7 @@ async function restore(txt){
     if(!ok.length)throw 0;
     const have=new Set((await allDocs()).map(d=>d.id));const nu=ok.filter(d=>!have.has(d.id));
     if(!nu.length)return toast('Όλα τα έγγραφα του αντιγράφου υπάρχουν ήδη');
-    if(!confirm(`Επαναφορά ${nu.length} εγγράφων από ${new Date(o.date).toLocaleString('el-GR')}; Τα έγγραφα που έχεις τώρα δεν αλλάζουν, προστίθενται μόνο όσα λείπουν.`+(ok.length>nu.length?` (${ok.length-nu.length} υπάρχουν ήδη και μένουν όπως είναι.)`:'')))return;
+    if(!confirm(`Επαναφορά ${nu.length} εγγράφων από ${new Date(o.date).toLocaleString(LOC)}; Τα έγγραφα που έχεις τώρα δεν αλλάζουν, προστίθενται μόνο όσα λείπουν.`+(ok.length>nu.length?` (${ok.length-nu.length} υπάρχουν ήδη και μένουν όπως είναι.)`:'')))return;
     await store('readwrite',s=>{nu.forEach(d=>s.put(d))});toast('Η επαναφορά έγινε');changed();
   }catch(e){toast('Αυτό δεν είναι αντίγραφο του GlenRead')}
 }
@@ -612,7 +628,7 @@ const gdStore={get:()=>{try{return JSON.parse(localStorage.getItem('glenread-gdr
 function gdPaint(){
   const g=GD();if(!g){$('#gdState').textContent='δεν φορτώθηκε (χρειάζεται σύνδεση)';$('#gdConnect').disabled=true;return}
   const s=g.state();
-  $('#gdState').textContent=s.on?(s.needTap?'περιμένει ένα πάτημα για να ανεβάσει τις αλλαγές':s.pending?'ανεβαίνει σε λίγο…':s.last?'✓ ασφαλή · τελευταίο '+new Date(s.last).toLocaleString('el-GR'):'συνδέθηκε'):'δεν έχει συνδεθεί';
+  $('#gdState').textContent=s.on?(s.needTap?'περιμένει ένα πάτημα για να ανεβάσει τις αλλαγές':s.pending?'ανεβαίνει σε λίγο…':s.last?'✓ ασφαλή · τελευταίο '+new Date(s.last).toLocaleString(LOC):'συνδέθηκε'):'δεν έχει συνδεθεί';
   $('#gdConnect').classList.toggle('hidden',!!s.on);['#gdNow','#gdList','#gdOff'].forEach(id=>$(id).classList.toggle('hidden',!s.on));
 }
 try{GD()&&GD().init({app:'glenread',folder:'GlenRead',prefix:'glenread-antigrafo',payload:()=>JSON.stringify({app:BK.app,version:VERSION,date:new Date().toISOString(),docs:docsCache}),t:(t,e)=>{if(e)for(const k in e)t=t.replace('{'+k+'}',e[k]);return t},toast,store:gdStore,onState:gdPaint})}catch(e){console.warn(e)}
@@ -630,8 +646,10 @@ $('#gdList').onclick=async()=>{
 
 // ---------- Οι εφαρμογές μας (κοινό efarmoges-mas.js) ----------
 const EFM=()=>window.EfarmogesMas;
-try{EFM()&&EFM().init({app:'glenread',isPro:()=>false,lang:()=>'el',canShow:()=>docsCache.length>0})}catch(e){}
-function efmShow(){try{EFM()&&$('#home')&&!$('#home').classList.contains('hidden')&&EFM().mount($('#efmSlot'))}catch(e){}}
+try{EFM()&&EFM().init({app:'glenread',isPro:()=>false,lang:()=>UI,canShow:()=>docsCache.length>0})}catch(e){}
+// χωρίς διαφημιστική λωρίδα: οι εφαρμογές μας φαίνονται μόνο στην κάρτα «Οι εφαρμογές μας» και στο μενού, όταν τις ανοίξει ο χρήστης
+function efmShow(){}
+$('#mApps').onclick=()=>{closeSheet();dlgOpen('✨ Οι εφαρμογές μας','<div id="efmDlg"></div>',null,true);try{EFM()?EFM().page($('#efmDlg')):$('#efmDlg').innerHTML='<p class="muted">Η λίστα δεν φορτώθηκε. Χρειάζεται σύνδεση στο διαδίκτυο.</p>'}catch(e){}};
 $('#appsBox').addEventListener('toggle',()=>{if($('#appsBox').open)try{EFM()?EFM().page($('#efmPage')):$('#efmPage').innerHTML='<p class="muted">Η λίστα δεν φορτώθηκε. Χρειάζεται σύνδεση στο διαδίκτυο.</p>'}catch(e){}});
 allDocs().then(d=>{docsCache=d||[];efmShow()}).catch(()=>{});
 
@@ -912,7 +930,7 @@ draftGet('shots').then(s=>{if(Array.isArray(s)&&s.length){shots=s;drawThumbs();t
 const loadImg=src=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=src});
 async function ocrShots(){
   if(!shots.length)return;cancelled=false;show('work');$('#wTitle').textContent='Φωτογραφίες';
-  const pages=[];const d0=new Date();const part={id:Date.now(),date:d0.toISOString(),name:'Σάρωση '+d0.toLocaleDateString('el-GR')+' '+d0.toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'}),pages,partial:shots.length};
+  const pages=[];const d0=new Date();const part={id:Date.now(),date:d0.toISOString(),name:(EN?'Scan ':'Σάρωση ')+d0.toLocaleDateString(LOC)+' '+d0.toLocaleTimeString(LOC,{hour:'2-digit',minute:'2-digit'}),pages,partial:shots.length};
   ocrRunning(true);
   try{
     for(let i=0;i<shots.length;i++){
@@ -938,7 +956,7 @@ async function makePdf(){
     const W=595,H=842,r=Math.min(W/c.width,H/c.height);if(i)pdf.addPage();
     pdf.addImage(data,'JPEG',(W-c.width*r)/2,(H-c.height*r)/2,c.width*r,c.height*r);
   }
-  const name='Σάρωση-'+new Date().toISOString().slice(0,10)+'.pdf';
+  const name=(EN?'Scan-':'Σάρωση-')+new Date().toISOString().slice(0,10)+'.pdf';
   const blob=pdf.output('blob');
   shareOrSave(blob,name);
 }
@@ -966,9 +984,22 @@ async function openCam(){
   if(history.state&&history.state.v!=='cam')history.pushState({v:'cam'},'');
 }
 function camFallback(){try{sessionStorage.setItem('glenread-cam','1')}catch(e){}$('#fCam').click()}
-function camCount(){$('#camCnt').textContent=shots.length+(shots.length===1?' σελίδα':' σελίδες')}
+function camCount(){$('#camCnt').textContent=shots.length+(shots.length===1?' σελίδα':' σελίδες');const t=$('#camThumb'),u=shots[shots.length-1];
+  t.classList.toggle('empty',!u);t.classList.toggle('bad',!!u&&shotBlur.has(u));t.style.backgroundImage=u?`url("${u}")`:'none';$('#camThumbN').textContent=shots.length}
+// η φωτογραφία που μόλις τραβήχτηκε: φαίνεται για λίγο σε όλη την οθόνη και «πετάει» στη μικρογραφία
+function camFly(u){const f=$('#camFly');f.style.backgroundImage=`url("${u}")`;f.classList.remove('hidden','go');void f.offsetWidth;
+  setTimeout(()=>{f.classList.add('go')},550);setTimeout(()=>{f.classList.add('hidden');f.classList.remove('go');const t=$('#camThumb');t.classList.remove('pop');void t.offsetWidth;t.classList.add('pop')},1050)}
+// έλεγχος της φωτογραφίας: μεγάλη, με μεγέθυνση για να δεις αν διαβάζονται τα γράμματα
+let revZ=1;
+function camReview(){const u=shots[shots.length-1];if(!u)return toast('Δεν έχεις τραβήξει ακόμη φωτογραφία');revZ=1;const im=$('#camRevImg');im.src=u;im.style.width='100%';
+  $('#camRevMsg').textContent=(shotBlur.has(u)?'⚠️ Φαίνεται θολή — καλύτερα σβήσ\' την και ξανατράβα. ':'')+'Σελίδα '+shots.length+' · πάτα δύο φορές ή «Μεγέθυνση» για να δεις τα γράμματα';
+  $('#camRev').classList.remove('hidden')}
+function revZoom(){revZ=revZ>=3?1:revZ+1;$('#camRevImg').style.width=(revZ*100)+'%';$('#camRevZ').textContent=revZ>=3?'🔍 Ολόκληρη':'🔍 Μεγέθυνση'}
+$('#camThumb').onclick=camReview;$('#camRevOk').onclick=()=>$('#camRev').classList.add('hidden');$('#camRevZ').onclick=revZoom;
+$('#camRevImg').ondblclick=revZoom;
+$('#camRevDel').onclick=()=>{const u=shots.pop();if(u)shotBlur.delete(u);drawThumbs();camCount();draftSet('shots',shots);$('#camRev').classList.add('hidden');$('#camDel').classList.add('hidden');toast('Σβήστηκε — τράβα ξανά')};
 function closeCam(fromPop){
-  motStop();if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null}camTrack=null;camIC=null;torchOn=false;$('#camTorch').classList.remove('on');
+  $('#camRev').classList.add('hidden');motStop();if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null}camTrack=null;camIC=null;torchOn=false;$('#camTorch').classList.remove('on');
   $('#camV').srcObject=null;$('#cam').classList.add('hidden');
   if(!fromPop&&history.state&&history.state.v==='cam')history.back();
   if(shots.length)$('#scanBox').scrollIntoView({behavior:'smooth',block:'center'});
@@ -1030,7 +1061,7 @@ $('#camShot').onclick=async()=>{
     // 5) έλεγχος θολούρας
     let sh=1;try{sh=sharpness(await loadImg(url))}catch(e){}
     const blurry=sh<BLUR_LIMIT;if(blurry)shotBlur.add(url);
-    shots.push(url);drawThumbs();camCount();draftSet('shots',shots);
+    shots.push(url);drawThumbs();camCount();draftSet('shots',shots);camFly(url);
     const mp=((info.w||0)*(info.h||0)/1e6).toFixed(1);
     if(blurry){$('#camRes').textContent='⚠️ Θολή φωτογραφία — ξανατράβα';$('#camDel').classList.remove('hidden');try{navigator.vibrate&&navigator.vibrate([90,70,90])}catch(e){}
       toast('⚠️ Η φωτογραφία βγήκε θολή ή κουνημένη. Πάτα «🗑 Σβήσε την τελευταία» και ξανατράβα, κρατώντας σταθερά.')}
@@ -1139,8 +1170,9 @@ $('#mSpeak').onclick=()=>{
   if(speaking)return stopSpeak();
   const sel=getSelection().toString()||fullText();
   const chunks=sel.match(/[^.!;\n]{1,220}[.!;\n]?/g)||[sel];
-  const v=speechSynthesis.getVoices().find(v=>v.lang.startsWith('el'));
-  chunks.forEach((c,i)=>{const u=new SpeechSynthesisUtterance(c);u.lang='el-GR';u.rate=+RD.rate||1;if(v)u.voice=v;if(i===chunks.length-1)u.onend=()=>{speaking=false;speakUI()};speechSynthesis.speak(u)});
+  const sl=guessLang(sel.slice(0,3000)),SL={el:'el-GR',en:'en-US',de:'de-DE',fr:'fr-FR',it:'it-IT',es:'es-ES',pt:'pt-PT',nl:'nl-NL',pl:'pl-PL',tr:'tr-TR',ro:'ro-RO',ru:'ru-RU',uk:'uk-UA',bg:'bg-BG',ar:'ar-SA',zh:'zh-CN',sq:'sq-AL'}[sl]||'en-US';
+  const v=speechSynthesis.getVoices().find(v=>v.lang.replace('_','-').startsWith(sl));
+  chunks.forEach((c,i)=>{const u=new SpeechSynthesisUtterance(c);u.lang=SL;u.rate=+RD.rate||1;if(v)u.voice=v;if(i===chunks.length-1)u.onend=()=>{speaking=false;speakUI()};speechSynthesis.speak(u)});
   speaking=true;speakUI();toast('Διαβάζω… (Μενού → Σταμάτα την ανάγνωση)');
 };
 function goHome(){
@@ -1394,7 +1426,6 @@ const TOOL_TIPS={pan:'Κύλιση: μετακινείσαι στη σελίδα
   tx:'Κείμενο: πάτα στο σημείο που θέλεις να γράψεις. Πάτα σε υπάρχον κείμενο για αλλαγή.',sh:'Σχήμα: σύρε από τη μία γωνία στην άλλη. Ξαναπάτα «Σχήμα» για άλλο σχήμα.',
   sig:'Υπογραφή: πάτα στο σημείο που θέλεις να μπει η υπογραφή σου.',mv:'Μετακίνηση: πάτα μια σημείωση για να τη μετακινήσεις, να τη μεγαλώσεις ή να τη μικρύνεις.',er:'Γόμα: πέρνα πάνω από ό,τι θέλεις να σβήσεις.'};
 function pvTool(t,silent){
-  if(t==='sig')proTouch('sig','Υπογραφή');else if(t==='sh')proTouch('sh','Σχήματα');
   const again=pv.tool===t&&!silent;if(t!=='mv')selClear();pv.tool=t;document.body.classList.toggle('drawing',t!=='pan');
   document.querySelectorAll('#inkBar [data-tool]').forEach(b=>b.classList.toggle('on',b.dataset.tool===t));
   $('#inkColor .dot').style.background=t==='hl'?HL_COLORS[pv.hl]:PEN_COLORS[pv.pen];
@@ -1474,7 +1505,7 @@ const hex2rgb=h=>{const n=parseInt(h.slice(1),16);return[(n>>16&255)/255,(n>>8&2
 function txPng(s,W){const sc=3,fz=s.s*W*sc,lines=(s.text||'').split('\n');const c=document.createElement('canvas'),x=c.getContext('2d');x.font=`600 ${fz}px system-ui,sans-serif`;
   c.width=Math.ceil(Math.max(...lines.map(l=>x.measureText(l).width))+4);c.height=Math.ceil(lines.length*fz*1.25+4);x.font=`600 ${fz}px system-ui,sans-serif`;x.fillStyle=s.c;x.textBaseline='top';lines.forEach((l,k)=>x.fillText(l,0,k*fz*1.25));return{url:c.toDataURL('image/png'),w:c.width/sc,h:c.height/sc}}
 $('#mAnnPdf').onclick=async()=>{
-  closeSheet();proTouch('annpdf','Αποθήκευση PDF με σημειώσεις');
+  closeSheet();
   const file=pv.file||await draftGet('file-'+doc.id);
   if(!file)return toast('Το πρωτότυπο δεν κρατήθηκε — άνοιξε ξανά το PDF για να γράψεις πάνω του');
   const ann=doc.ann||{};toast('Ετοιμάζεται το PDF…');
@@ -1527,7 +1558,7 @@ async function saveToFolder(blob,name){
   }
   if(dir){
     try{
-      const sub=await dir.getDirectoryHandle('Έγγραφα',{create:true});
+      const sub=await dir.getDirectoryHandle(EN?'Documents':'Έγγραφα',{create:true});
       // δεν σβήνουμε ποτέ υπάρχον αρχείο: «όνομα (2).pdf», «όνομα (3).pdf» …
       const m=name.match(/^(.*?)(\.[^.]+)?$/);let final=name,k=2;
       while(true){try{await sub.getFileHandle(final);final=`${m[1]} (${k++})${m[2]||''}`}catch(e){break}}
@@ -1552,7 +1583,7 @@ async function shareOrSave(blob,name){
 // ---------- Πρόσφατα ----------
 async function drawHist(){
   const list=(await allDocs()||[]).sort((a,b)=>b.id-a.id);
-  $('#histList').innerHTML=list.length?list.map(d=>`<div class="it"><div data-open="${esc(d.id)}"><strong>${esc(d.name)}</strong><span class="muted">${esc(new Date(d.date).toLocaleString('el-GR'))} · ${(d.pages||[]).length}${d.partial?' από '+esc(d.partial):''} σελ.${d.partial?' · διακόπηκε':''}</span></div><button class="sec" data-del="${esc(d.id)}">🗑</button></div>`).join(''):'<p class="muted">Δεν υπάρχουν ακόμη έγγραφα.</p>';
+  $('#histList').innerHTML=list.length?list.map(d=>`<div class="it"><div data-open="${esc(d.id)}"><strong>${esc(d.name)}</strong><span class="muted">${esc(new Date(d.date).toLocaleString(LOC))} · ${(d.pages||[]).length}${d.partial?' από '+esc(d.partial):''} σελ.${d.partial?' · διακόπηκε':''}</span></div><button class="sec" data-del="${esc(d.id)}">🗑</button></div>`).join(''):'<p class="muted">Δεν υπάρχουν ακόμη έγγραφα.</p>';
 }
 $('#histList').onclick=async e=>{
   const o=e.target.closest('[data-open]'),x=e.target.closest('[data-del]');
@@ -1570,7 +1601,8 @@ $('#fPdf').onchange=e=>{const f=e.target.files[0];e.target.value='';f&&openAny(f
 $('#fCam').onchange=$('#fImg').onchange=e=>{try{sessionStorage.removeItem('glenread-cam')}catch(x){}const f=[...e.target.files];e.target.value='';addImages(f)};
 $('#bOcrImgs').onclick=ocrShots;$('#bMakePdf').onclick=makePdf;
 $('#bCancel').onclick=()=>{cancelled=true;prog(null,'Ακύρωση… οι σελίδες που έγιναν κρατιούνται');if(ocrStop)ocrStop()};
-['lang','ocrMode'].forEach(k=>{const el=$('#'+k);try{el.value=localStorage.getItem('glenread-'+k)||el.value}catch(e){}el.onchange=()=>{try{localStorage.setItem('glenread-'+k,el.value);if(k==='ocrMode'){localStorage.removeItem('glenread-lowmem');if(el.value==='careful')proTouch('careful','Προσεκτική αναγνώριση')}}catch(e){}}});
+if(EN){try{if(!localStorage.getItem('glenread-lang'))$('#lang').value='eng'}catch(e){}}
+['lang','ocrMode'].forEach(k=>{const el=$('#'+k);try{el.value=localStorage.getItem('glenread-'+k)||el.value}catch(e){}el.onchange=()=>{try{localStorage.setItem('glenread-'+k,el.value);if(k==='ocrMode'){localStorage.removeItem('glenread-lowmem');}}catch(e){}}});
 
 // αρχεία από «Κοινοποίηση → GlenRead» (Ανδροειδές)
 (async()=>{
@@ -1650,6 +1682,11 @@ $('#qGrid').onclick=e=>{
 };
 // μόνο μία κατηγορία ανοιχτή τη φορά
 document.querySelectorAll('#sheet details.cat').forEach(d=>d.addEventListener('toggle',()=>{if(d.open){document.querySelectorAll('#sheet details.cat').forEach(o=>{if(o!==d)o.open=false});setTimeout(()=>d.scrollIntoView({block:'nearest',behavior:'smooth'}),60)}}));
+// αλλαγή γλώσσας εφαρμογής (ξαναφορτώνει· τα έγγραφα δεν αλλάζουν)
+function setUi(v){try{localStorage.setItem('glenread-ui',v)}catch(e){}flushAll();location.reload()}
+if(!LANG_READY){$('#mUi').classList.add('hidden');$('#uiLang').closest('p').classList.add('hidden')}
+$('#uiLang').value=UI;$('#uiLang').onchange=e=>setUi(e.target.value);
+$('#mUiS').textContent=UI==='el'?'Ελληνικά — πάτα για English':'English — πάτησε για Ελληνικά';$('#mUi').onclick=()=>setUi(UI==='el'?'en':'el');
 $('#mGpos').onclick=()=>{try{localStorage.removeItem('glenread-gpos')}catch(e){}$('#gMenu').classList.remove('custom');closeSheet();toast('Το κουμπί G γύρισε κάτω δεξιά')};
 
 // ---------- Σειρά κουμπιών (πάνω και κάτω μπάρα) ----------
@@ -1724,14 +1761,14 @@ function openTranslate(){
   closeSheet();if(!doc)return;
   const live=String(getSelection()||'').trim(),sel=live||(Date.now()-lastSelAt<120000?lastSel:'');
   const local='Translator' in self;
-  let to='';try{to=localStorage.getItem('glenread-trto')||''}catch(e){}
+  let to='';try{to=localStorage.getItem('glenread-trto')||''}catch(e){}if(!to)to=UI;
   const from0=guessLang((sel||fullText()).slice(0,3000));if(!to||to===from0)to=from0==='el'?'en':'el';
   const R=(v,t,sub,ck)=>`<label class="trw"><input type="radio" name="trW" value="${v}" ${ck?'checked':''}><span><b>${t}</b>${sub?`<small>${sub}</small>`:''}</span></label>`;
   dlgOpen('🌐 Μετάφραση',`<div class="trws">
       ${sel?R('sel','Το κείμενο που επέλεξα','«'+esc(sel.slice(0,60))+(sel.length>60?'…':'')+'»',true):''}
       ${R('tap','Πατάω παραγράφους','Πατάς όσες θέλεις και γίνονται κίτρινες',!sel)}
-      ${doc.pages.length>1?R('page','Αυτή τη σελίδα <i class="pb">PRO</i>',''):''}
-      ${R('all','Όλο το έγγραφο <i class="pb">PRO</i>','')}
+      ${doc.pages.length>1?R('page','Αυτή τη σελίδα ',''):''}
+      ${R('all','Όλο το έγγραφο ','')}
     </div>
     <label>Μετάφραση σε<br><select id="trTo" style="width:100%;margin-top:4px">${LANGS.map(([c,n])=>`<option value="${c}" ${c===to?'selected':''}>${n}</option>`).join('')}</select></label>
     ${local?'<p class="muted" style="margin:10px 0 0">✅ Η μετάφραση γίνεται μέσα στη συσκευή.</p>':
@@ -1740,7 +1777,6 @@ function openTranslate(){
      <p class="muted" style="margin:6px 0 0;font-size:12.5px">⚠️ Στο κινητό σου δεν υπάρχει ακόμη ενσωματωμένος μεταφραστής, οπότε το κείμενο πηγαίνει στη Μετάφραση Google.</p></div>`}`,
     ()=>{const t=$('#trTo').value,w=(document.querySelector('input[name=trW]:checked')||{}).value||'all',h=(document.querySelector('input[name=trH]:checked')||{}).value||'web';
       try{localStorage.setItem('glenread-trto',t)}catch(e){}
-      if(w==='page'||w==='all')proTouch('trall','Μετάφραση σελίδας ή εγγράφου');
       if(w==='tap')return tapPick(t,h);
       const text=w==='sel'?sel:w==='page'?curPageText():fullText();
       doTranslate(text,guessLang(text.slice(0,3000)),t,w!=='all',h)});
@@ -1779,7 +1815,7 @@ async function doTranslate(text,from,to,isSel,how){
 function trReset(){if(trDoc&&trOrig)trDoc.pages=trOrig;const was=!!trOrig;trOrig=null;trDoc=null;return was}
 function showTranslation(t,to,isSel){
   const name=(LANGS.find(l=>l[0]===to)||[,''])[1];
-  if(isSel){dlgOpen('Μετάφραση σε '+name,`<div style="white-space:pre-wrap;max-height:50vh;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:10px">${esc(t)}</div><div class="row" style="justify-content:flex-start"><button class="sec" id="trCopy">📋 Αντιγραφή</button></div>`,null,true);setTimeout(()=>{$('#trCopy').onclick=()=>navigator.clipboard.writeText(t).then(()=>toast('Αντιγράφηκε'))},30);return}
+  if(isSel){dlgOpen('Μετάφραση σε '+name,`<div id="trOut" style="white-space:pre-wrap;max-height:50vh;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:10px">${esc(t)}</div><div class="row" style="justify-content:flex-start"><button class="sec" id="trCopy">📋 Αντιγραφή</button></div>`,null,true);setTimeout(()=>{$('#trCopy').onclick=()=>navigator.clipboard.writeText(t).then(()=>toast('Αντιγράφηκε'))},30);return}
   if(pv.on)viewText();if(!trOrig||trDoc!==doc){trReset();trOrig=doc.pages;trDoc=doc}doc.pages=[{text:t,conf:100,ocr:false}];render();
   $('#lowConf').classList.remove('hidden');$('#lowConf').innerHTML=`🌐 Βλέπεις μετάφραση στα ${esc(name)}. <button class="sec" id="trBack" style="min-height:34px;margin-left:6px">Επιστροφή στο πρωτότυπο</button>`;
   $('#trBack').onclick=()=>{trReset();render();$('#lowConf').classList.add('hidden')};scrollTo(0,0);
@@ -1861,7 +1897,7 @@ $('#mPin').onclick=()=>{pinned=!pinned;try{localStorage.setItem('glenread-pin',p
 // σημείο ανάγνωσης + λίγες λέξεις από το κείμενο εκεί, για τίτλο του σελιδοδείκτη
 const snip=t=>{t=(t||'').replace(/\s+/g,' ').trim();if(!t)return'';const w=t.split(' ');let o='';for(const x of w){if((o+' '+x).length>48)break;o+=(o?' ':'')+x}return o||t.slice(0,48)};
 function curPos(){
-  const when=new Date().toLocaleString('el-GR',{day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'});
+  const when=new Date().toLocaleString(LOC,{day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'});
   if(pv.on){
     const els=[...document.querySelectorAll('.pvp')];const k=Math.max(0,els.findIndex(el=>el.getBoundingClientRect().bottom>80));
     const r=els[k]?els[k].getBoundingClientRect():{top:0,height:1};const f=Math.min(.98,Math.max(0,(80-r.top)/r.height));
@@ -1931,23 +1967,6 @@ $('#instYes').onclick=async()=>{
   if(r.outcome==='accepted')$('#instBox').classList.add('hidden');
 };
 $('#instNo').onclick=()=>{try{localStorage.setItem('glenread-inst-later',Date.now()+7*864e5)}catch(e){}$('#instBox').classList.add('hidden')};
-
-// ---------- GlenRead Pro ----------
-// Όλα είναι ανοιχτά: προσφορά γνωριμίας. Η ημερομηνία αλλάζει εδώ, σε ένα σημείο.
-// Μετά τη λήξη ΔΕΝ κλειδώνει τίποτα μόνο του — μόνο όταν μπει αγορά μέσω Google Play.
-const PRO_UNTIL=new Date('2027-03-31T23:59:59');
-const PRO_UNTIL_TXT='31 Μαρτίου 2027';
-const PRO_LIST=[['✍️','Υπογραφή πάνω στο PDF'],['📑','Αποθήκευση PDF με σημειώσεις και υπογραφές'],['⬜','Σχήματα: γραμμές, βέλη, πλαίσια, κύκλοι'],['🌐','Μετάφραση ολόκληρης σελίδας ή εγγράφου'],['🔬','«Προσεκτική» αναγνώριση για μικρά ή θολά γράμματα']];
-const PRO_SOON=['PDF με αναζήτηση από φωτογραφίες','Ένωση, διαχωρισμός και σειρά σελίδων PDF','Συμπλήρωση εντύπων PDF','Πολλές υπογραφές, μονογραφή και σφραγίδα','Εξαγωγή σε Word και πίνακες σε Excel','Αυτόματο κόψιμο και ίσιωμα σελίδας'];
-const proOffer=()=>Date.now()<=PRO_UNTIL.getTime();
-function proPaint(){const t=$('#proTxt');if(!t)return;t.textContent=proOffer()?`Προσφορά γνωριμίας: όλες οι λειτουργίες Pro 100% δωρεάν έως ${PRO_UNTIL_TXT}.`:'Η προσφορά γνωριμίας έληξε — οι λειτουργίες Pro μένουν ανοιχτές προς το παρόν.'}
-function proInfo(){dlgOpen('⭐ GlenRead Pro',`<p style="margin:0 0 6px">${proOffer()?`<b>Προσφορά γνωριμίας: 100% δωρεάν έως ${PRO_UNTIL_TXT}.</b> Δεν χρειάζεται εγγραφή ούτε κάρτα.`:'Η προσφορά γνωριμίας έληξε.'}</p>
-  <b>Λειτουργίες Pro</b><ul class="proli">${PRO_LIST.map(([i,t])=>`<li>${i} ${t}</li>`).join('')}</ul>
-  <b style="display:block;margin-top:10px">Έρχονται στο Pro</b><ul class="proli">${PRO_SOON.map(t=>`<li>${t}</li>`).join('')}</ul>
-  <p class="muted" style="margin:10px 0 0;font-size:13px">Όλα τα υπόλοιπα (άνοιγμα όλων των αρχείων, ανάγνωση, αναγνώριση κειμένου, φωτογράφιση, στυλό, μαρκαδόρος, σημειώσεις κειμένου, αναζήτηση, θέματα, αντίγραφα ασφαλείας) μένουν δωρεάν. Τα έγγραφά σου είναι πάντα δικά σου και ανοίγουν πάντα, ό,τι κι αν γίνει με το Pro.</p>`,null,true)}
-function proTouch(k,name){try{const K='glenread-pro-seen';const S=JSON.parse(localStorage.getItem(K)||'[]');if(S.includes(k))return;S.push(k);localStorage.setItem(K,JSON.stringify(S))}catch(e){return}
-  if(proOffer())setTimeout(()=>toast(`⭐ «${name}» είναι λειτουργία Pro — δωρεάν για σένα έως ${PRO_UNTIL_TXT}`),900)}
-$('#proMore').onclick=proInfo;proPaint();
 
 // ---------- Αναβάθμιση ----------
 // η νέα έκδοση φορτώνει μόνο όταν είσαι στην αρχική και δεν γίνεται κάποια δουλειά (ποτέ στη μέση της ανάγνωσης ή της αναγνώρισης)

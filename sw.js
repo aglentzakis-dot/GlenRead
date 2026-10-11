@@ -1,4 +1,4 @@
-const CACHE='glenread-2.29';
+const CACHE='glenread-2.30';
 const CORE=['./','index.html','manifest.json','icon-192.png','icon-512.png','icon-512-maskable.png','apple-touch-icon.png','privacy.html','G-glenapps.png','antigrafa.js','efarmoges-mas.js'];
 // το κοινό αρχείο της σελίδας GlenApps: αν λείπει για λίγο, η εγκατάσταση δεν πρέπει να αποτύχει
 const SHARED=['/efarmoges-mas.js'];
