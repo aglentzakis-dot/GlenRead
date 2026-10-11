@@ -471,7 +471,12 @@ var D={
 "Δεν βρέθηκαν σίγουρα οι άκρες — σύρε τις γωνίες με το δάχτυλο": "Couldn't find the edges for sure — drag the corners with your finger",
 "Κρατήθηκε όλη η φωτογραφία": "The whole photo was kept",
 "✂️ Η σελίδα κόπηκε και ισιώθηκε": "✂️ Page cropped and straightened",
-"Το κόψιμο δεν έγινε — δοκίμασε ξανά": "Cropping failed — try again"
+"Το κόψιμο δεν έγινε — δοκίμασε ξανά": "Cropping failed — try again",
+"Η κάμερα της εφαρμογής δεν άνοιξε (δεν δόθηκε άδεια). Μπορείς να τραβήξεις με την κάμερα του κινητού.": "The app camera didn't open (permission not granted). You can use your phone's camera instead.",
+"📷 Κάμερα": "📷 Camera",
+"Αυτό το έγγραφο σβήστηκε": "This document was deleted",
+"⚠️ Η επαναφορά δεν χώρεσε — ο χώρος του κινητού γέμισε": "⚠️ Restore didn't fit — your phone's storage is full",
+"Οι γωνίες δεν σχηματίζουν σελίδα — διόρθωσέ τες": "The corners don't form a page — adjust them"
 };
 var G=function(s){return D.hasOwnProperty(s)?D[s]:s};
 var P=[
@@ -524,7 +529,7 @@ function tr(t){if(!t||!GR.test(t))return null;var k=t.replace(/\s+/g,' ').trim()
   return t.match(/^\s*/)[0]+v+t.match(/\s*$/)[0]}
 window.TR=function(t){var v=tr(t);return v==null?t:v};
 // ό,τι είναι περιεχόμενο του χρήστη δεν μεταφράζεται ποτέ
-var SKIP='#reader,#pagesView,#wTitle,#lastName,#mRenameS,.bt,#histList strong,#bkList strong,#gdFiles strong,#efmPage,#efmDlg,#trOut,#thumbs,#uiLang,textarea,script,style';
+var SKIP='#reader,#pagesView,#wTitle,#lastName,#mRenameS,.bt,#histList strong,#bkList strong,#gdFiles strong,#efmPage,#efmDlg,#trOut,#thumbs,#uiLang,.usr,textarea,script,style';
 function skipped(e){return !e||(e.closest&&!!e.closest(SKIP))}
 function attrs(e){if(!e.getAttribute)return;for(var a=['placeholder','aria-label','title','alt'],i=0;i<a.length;i++){var x=e.getAttribute(a[i]);if(x){var v=tr(x);if(v!=null&&v!==x)e.setAttribute(a[i],v)}}}
 function text(n){var v=tr(n.nodeValue);if(v!=null&&v!==n.nodeValue)n.nodeValue=v}

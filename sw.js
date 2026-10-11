@@ -1,10 +1,10 @@
-const CACHE='glenread-2.33';
+const CACHE='glenread-2.34';
 const CORE=['./','index.html','manifest.json','icon-192.png','icon-512.png','icon-512-maskable.png','apple-touch-icon.png','privacy.html','G-glenapps.png','antigrafa.js','efarmoges-mas.js','lang-en.js'];
 // το κοινό αρχείο της σελίδας GlenApps: αν λείπει για λίγο, η εγκατάσταση δεν πρέπει να αποτύχει
 const SHARED=['/efarmoges-mas.js'];
-self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE).then(()=>Promise.all(SHARED.map(u=>c.add(u).catch(()=>{})))))));
+self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE.map(u=>new Request(u,{cache:'reload'}))).then(()=>Promise.all(SHARED.map(u=>c.add(u).catch(()=>{})))))));
 self.addEventListener('message',e=>{if(e.data==='skip')self.skipWaiting()});
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>(k.startsWith('diavaseto-')||k.startsWith('gdoc-')||k.startsWith('glenread-'))&&k!==CACHE&&k!=='glenread-lib'&&k!=='glenread-share').map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>(k.startsWith('diavaseto-')||k.startsWith('gdoc-')||k.startsWith('glenread-'))&&k!==CACHE&&k!=='glenread-lib'&&k!=='glenread-share').map(k=>caches.delete(k)))).then(()=>caches.open('glenread-lib')).then(c=>c.keys().then(ks=>Promise.all(ks.filter(r=>!/^https:\/\/(cdnjs\.cloudflare\.com|cdn\.jsdelivr\.net|unpkg\.com|tessdata\.projectnaptha\.com)\//.test(r.url)).map(r=>c.delete(r))))).catch(()=>{}).then(()=>self.clients.claim())));
 const timeout=(p,ms)=>Promise.race([p,new Promise((_,j)=>setTimeout(()=>j(new Error('timeout')),ms))]);
 self.addEventListener('fetch',e=>{
   const u=new URL(e.request.url);
@@ -30,11 +30,14 @@ self.addEventListener('fetch',e=>{
     const ms=nav?5000:u.pathname==='/efarmoges-mas.js'?4000:10000;
     e.respondWith(timeout(fetch(e.request),ms).then(r=>{
       // κρατάμε μόνο σωστές απαντήσεις (όχι 404/500 την ώρα που ανεβαίνει νέα έκδοση)
-      if(r.ok&&r.type==='basic'){const c=r.clone();caches.open(CACHE).then(x=>x.put(key,c)).catch(()=>{})}
-      return r;
+      if(r.ok&&r.type==='basic'){const c=r.clone();caches.open(CACHE).then(x=>x.put(key,c)).catch(()=>{});return r}
+      // σφάλμα του διακομιστή (π.χ. την ώρα που ανεβαίνει νέα έκδοση): η αποθηκευμένη, αν υπάρχει
+      return caches.match(key,{ignoreSearch:true}).then(c=>c||r);
     }).catch(()=>caches.match(key,{ignoreSearch:true}).then(r=>r||(nav?caches.match('index.html'):null)).then(r=>r||Response.error())));
     return;
   }
+  // Google Drive, σύνδεση κ.λπ.: πάντα από το δίκτυο, ποτέ στην αποθήκευση (προσωπικά δεδομένα, πάντα φρέσκα)
+  if(e.request.headers.has('authorization')||!/^(cdnjs\.cloudflare\.com|cdn\.jsdelivr\.net|unpkg\.com|tessdata\.projectnaptha\.com)$/.test(u.hostname))return;
   // βιβλιοθήκες και λεξικά γλώσσας: από την αποθήκευση (για χρήση χωρίς ίντερνετ),
   // και για τα σενάρια ανανέωση στο παρασκήνιο, ώστε μια κακή απάντηση (π.χ. Wi-Fi ξενοδοχείου) να διορθώνεται μόνη της
   e.respondWith(caches.open('glenread-lib').then(c=>c.match(e.request).then(r=>{
