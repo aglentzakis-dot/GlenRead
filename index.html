@@ -244,6 +244,15 @@ details summary{cursor:pointer;font-weight:600}
 #cam .thumb.pop{animation:tpop .35s ease}@keyframes tpop{50%{transform:scale(1.18)}}
 #cam .fly{position:absolute;inset:0;z-index:4;background:#000 center/contain no-repeat;pointer-events:none;transition:transform .45s cubic-bezier(.5,0,.3,1),opacity .45s;transform-origin:85% 92%}
 #cam .fly.go{transform:scale(.12);opacity:.3}
+#crop{position:fixed;inset:0;z-index:30;background:#111;display:flex;flex-direction:column;color:#fff}
+#crop .cbox{flex:1;position:relative;overflow:hidden;touch-action:none}
+#crop canvas,#crop svg{position:absolute;left:0;top:0}
+#crop svg polygon{fill:rgba(253,209,23,.18);stroke:#FDD117;stroke-width:2.5}
+#crop svg circle{fill:#FDD117;stroke:#fff;stroke-width:3;cursor:grab}
+#crop .chint{position:absolute;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top));text-align:center;font-size:13px;text-shadow:0 1px 3px #000;pointer-events:none}
+#crop .cbar{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px 10px calc(10px + env(safe-area-inset-bottom));background:#000}
+#crop .cbar button{min-height:46px;padding:4px;font-size:14px}#crop .cbar .sec{color:#fff;border-color:#555;background:#222}
+#crop .busy{position:absolute;inset:0;display:grid;place-items:center;background:#0009;font-size:18px;font-weight:700}
 #camRev{position:absolute;inset:0;z-index:6;background:#000;display:flex;flex-direction:column}
 #camRev .rv{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y}
 #camRev .rv img{display:block;width:100%;height:auto;transition:width .2s}
@@ -334,6 +343,7 @@ details summary{cursor:pointer;font-weight:600}
           <option value="fast">Γρήγορη (προτείνεται)</option>
           <option value="careful">Προσεκτική — πιο αργή, για μικρά ή θολά γράμματα </option>
         </select></label></p>
+      <p><label><input type="checkbox" id="autoCrop" checked> Αυτόματο κόψιμο και ίσιωμα της σελίδας στις φωτογραφίες</label></p>
       <p><label><input type="checkbox" id="pre" checked> Καθαρισμός φωτογραφίας πριν την αναγνώριση (ασπρόμαυρο, αντίθεση)</label></p>
       <p><label><input type="checkbox" id="forceOcr"> Αναγνώριση ακόμη κι όταν το PDF έχει ήδη κείμενο</label></p>
       <p><label>🌐 Γλώσσα εφαρμογής · App language<br><select id="uiLang"><option value="el">Ελληνικά</option><option value="en">English</option></select></label></p>
@@ -502,6 +512,8 @@ details summary{cursor:pointer;font-weight:600}
   </div>
 </div>
 <div class="dlg hidden" id="dlg"><div class="bx"><h4 id="dlgT"></h4><div id="dlgB"></div><div class="row"><button class="sec" id="dlgNo">Ακύρωση</button><button id="dlgOk">Εντάξει</button></div></div></div>
+<div id="crop" class="hidden"><div class="cbox" id="cropBox"><canvas id="cropC"></canvas><svg id="cropS"></svg><div class="chint">Σύρε τις 4 κίτρινες γωνίες πάνω στις άκρες της σελίδας</div><div class="busy hidden" id="cropBusy">Ισιώνω τη σελίδα…</div></div>
+  <div class="cbar"><button class="sec" id="cropAuto">🪄 Αυτόματα</button><button class="sec" id="cropAll">⬜ Όλη η φωτογραφία</button><button class="sec" id="cropRot">⟳ Περιστροφή</button><button class="sec" id="cropNo">Άκυρο</button><span></span><button id="cropOk">✂️ Κόψιμο</button></div></div>
 <div id="cam" class="hidden">
   <div class="hint">Κράτα το κινητό ίσια πάνω από τη σελίδα, να τη γεμίζει. Πάτα στην οθόνη για εστίαση.</div>
   <video id="camV" playsinline muted autoplay></video>
@@ -515,7 +527,7 @@ details summary{cursor:pointer;font-weight:600}
   <div class="flash" id="camF"></div>
   <div class="fly hidden" id="camFly"></div>
   <div id="camRev" class="hidden"><div class="rv" id="camRevBox"><img id="camRevImg" alt=""></div>
-    <div class="rvbar"><span class="rvmsg" id="camRevMsg"></span><button class="sec" id="camRevDel" style="color:#fff;border-color:#e53935">🗑 Σβήσε</button><button class="sec" id="camRevZ" style="color:#fff;border-color:#555">🔍 Μεγέθυνση</button><button id="camRevOk">✓ Εντάξει</button></div></div>
+    <div class="rvbar"><span class="rvmsg" id="camRevMsg"></span><button class="sec" id="camRevDel" style="color:#fff;border-color:#e53935">🗑 Σβήσε</button><button class="sec" id="camRevCrop" style="color:#fff;border-color:#FDD117">✂️ Κόψιμο</button><button class="sec" id="camRevZ" style="color:#fff;border-color:#555">🔍 Μεγέθυνση</button><button id="camRevOk">✓ Εντάξει</button></div></div>
   <div class="hold" id="camHold">✋ Μην κουνάς<small id="camHoldT">τραβάω τη φωτογραφία…</small><i></i></div>
   <div class="bar">
     <button class="sec" id="camClose" style="color:#fff;border-color:#555">✕ Κλείσιμο</button>
@@ -539,7 +551,7 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.31';
+const VERSION='2.32';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -916,7 +928,7 @@ async function shrink(src,max=3600,info){
 async function addImages(files){
   const list=[...files];if(!list.length)return;let blurN=0;
   for(const f of list){ // μία-μία, όχι όλες μαζί, για να μη γεμίζει η μνήμη
-    try{const u=await shrink(f);try{if(sharpness(await loadImg(u))<BLUR_LIMIT){shotBlur.add(u);blurN=(blurN||0)+1}}catch(x){}shots.push(u);drawThumbs()}catch(e){toast('Μία φωτογραφία δεν διαβάστηκε — ίσως είναι πολύ μεγάλη')}
+    try{const u=await autoCrop(await shrink(f));try{if(sharpness(await loadImg(u))<BLUR_LIMIT){shotBlur.add(u);blurN=(blurN||0)+1}}catch(x){}shots.push(u);drawThumbs()}catch(e){toast('Μία φωτογραφία δεν διαβάστηκε — ίσως είναι πολύ μεγάλη')}
   }
   draftSet('shots',shots);
   if(blurN)toast(`⚠️ ${blurN===1?'Μία φωτογραφία φαίνεται θολή':blurN+' φωτογραφίες φαίνονται θολές'} (κόκκινο πλαίσιο). Για καλύτερη ανάγνωση, ξανατράβηξέ ${blurN===1?'την':'τες'}.`);
@@ -925,7 +937,98 @@ function drawThumbs(){
   $('#scanBox').classList.toggle('hidden',!shots.length);
   $('#thumbs').innerHTML=shots.map((s,i)=>`<div${shotBlur.has(s)?' class="blur"':''}><img src="${s}" alt="σελίδα ${i+1}"><b data-i="${i}">✕</b></div>`).join('');
 }
-$('#thumbs').onclick=e=>{if(e.target.dataset.i!=null){shots.splice(+e.target.dataset.i,1);drawThumbs();draftSet('shots',shots)}};
+$('#thumbs').onclick=e=>{if(e.target.dataset.i!=null){const u=shots.splice(+e.target.dataset.i,1)[0];shotOrig.delete(u);drawThumbs();draftSet('shots',shots);return}
+  const im=e.target.closest('img');if(im){const i=[...$('#thumbs').querySelectorAll('img')].indexOf(im);if(i>=0)openCrop(i)}};
+// ---------- Κόψιμο και ίσιωμα σελίδας ----------
+// το πρωτότυπο κάθε κομμένης φωτογραφίας (για να ξανακόψεις πιο φαρδιά) και οι γωνίες που διαλέχτηκαν — μόνο για όσο είναι ανοιχτή η εφαρμογή
+const shotOrig=new Map(),shotQuad=new Map();
+const autoCropOn=()=>{try{return localStorage.getItem('glenread-autocrop')!=='0'}catch(e){return true}};
+$('#autoCrop').checked=autoCropOn();$('#autoCrop').onchange=e=>{try{localStorage.setItem('glenread-autocrop',e.target.checked?'1':'0')}catch(x){}};
+// εντοπισμός σελίδας: η πιο μεγάλη φωτεινή περιοχή (το χαρτί) πάνω σε πιο σκούρο φόντο → οι 4 γωνίες της
+function detectPage(img){try{
+  const W0=img.naturalWidth||img.width,H0=img.naturalHeight||img.height,k=420/Math.max(W0,H0),w=Math.max(8,Math.round(W0*k)),h=Math.max(8,Math.round(H0*k));
+  const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0,w,h);
+  const d=x.getImageData(0,0,w,h).data;c.width=c.height=0;const n=w*h,g=new Float32Array(n);
+  for(let i=0;i<n;i++)g[i]=d[i*4]*.299+d[i*4+1]*.587+d[i*4+2]*.114;
+  // θάμπωμα 5×5 για να «σβήσουν» τα γράμματα
+  const b=new Float32Array(n),t=new Float32Array(n),r=2;
+  for(let y=0;y<h;y++)for(let xx=0;xx<w;xx++){let s=0,m=0;for(let q=-r;q<=r;q++){const X=xx+q;if(X>=0&&X<w){s+=g[y*w+X];m++}}t[y*w+xx]=s/m}
+  for(let y=0;y<h;y++)for(let xx=0;xx<w;xx++){let s=0,m=0;for(let q=-r;q<=r;q++){const Y=y+q;if(Y>=0&&Y<h){s+=t[Y*w+xx];m++}}b[y*w+xx]=s/m}
+  // κατώφλι Otsu
+  const H=new Uint32Array(256);for(let i=0;i<n;i++)H[b[i]|0]++;let sum=0;for(let i=0;i<256;i++)sum+=i*H[i];
+  let sB=0,wB=0,best=0,thr=128;for(let i=0;i<256;i++){wB+=H[i];if(!wB)continue;const wF=n-wB;if(!wF)break;sB+=i*H[i];const mB=sB/wB,mF=(sum-sB)/wF,v=wB*wF*(mB-mF)*(mB-mF);if(v>best){best=v;thr=i}}
+  // μεγαλύτερη φωτεινή συνεχόμενη περιοχή
+  const lab=new Int32Array(n).fill(-1),st=new Int32Array(n);let bestL=-1,bestA=0,cur=0;
+  for(let i=0;i<n;i++){if(lab[i]!==-1||b[i]<=thr)continue;let sp=0,a=0;st[sp++]=i;lab[i]=cur;
+    while(sp){const p=st[--sp];a++;const px=p%w,py=(p/w)|0;
+      if(px>0&&lab[p-1]===-1&&b[p-1]>thr){lab[p-1]=cur;st[sp++]=p-1}if(px<w-1&&lab[p+1]===-1&&b[p+1]>thr){lab[p+1]=cur;st[sp++]=p+1}
+      if(py>0&&lab[p-w]===-1&&b[p-w]>thr){lab[p-w]=cur;st[sp++]=p-w}if(py<h-1&&lab[p+w]===-1&&b[p+w]>thr){lab[p+w]=cur;st[sp++]=p+w}}
+    if(a>bestA){bestA=a;bestL=cur}cur++}
+  if(bestL<0)return null;
+  // γωνίες: ακραία σημεία στις διαγώνιες
+  let tl=[0,0,1e9],tr=[0,0,-1e9],br=[0,0,-1e9],bl=[0,0,1e9];
+  for(let i=0;i<n;i++){if(lab[i]!==bestL)continue;const px=i%w,py=(i/w)|0,s1=px+py,s2=px-py;
+    if(s1<tl[2])tl=[px,py,s1];if(s1>br[2])br=[px,py,s1];if(s2>tr[2])tr=[px,py,s2];if(s2<bl[2])bl=[px,py,s2]}
+  const Q=[tl,tr,br,bl].map(p=>[(p[0]+.5)/w,(p[1]+.5)/h]);
+  const area=Math.abs(Q.reduce((a,p,i)=>{const q=Q[(i+1)%4];return a+p[0]*q[1]-q[0]*p[1]},0))/2;
+  // σιγουριά: σελίδα αρκετά μεγάλη, όχι όλη η φωτογραφία, και «γεμάτη» (σαν τετράπλευρο)
+  if(area<.18||area>.94||bestA/n/area<.82)return null;
+  return Q}catch(e){return null}}
+// λύση γραμμικού συστήματος (για την προοπτική)
+function solve(A,bv){const n=bv.length;for(let i=0;i<n;i++){let m=i;for(let r=i+1;r<n;r++)if(Math.abs(A[r][i])>Math.abs(A[m][i]))m=r;[A[i],A[m]]=[A[m],A[i]];[bv[i],bv[m]]=[bv[m],bv[i]];
+  for(let r=i+1;r<n;r++){const f=A[r][i]/A[i][i];for(let c=i;c<n;c++)A[r][c]-=f*A[i][c];bv[r]-=f*bv[i]}}
+  const x=new Array(n);for(let i=n-1;i>=0;i--){let s=bv[i];for(let c=i+1;c<n;c++)s-=A[i][c]*x[c];x[i]=s/A[i][i]}return x}
+// ίσιωμα: οι 4 γωνίες γίνονται ορθογώνιο
+async function warpPage(url,Q){
+  const img=await loadImg(url),W0=img.naturalWidth,H0=img.naturalHeight,P=Q.map(q=>[q[0]*W0,q[1]*H0]);
+  const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);let OW=Math.max(dist(P[0],P[1]),dist(P[3],P[2])),OH=Math.max(dist(P[0],P[3]),dist(P[1],P[2]));
+  const k=Math.min(1,3000/Math.max(OW,OH));OW=Math.max(16,Math.round(OW*k));OH=Math.max(16,Math.round(OH*k));
+  const D=[[0,0],[OW,0],[OW,OH],[0,OH]],A=[],B=[];
+  for(let i=0;i<4;i++){const[x,y]=D[i],[u,v]=P[i];A.push([x,y,1,0,0,0,-u*x,-u*y]);B.push(u);A.push([0,0,0,x,y,1,-v*x,-v*y]);B.push(v)}
+  const h=solve(A,B);
+  const sc=document.createElement('canvas');sc.width=W0;sc.height=H0;const sx=sc.getContext('2d',{willReadFrequently:true});sx.drawImage(img,0,0);
+  const S=sx.getImageData(0,0,W0,H0).data;sc.width=sc.height=0;
+  const oc=document.createElement('canvas');oc.width=OW;oc.height=OH;const ox=oc.getContext('2d'),O=ox.createImageData(OW,OH),od=O.data;
+  for(let y=0;y<OH;y++){if(y%200===0)await new Promise(r=>setTimeout(r,0));
+    for(let x=0;x<OW;x++){const z=h[6]*x+h[7]*y+1,u=(h[0]*x+h[1]*y+h[2])/z,v=(h[3]*x+h[4]*y+h[5])/z;
+      const ui=Math.min(W0-2,Math.max(0,u|0)),vi=Math.min(H0-2,Math.max(0,v|0)),fu=Math.min(1,Math.max(0,u-ui)),fv=Math.min(1,Math.max(0,v-vi)),o=(y*OW+x)*4,s0=(vi*W0+ui)*4,s1=s0+W0*4;
+      for(let c=0;c<3;c++)od[o+c]=(S[s0+c]*(1-fu)+S[s0+4+c]*fu)*(1-fv)+(S[s1+c]*(1-fu)+S[s1+4+c]*fu)*fv;od[o+3]=255}}
+  ox.putImageData(O,0,0);const out=oc.toDataURL('image/jpeg',.92);oc.width=oc.height=0;return out}
+async function rotateUrl(url){const img=await loadImg(url),c=document.createElement('canvas');c.width=img.naturalHeight;c.height=img.naturalWidth;const x=c.getContext('2d');
+  x.translate(c.width,0);x.rotate(Math.PI/2);x.drawImage(img,0,0);const o=c.toDataURL('image/jpeg',.92);c.width=c.height=0;return o}
+// αυτόματο κόψιμο μιας νέας φωτογραφίας (αν βρεθεί σίγουρα η σελίδα)
+async function autoCrop(url){if(!autoCropOn())return url;try{const Q=detectPage(await loadImg(url));if(!Q)return url;const out=await warpPage(url,Q);shotOrig.set(out,url);shotQuad.set(out,Q);return out}catch(e){return url}}
+// επεξεργαστής κοψίματος: 4 γωνίες που σέρνονται
+let crop=null;
+async function openCrop(i){const cur=shots[i];if(!cur)return;const src=shotOrig.get(cur)||cur;
+  crop={i,src,Q:shotQuad.get(cur)||null};$('#crop').classList.remove('hidden');$('#cropBusy').classList.add('hidden');
+  if(history.state&&history.state.v!=='crop')history.pushState({v:'crop'},'');
+  await cropLoad();if(!crop.Q)crop.Q=detectPage(crop.img)||[[0,0],[1,0],[1,1],[0,1]];cropDraw()}
+async function cropLoad(){crop.img=await loadImg(crop.src);const box=$('#cropBox'),bw=box.clientWidth,bh=box.clientHeight,iw=crop.img.naturalWidth,ih=crop.img.naturalHeight;
+  const k=Math.min((bw-36)/iw,(bh-36)/ih);crop.w=iw*k;crop.h=ih*k;crop.ox=(bw-crop.w)/2;crop.oy=(bh-crop.h)/2;
+  const c=$('#cropC');c.width=Math.round(crop.w*Math.min(2,devicePixelRatio||1));c.height=Math.round(crop.h*Math.min(2,devicePixelRatio||1));c.style.width=crop.w+'px';c.style.height=crop.h+'px';c.style.left=crop.ox+'px';c.style.top=crop.oy+'px';
+  c.getContext('2d').drawImage(crop.img,0,0,c.width,c.height);const s=$('#cropS');s.setAttribute('width',bw);s.setAttribute('height',bh)}
+function cropDraw(){const P=crop.Q.map(q=>[crop.ox+q[0]*crop.w,crop.oy+q[1]*crop.h]);
+  $('#cropS').innerHTML=`<polygon points="${P.map(p=>p.join(',')).join(' ')}"/>`+P.map((p,k)=>`<circle data-k="${k}" cx="${p[0]}" cy="${p[1]}" r="17"/>`).join('')}
+(()=>{let drag=-1;const s=$('#cropS');
+  s.addEventListener('pointerdown',e=>{if(!crop)return;const r=s.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;let bd=1e9;
+    crop.Q.forEach((q,k)=>{const d=Math.hypot(crop.ox+q[0]*crop.w-x,crop.oy+q[1]*crop.h-y);if(d<bd){bd=d;drag=k}});if(bd>60){drag=-1;return}s.setPointerCapture(e.pointerId);e.preventDefault()});
+  s.addEventListener('pointermove',e=>{if(drag<0||!crop)return;const r=s.getBoundingClientRect();crop.Q[drag]=[Math.min(1,Math.max(0,(e.clientX-r.left-crop.ox)/crop.w)),Math.min(1,Math.max(0,(e.clientY-r.top-crop.oy)/crop.h))];cropDraw()});
+  const up=()=>{drag=-1};s.addEventListener('pointerup',up);s.addEventListener('pointercancel',up)})();
+function cropClose(fromPop){$('#crop').classList.add('hidden');crop=null;if(!fromPop&&history.state&&history.state.v==='crop')history.back()}
+addEventListener('popstate',()=>{if(!$('#crop').classList.contains('hidden'))cropClose(true)});
+$('#cropNo').onclick=()=>cropClose();
+$('#cropAll').onclick=()=>{if(!crop)return;crop.Q=[[0,0],[1,0],[1,1],[0,1]];cropDraw()};
+$('#cropAuto').onclick=()=>{if(!crop)return;const Q=detectPage(crop.img);if(!Q)return toast('Δεν βρέθηκαν σίγουρα οι άκρες — σύρε τις γωνίες με το δάχτυλο');crop.Q=Q;cropDraw()};
+$('#cropRot').onclick=async()=>{if(!crop)return;crop.src=await rotateUrl(crop.src);crop.Q=null;await cropLoad();crop.Q=detectPage(crop.img)||[[0,0],[1,0],[1,1],[0,1]];cropDraw()};
+$('#cropOk').onclick=async()=>{if(!crop)return;const c=crop,full=c.Q.every((q,k)=>Math.hypot(q[0]-[0,1,1,0][k],q[1]-[0,0,1,1][k])<.005);
+  $('#cropBusy').classList.remove('hidden');
+  try{const old=shots[c.i];let out=c.src,orig=null;if(!full){out=await warpPage(c.src,c.Q);orig=c.src}
+    shotOrig.delete(old);shotQuad.delete(old);shotBlur.delete(old);if(orig){shotOrig.set(out,orig);shotQuad.set(out,c.Q.map(q=>q.slice()))}
+    try{if(sharpness(await loadImg(out))<BLUR_LIMIT)shotBlur.add(out)}catch(e){}
+    shots[c.i]=out;drawThumbs();camCount();draftSet('shots',shots);if(!$('#camRev').classList.contains('hidden'))$('#camRevImg').src=out;toast(full?'Κρατήθηκε όλη η φωτογραφία':'✂️ Η σελίδα κόπηκε και ισιώθηκε')}
+  catch(e){console.error(e);toast('Το κόψιμο δεν έγινε — δοκίμασε ξανά')}
+  cropClose()};
 draftGet('shots').then(s=>{if(Array.isArray(s)&&s.length){shots=s;drawThumbs();toast('Οι φωτογραφίες σου είναι εδώ — συνέχισε από εκεί που είχες μείνει')}});
 const loadImg=src=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=src});
 async function ocrShots(){
@@ -995,7 +1098,7 @@ function camReview(){const u=shots[shots.length-1];if(!u)return toast('Δεν έ
   $('#camRevMsg').textContent=(shotBlur.has(u)?'⚠️ Φαίνεται θολή — καλύτερα σβήσ\' την και ξανατράβα. ':'')+'Σελίδα '+shots.length+' · πάτα δύο φορές ή «Μεγέθυνση» για να δεις τα γράμματα';
   $('#camRev').classList.remove('hidden')}
 function revZoom(){revZ=revZ>=3?1:revZ+1;$('#camRevImg').style.width=(revZ*100)+'%';$('#camRevZ').textContent=revZ>=3?'🔍 Ολόκληρη':'🔍 Μεγέθυνση'}
-$('#camThumb').onclick=camReview;$('#camRevOk').onclick=()=>$('#camRev').classList.add('hidden');$('#camRevZ').onclick=revZoom;
+$('#camThumb').onclick=camReview;$('#camRevCrop').onclick=()=>{if(shots.length)openCrop(shots.length-1)};$('#camRevOk').onclick=()=>$('#camRev').classList.add('hidden');$('#camRevZ').onclick=revZoom;
 $('#camRevImg').ondblclick=revZoom;
 $('#camRevDel').onclick=()=>{const u=shots.pop();if(u)shotBlur.delete(u);drawThumbs();camCount();draftSet('shots',shots);$('#camRev').classList.add('hidden');$('#camDel').classList.add('hidden');toast('Σβήστηκε — τράβα ξανά')};
 function closeCam(fromPop){
@@ -1058,6 +1161,7 @@ $('#camShot').onclick=async()=>{
     if(!url&&frame){info={w:frame.width,h:frame.height};url=frame.toDataURL('image/jpeg',0.92);how='video'}
     if(frame)frame.width=frame.height=0;
     if(!url||url.length<100)return toast('Η φωτογραφία δεν τραβήχτηκε — δοκίμασε ξανά');
+    {const u2=await autoCrop(url);if(u2!==url){url=u2;$('#camRes').textContent='✂️ η σελίδα κόπηκε αυτόματα'}}
     // 5) έλεγχος θολούρας
     let sh=1;try{sh=sharpness(await loadImg(url))}catch(e){}
     const blurry=sh<BLUR_LIMIT;if(blurry)shotBlur.add(url);

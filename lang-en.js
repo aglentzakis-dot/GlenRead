@@ -459,7 +459,19 @@ var D={
 "➚ Βέλος": "➚ Arrow",
 "⬜ Ορθογώνιο": "⬜ Rectangle",
 "⭕ Κύκλος": "⭕ Circle",
-"Ελληνικά — πάτα για English": "Ελληνικά — tap for English"
+"Ελληνικά — πάτα για English": "Ελληνικά — tap for English",
+"Αυτόματο κόψιμο και ίσιωμα της σελίδας στις φωτογραφίες": "Automatically crop and straighten the page in photos",
+"Σύρε τις 4 κίτρινες γωνίες πάνω στις άκρες της σελίδας": "Drag the 4 yellow corners onto the edges of the page",
+"Ισιώνω τη σελίδα…": "Straightening the page…",
+"🪄 Αυτόματα": "🪄 Auto",
+"⬜ Όλη η φωτογραφία": "⬜ Whole photo",
+"⟳ Περιστροφή": "⟳ Rotate",
+"✂️ Κόψιμο": "✂️ Crop",
+"✂️ η σελίδα κόπηκε αυτόματα": "✂️ page cropped automatically",
+"Δεν βρέθηκαν σίγουρα οι άκρες — σύρε τις γωνίες με το δάχτυλο": "Couldn't find the edges for sure — drag the corners with your finger",
+"Κρατήθηκε όλη η φωτογραφία": "The whole photo was kept",
+"✂️ Η σελίδα κόπηκε και ισιώθηκε": "✂️ Page cropped and straightened",
+"Το κόψιμο δεν έγινε — δοκίμασε ξανά": "Cropping failed — try again"
 };
 var G=function(s){return D.hasOwnProperty(s)?D[s]:s};
 var P=[
