@@ -228,16 +228,17 @@ input[type=search]{flex:1;min-width:0}
 .list .it strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .warn{background:#fff3cd;color:#5a4500;border-radius:12px;padding:10px 12px;font-size:14px}
 @media (prefers-color-scheme:dark){.warn{background:#3b3214;color:#f3e3a6}}
-#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1d1d1b;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:9;max-width:90%}
+#toast{z-index:50!important;position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1d1d1b;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:9;max-width:90%}
 #toast.on{opacity:1}
 details summary{cursor:pointer;font-weight:600}
-#cam{position:fixed;inset:0;z-index:20;background:#000;display:flex;flex-direction:column}
+#cam{touch-action:none;position:fixed;inset:0;z-index:20;background:#000;display:flex;flex-direction:column}
 #cam video{flex:1;min-height:0;width:100%;object-fit:contain;background:#000}
+#cam #camClose{min-width:0;flex:0 1 auto;padding-left:8px;padding-right:8px;font-size:15px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:34%}
 #cam .bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:#000}
 #cam .shot.busy{opacity:.5;transform:scale(.92)}
-#cam .shot{width:74px;height:74px;border-radius:50%;border:5px solid #fff;background:#FDD117;padding:0;min-height:0}
+#cam .shot{flex:0 0 74px;width:74px;height:74px;border-radius:50%;border:5px solid #fff;background:#FDD117;padding:0;min-height:0}
 #cam .cnt{color:#fff;font-size:12px;text-align:center;margin-top:3px}
-#cam .tbox{min-width:90px;display:flex;flex-direction:column;align-items:center}
+#cam .tbox{flex:none;min-width:80px;display:flex;flex-direction:column;align-items:center}
 #cam .thumb{width:64px;height:64px;border-radius:12px;border:3px solid #fff;padding:0;min-height:0;background:#222 center/cover no-repeat;position:relative;overflow:visible}
 #cam .thumb.empty{opacity:.35}#cam .thumb.bad{border-color:#e53935}
 #cam .thumb b{position:absolute;top:-8px;right:-8px;background:#FDD117;color:#1d1d1b;border-radius:12px;min-width:24px;height:24px;font-size:13px;display:grid;place-items:center;padding:0 5px}
@@ -252,6 +253,7 @@ details summary{cursor:pointer;font-weight:600}
 #crop .chint{position:absolute;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top));text-align:center;font-size:13px;text-shadow:0 1px 3px #000;pointer-events:none}
 #crop .cbar{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px 10px calc(10px + env(safe-area-inset-bottom));background:#000}
 #crop .cbar button{min-height:46px;padding:4px;font-size:14px}#crop .cbar .sec{color:#fff;border-color:#555;background:#222}
+#crop.working .cbar{pointer-events:none;opacity:.5}
 #crop .busy{position:absolute;inset:0;display:grid;place-items:center;background:#0009;font-size:18px;font-weight:700}
 #camRev{position:absolute;inset:0;z-index:6;background:#000;display:flex;flex-direction:column}
 #camRev .rv{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y}
@@ -268,7 +270,7 @@ details summary{cursor:pointer;font-weight:600}
 #cam .camtools button{color:#fff;border-color:#777;background:#0006;min-height:40px}
 #cam .camtools button.on{background:#FDD117;color:#000}
 #cam .camres{color:#fff;font-size:12px;background:#0006;border-radius:8px;padding:2px 8px}
-#cam .camzoom{position:absolute;left:16px;right:16px;bottom:calc(120px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;color:#fff;background:#0006;border-radius:14px;padding:8px 12px}
+#cam .camzoom{touch-action:pan-x;position:absolute;left:16px;right:16px;bottom:calc(120px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;color:#fff;background:#0006;border-radius:14px;padding:8px 12px}
 #cam .camzoom input{flex:1}
 #cam .hint{position:absolute;top:calc(10px + env(safe-area-inset-top));left:8px;right:8px;text-align:center;color:#fff;font-size:13px;line-height:1.35;text-shadow:0 1px 3px #000}
 </style>
@@ -551,7 +553,7 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.32';
+const VERSION='2.33';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -937,11 +939,12 @@ function drawThumbs(){
   $('#scanBox').classList.toggle('hidden',!shots.length);
   $('#thumbs').innerHTML=shots.map((s,i)=>`<div${shotBlur.has(s)?' class="blur"':''}><img src="${s}" alt="σελίδα ${i+1}"><b data-i="${i}">✕</b></div>`).join('');
 }
-$('#thumbs').onclick=e=>{if(e.target.dataset.i!=null){const u=shots.splice(+e.target.dataset.i,1)[0];shotOrig.delete(u);drawThumbs();draftSet('shots',shots);return}
+$('#thumbs').onclick=e=>{if(e.target.dataset.i!=null){const u=shots.splice(+e.target.dataset.i,1)[0];forgetShot(u);drawThumbs();draftSet('shots',shots);return}
   const im=e.target.closest('img');if(im){const i=[...$('#thumbs').querySelectorAll('img')].indexOf(im);if(i>=0)openCrop(i)}};
 // ---------- Κόψιμο και ίσιωμα σελίδας ----------
 // το πρωτότυπο κάθε κομμένης φωτογραφίας (για να ξανακόψεις πιο φαρδιά) και οι γωνίες που διαλέχτηκαν — μόνο για όσο είναι ανοιχτή η εφαρμογή
 const shotOrig=new Map(),shotQuad=new Map();
+function forgetShot(u){if(!u)return;shotOrig.delete(u);shotQuad.delete(u);shotBlur.delete(u)}
 const autoCropOn=()=>{try{return localStorage.getItem('glenread-autocrop')!=='0'}catch(e){return true}};
 $('#autoCrop').checked=autoCropOn();$('#autoCrop').onchange=e=>{try{localStorage.setItem('glenread-autocrop',e.target.checked?'1':'0')}catch(x){}};
 // εντοπισμός σελίδας: η πιο μεγάλη φωτεινή περιοχή (το χαρτί) πάνω σε πιο σκούρο φόντο → οι 4 γωνίες της
@@ -973,6 +976,10 @@ function detectPage(img){try{
   const area=Math.abs(Q.reduce((a,p,i)=>{const q=Q[(i+1)%4];return a+p[0]*q[1]-q[0]*p[1]},0))/2;
   // σιγουριά: σελίδα αρκετά μεγάλη, όχι όλη η φωτογραφία, και «γεμάτη» (σαν τετράπλευρο)
   if(area<.18||area>.94||bestA/n/area<.82)return null;
+  // η σελίδα γεμίζει το κάδρο από 3-4 πλευρές: δεν υπάρχει τραπέζι γύρω για να κοπεί (π.χ. σκιά/φωτισμός σε κοντινή λήψη)
+  const e=.03,touch=[Q.some(p=>p[0]<e),Q.some(p=>p[0]>1-e),Q.some(p=>p[1]<e),Q.some(p=>p[1]>1-e)].filter(Boolean).length;if(touch>=3)return null;
+  // καθαρή αντίθεση σελίδας-φόντου, όχι απλή διαβάθμιση του φωτός
+  let si=0,so=0;for(let i=0;i<n;i++){if(lab[i]===bestL)si+=b[i];else so+=b[i]}if(n>bestA&&si/bestA-so/(n-bestA)<45)return null;
   return Q}catch(e){return null}}
 // λύση γραμμικού συστήματος (για την προοπτική)
 function solve(A,bv){const n=bv.length;for(let i=0;i<n;i++){let m=i;for(let r=i+1;r<n;r++)if(Math.abs(A[r][i])>Math.abs(A[m][i]))m=r;[A[i],A[m]]=[A[m],A[i]];[bv[i],bv[m]]=[bv[m],bv[i]];
@@ -985,7 +992,10 @@ async function warpPage(url,Q){
   const k=Math.min(1,3000/Math.max(OW,OH));OW=Math.max(16,Math.round(OW*k));OH=Math.max(16,Math.round(OH*k));
   const D=[[0,0],[OW,0],[OW,OH],[0,OH]],A=[],B=[];
   for(let i=0;i<4;i++){const[x,y]=D[i],[u,v]=P[i];A.push([x,y,1,0,0,0,-u*x,-u*y]);B.push(u);A.push([0,0,0,x,y,1,-v*x,-v*y]);B.push(v)}
-  const h=solve(A,B);
+  // οι γωνίες πρέπει να σχηματίζουν κυρτό τετράπλευρο (όχι «σταυρωτό»)
+  const cr=[0,1,2,3].map(i=>{const a=P[i],b=P[(i+1)%4],c=P[(i+2)%4];return (b[0]-a[0])*(c[1]-b[1])-(b[1]-a[1])*(c[0]-b[0])});
+  if(!(cr.every(v=>v>0)||cr.every(v=>v<0)))throw new Error('shape');
+  const h=solve(A,B);if(!h.every(Number.isFinite))throw new Error('shape');
   const sc=document.createElement('canvas');sc.width=W0;sc.height=H0;const sx=sc.getContext('2d',{willReadFrequently:true});sx.drawImage(img,0,0);
   const S=sx.getImageData(0,0,W0,H0).data;sc.width=sc.height=0;
   const oc=document.createElement('canvas');oc.width=OW;oc.height=OH;const ox=oc.getContext('2d'),O=ox.createImageData(OW,OH),od=O.data;
@@ -1003,32 +1013,32 @@ let crop=null;
 async function openCrop(i){const cur=shots[i];if(!cur)return;const src=shotOrig.get(cur)||cur;
   crop={i,src,Q:shotQuad.get(cur)||null};$('#crop').classList.remove('hidden');$('#cropBusy').classList.add('hidden');
   if(history.state&&history.state.v!=='crop')history.pushState({v:'crop'},'');
-  await cropLoad();if(!crop.Q)crop.Q=detectPage(crop.img)||[[0,0],[1,0],[1,1],[0,1]];cropDraw()}
-async function cropLoad(){crop.img=await loadImg(crop.src);const box=$('#cropBox'),bw=box.clientWidth,bh=box.clientHeight,iw=crop.img.naturalWidth,ih=crop.img.naturalHeight;
+  const c=crop;await cropLoad();if(crop!==c)return;if(!c.Q)c.Q=detectPage(c.img)||[[0,0],[1,0],[1,1],[0,1]];cropDraw()}
+async function cropLoad(){const c0=crop,img=await loadImg(c0.src);if(crop!==c0)throw new Error('closed');crop.img=img;const box=$('#cropBox'),bw=box.clientWidth,bh=box.clientHeight,iw=crop.img.naturalWidth,ih=crop.img.naturalHeight;
   const k=Math.min((bw-36)/iw,(bh-36)/ih);crop.w=iw*k;crop.h=ih*k;crop.ox=(bw-crop.w)/2;crop.oy=(bh-crop.h)/2;
   const c=$('#cropC');c.width=Math.round(crop.w*Math.min(2,devicePixelRatio||1));c.height=Math.round(crop.h*Math.min(2,devicePixelRatio||1));c.style.width=crop.w+'px';c.style.height=crop.h+'px';c.style.left=crop.ox+'px';c.style.top=crop.oy+'px';
   c.getContext('2d').drawImage(crop.img,0,0,c.width,c.height);const s=$('#cropS');s.setAttribute('width',bw);s.setAttribute('height',bh)}
 function cropDraw(){const P=crop.Q.map(q=>[crop.ox+q[0]*crop.w,crop.oy+q[1]*crop.h]);
   $('#cropS').innerHTML=`<polygon points="${P.map(p=>p.join(',')).join(' ')}"/>`+P.map((p,k)=>`<circle data-k="${k}" cx="${p[0]}" cy="${p[1]}" r="17"/>`).join('')}
 (()=>{let drag=-1;const s=$('#cropS');
-  s.addEventListener('pointerdown',e=>{if(!crop)return;const r=s.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;let bd=1e9;
+  s.addEventListener('pointerdown',e=>{if(!crop||!crop.Q||crop.busy)return;const r=s.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;let bd=1e9;
     crop.Q.forEach((q,k)=>{const d=Math.hypot(crop.ox+q[0]*crop.w-x,crop.oy+q[1]*crop.h-y);if(d<bd){bd=d;drag=k}});if(bd>60){drag=-1;return}s.setPointerCapture(e.pointerId);e.preventDefault()});
-  s.addEventListener('pointermove',e=>{if(drag<0||!crop)return;const r=s.getBoundingClientRect();crop.Q[drag]=[Math.min(1,Math.max(0,(e.clientX-r.left-crop.ox)/crop.w)),Math.min(1,Math.max(0,(e.clientY-r.top-crop.oy)/crop.h))];cropDraw()});
+  s.addEventListener('pointermove',e=>{if(drag<0||!crop||!crop.Q)return;const r=s.getBoundingClientRect();crop.Q[drag]=[Math.min(1,Math.max(0,(e.clientX-r.left-crop.ox)/crop.w)),Math.min(1,Math.max(0,(e.clientY-r.top-crop.oy)/crop.h))];cropDraw()});
   const up=()=>{drag=-1};s.addEventListener('pointerup',up);s.addEventListener('pointercancel',up)})();
 function cropClose(fromPop){$('#crop').classList.add('hidden');crop=null;if(!fromPop&&history.state&&history.state.v==='crop')history.back()}
-addEventListener('popstate',()=>{if(!$('#crop').classList.contains('hidden'))cropClose(true)});
-$('#cropNo').onclick=()=>cropClose();
+addEventListener('popstate',e=>{if(!$('#crop').classList.contains('hidden')&&!(e.state&&e.state.v==='crop'))cropClose(true)});
+$('#cropNo').onclick=()=>{if(crop&&crop.busy)return;cropClose()};
 $('#cropAll').onclick=()=>{if(!crop)return;crop.Q=[[0,0],[1,0],[1,1],[0,1]];cropDraw()};
 $('#cropAuto').onclick=()=>{if(!crop)return;const Q=detectPage(crop.img);if(!Q)return toast('Δεν βρέθηκαν σίγουρα οι άκρες — σύρε τις γωνίες με το δάχτυλο');crop.Q=Q;cropDraw()};
-$('#cropRot').onclick=async()=>{if(!crop)return;crop.src=await rotateUrl(crop.src);crop.Q=null;await cropLoad();crop.Q=detectPage(crop.img)||[[0,0],[1,0],[1,1],[0,1]];cropDraw()};
-$('#cropOk').onclick=async()=>{if(!crop)return;const c=crop,full=c.Q.every((q,k)=>Math.hypot(q[0]-[0,1,1,0][k],q[1]-[0,0,1,1][k])<.005);
+$('#cropRot').onclick=async()=>{if(!crop||crop.busy||!crop.Q)return;const c=crop;c.busy=true;try{const r=await rotateUrl(c.src);if(crop!==c)return;c.src=r;const keep=c.Q;c.Q=null;await cropLoad().catch(()=>{});if(crop!==c)return;c.Q=detectPage(c.img)||[[0,0],[1,0],[1,1],[0,1]];cropDraw()}finally{c.busy=false}};
+$('#cropOk').onclick=async()=>{if(!crop||crop.busy||!crop.Q)return;crop.busy=true;$('#crop').classList.add('working');const c=crop,full=c.Q.every((q,k)=>Math.hypot(q[0]-[0,1,1,0][k],q[1]-[0,0,1,1][k])<.005);
   $('#cropBusy').classList.remove('hidden');
   try{const old=shots[c.i];let out=c.src,orig=null;if(!full){out=await warpPage(c.src,c.Q);orig=c.src}
     shotOrig.delete(old);shotQuad.delete(old);shotBlur.delete(old);if(orig){shotOrig.set(out,orig);shotQuad.set(out,c.Q.map(q=>q.slice()))}
     try{if(sharpness(await loadImg(out))<BLUR_LIMIT)shotBlur.add(out)}catch(e){}
     shots[c.i]=out;drawThumbs();camCount();draftSet('shots',shots);if(!$('#camRev').classList.contains('hidden'))$('#camRevImg').src=out;toast(full?'Κρατήθηκε όλη η φωτογραφία':'✂️ Η σελίδα κόπηκε και ισιώθηκε')}
-  catch(e){console.error(e);toast('Το κόψιμο δεν έγινε — δοκίμασε ξανά')}
-  cropClose()};
+  catch(e){console.error(e);toast(e.message==='shape'?'Οι γωνίες δεν σχηματίζουν σελίδα — διόρθωσέ τες':'Το κόψιμο δεν έγινε — δοκίμασε ξανά');$('#crop').classList.remove('working');c.busy=false;$('#cropBusy').classList.add('hidden');if(e.message==='shape')return}
+  $('#crop').classList.remove('working');cropClose()};
 draftGet('shots').then(s=>{if(Array.isArray(s)&&s.length){shots=s;drawThumbs();toast('Οι φωτογραφίες σου είναι εδώ — συνέχισε από εκεί που είχες μείνει')}});
 const loadImg=src=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=src});
 async function ocrShots(){
@@ -1044,7 +1054,7 @@ async function ocrShots(){
     }
     ocrLbl='';ocrRunning(false);
     if(!await draftSet('file-'+part.id,{images:shots.slice()}))toast('⚠️ Οι φωτογραφίες δεν χώρεσαν στη μνήμη — το κείμενο κρατήθηκε');
-    delete part.partial;shots=[];drawThumbs();draftSet('shots',[]);finish(part);
+    delete part.partial;shots=[];shotOrig.clear();shotQuad.clear();shotBlur.clear();drawThumbs();draftSet('shots',[]);finish(part);
   }catch(e){if(e.message!=='cancel')console.error(e);ocrLbl='';ocrRunning(false);
     if(e.message==='cancel'){if(pages.length)saveDoc(part);return goHome()}
     if(pages.length){saveDoc(part);toast('Η σελίδα '+(pages.length+1)+' δεν διαβάστηκε — κρατήθηκαν οι '+pages.length+' πρώτες στα «Πρόσφατα». Οι φωτογραφίες είναι ακόμη εδώ.')}
@@ -1069,6 +1079,8 @@ async function makePdf(){
 // για να ελευθερώσει μνήμη. Με τη ζωντανή κάμερα μένουμε μέσα στην εφαρμογή.
 let camStream=null,camTrack=null,camIC=null,torchOn=false;
 async function openCam(){
+  if(camStream||openCam.busy)return;openCam.busy=true;try{await openCam0()}finally{openCam.busy=false}}
+async function openCam0(){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){camFallback();return}
   try{
     // ζητάμε την πιο υψηλή ανάλυση που δίνει ο φακός, για να διαβάζονται και τα μικρά γράμματα
@@ -1100,7 +1112,7 @@ function camReview(){const u=shots[shots.length-1];if(!u)return toast('Δεν έ
 function revZoom(){revZ=revZ>=3?1:revZ+1;$('#camRevImg').style.width=(revZ*100)+'%';$('#camRevZ').textContent=revZ>=3?'🔍 Ολόκληρη':'🔍 Μεγέθυνση'}
 $('#camThumb').onclick=camReview;$('#camRevCrop').onclick=()=>{if(shots.length)openCrop(shots.length-1)};$('#camRevOk').onclick=()=>$('#camRev').classList.add('hidden');$('#camRevZ').onclick=revZoom;
 $('#camRevImg').ondblclick=revZoom;
-$('#camRevDel').onclick=()=>{const u=shots.pop();if(u)shotBlur.delete(u);drawThumbs();camCount();draftSet('shots',shots);$('#camRev').classList.add('hidden');$('#camDel').classList.add('hidden');toast('Σβήστηκε — τράβα ξανά')};
+$('#camRevDel').onclick=()=>{const u=shots.pop();forgetShot(u);drawThumbs();camCount();draftSet('shots',shots);$('#camRev').classList.add('hidden');$('#camDel').classList.add('hidden');toast('Σβήστηκε — τράβα ξανά')};
 function closeCam(fromPop){
   $('#camRev').classList.add('hidden');motStop();if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null}camTrack=null;camIC=null;torchOn=false;$('#camTorch').classList.remove('on');
   $('#camV').srcObject=null;$('#cam').classList.add('hidden');
@@ -1151,8 +1163,9 @@ $('#camShot').onclick=async()=>{
     await waitSteady(1500);$('#camHoldT').textContent='τραβάω τη φωτογραφία…';
     // 3) πραγματική φωτογραφία στη μέγιστη ανάλυση — το μήνυμα «Μην κουνάς» μένει μέχρι να τελειώσει πραγματικά
     let url=null,info={},how='',blob=null;
-    if(camIC&&camIC.takePhoto){try{const pc=await camIC.getPhotoCapabilities().catch(()=>null);const opt=pc&&pc.imageWidth?{imageWidth:pc.imageWidth.max,imageHeight:pc.imageHeight.max}:{};
-      if(torchOn)opt.fillLightMode='flash';blob=await camIC.takePhoto(opt).catch(()=>camIC.takePhoto())}catch(e){blob=null}}
+    const lim=(p,ms)=>Promise.race([p,sleep(ms).then(()=>null)]);
+    if(camIC&&camIC.takePhoto){try{const pc=await lim(camIC.getPhotoCapabilities().catch(()=>null),2000);const opt=pc&&pc.imageWidth?{imageWidth:pc.imageWidth.max,imageHeight:pc.imageHeight.max}:{};
+      if(torchOn)opt.fillLightMode='flash';blob=await lim(camIC.takePhoto(opt).catch(()=>camIC.takePhoto()),6000)}catch(e){blob=null}}
     let frame=null;if(!blob){try{frame=document.createElement('canvas');frame.width=v.videoWidth;frame.height=v.videoHeight;frame.getContext('2d').drawImage(v,0,0)}catch(e){frame=null}}
     // 4) ΤΩΡΑ τραβήχτηκε: τώρα το «κλικ» (φλας + δόνηση) — από εδώ μπορείς να κουνήσεις το κινητό
     hold.classList.remove('on');const fl=$('#camF');fl.style.opacity=.8;setTimeout(()=>fl.style.opacity=0,120);try{navigator.vibrate&&navigator.vibrate(40)}catch(e){}
@@ -1173,11 +1186,11 @@ $('#camShot').onclick=async()=>{
     if(how==='video'&&!camLowWarned){camLowWarned=true;toast('Το κινητό δεν έδωσε φωτογραφία πλήρους ανάλυσης. Για πιο καθαρή, πάτα «📷 Κάμερα κινητού».')}
   }finally{hold.classList.remove('on');if(foc)camTrack&&camTrack.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(()=>{});shooting=false;$('#camShot').classList.remove('busy')}
 };
-$('#camDel').onclick=()=>{const u=shots.pop();if(u)shotBlur.delete(u);drawThumbs();camCount();draftSet('shots',shots);$('#camDel').classList.add('hidden');$('#camRes').textContent='Σβήστηκε — τράβα ξανά';};
+$('#camDel').onclick=()=>{const u=shots.pop();forgetShot(u);drawThumbs();camCount();draftSet('shots',shots);$('#camDel').classList.add('hidden');$('#camRes').textContent='Σβήστηκε — τράβα ξανά';};
 $('#camClose').onclick=()=>closeCam(false);
 // η κάμερα του ίδιου του κινητού: η καλύτερη ποιότητα (σταθεροποίηση, HDR) — οι φωτογραφίες που έχεις ήδη τραβήξει μένουν
 $('#camNative').onclick=()=>{closeCam(false);setTimeout(camFallback,250)};
-addEventListener('popstate',()=>{if(!$('#cam').classList.contains('hidden'))closeCam(true)});
+addEventListener('popstate',e=>{const v=e.state&&e.state.v;if(!$('#cam').classList.contains('hidden')&&v!=='cam'&&v!=='crop')closeCam(true)});
 // αν το Ανδροειδές έκλεισε την εφαρμογή όσο ήταν ανοιχτή η κάμερα του κινητού
 try{if(sessionStorage.getItem('glenread-cam')){sessionStorage.removeItem('glenread-cam');setTimeout(()=>toast('Αν χάθηκε η φωτογραφία, χρησιμοποίησε την κάμερα της εφαρμογής ή «Από φωτογραφίες»'),1200)}}catch(e){}
 

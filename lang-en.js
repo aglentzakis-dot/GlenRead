@@ -524,7 +524,7 @@ function tr(t){if(!t||!GR.test(t))return null;var k=t.replace(/\s+/g,' ').trim()
   return t.match(/^\s*/)[0]+v+t.match(/\s*$/)[0]}
 window.TR=function(t){var v=tr(t);return v==null?t:v};
 // ό,τι είναι περιεχόμενο του χρήστη δεν μεταφράζεται ποτέ
-var SKIP='#reader,#pagesView,#wTitle,#lastName,#mRenameS,.bt,#histList strong,#bkList strong,#gdFiles strong,#efmPage,#efmDlg,#trOut,#thumbs,textarea,script,style';
+var SKIP='#reader,#pagesView,#wTitle,#lastName,#mRenameS,.bt,#histList strong,#bkList strong,#gdFiles strong,#efmPage,#efmDlg,#trOut,#thumbs,#uiLang,textarea,script,style';
 function skipped(e){return !e||(e.closest&&!!e.closest(SKIP))}
 function attrs(e){if(!e.getAttribute)return;for(var a=['placeholder','aria-label','title','alt'],i=0;i<a.length;i++){var x=e.getAttribute(a[i]);if(x){var v=tr(x);if(v!=null&&v!==x)e.setAttribute(a[i],v)}}}
 function text(n){var v=tr(n.nodeValue);if(v!=null&&v!==n.nodeValue)n.nodeValue=v}
@@ -537,5 +537,6 @@ function start(){walk(document.body);document.title=document.title.replace('Δι
   new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var m=ms[i];if(m.type==='childList'){for(var j=0;j<m.addedNodes.length;j++)walk(m.addedNodes[j])}else if(m.type==='characterData'){if(!skipped(m.target.parentElement))text(m.target)}else attrs(m.target)}})
   .observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','aria-label','title','alt']})}
 if(document.body)start();else document.addEventListener('DOMContentLoaded',start);
+try{var st=document.createElement('style');st.textContent='#gMenu::after{content:"Menu"!important}.thumbs div.blur::after{content:"⚠️ blurry"!important}';document.head.appendChild(st)}catch(e){}
 var c0=window.confirm;window.confirm=function(m){return c0.call(window,window.TR(m))};
 })();
