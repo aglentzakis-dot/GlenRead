@@ -527,7 +527,7 @@ details summary{cursor:pointer;font-weight:600}
 
 <script>
 // γλώσσα εφαρμογής: ό,τι διάλεξε ο χρήστης, αλλιώς η γλώσσα του κινητού (ελληνικά → ελληνικά, οτιδήποτε άλλο → αγγλικά)
-window.LANG_READY=false; // τα αγγλικά ενεργοποιούνται μόλις ολοκληρωθεί το lang-en.js
+window.LANG_READY=true; // τα αγγλικά ενεργοποιούνται μόλις ολοκληρωθεί το lang-en.js
 window.UI=!LANG_READY?'el':(function(){try{var v=localStorage.getItem('glenread-ui');if(v==='el'||v==='en')return v}catch(e){}return /^el\b/i.test(navigator.language||'el')?'el':'en'})();
 document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-en.js"><\/script>');
 </script>
@@ -539,7 +539,7 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.30';
+const VERSION='2.31';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -1685,7 +1685,7 @@ document.querySelectorAll('#sheet details.cat').forEach(d=>d.addEventListener('t
 // αλλαγή γλώσσας εφαρμογής (ξαναφορτώνει· τα έγγραφα δεν αλλάζουν)
 function setUi(v){try{localStorage.setItem('glenread-ui',v)}catch(e){}flushAll();location.reload()}
 if(!LANG_READY){$('#mUi').classList.add('hidden');$('#uiLang').closest('p').classList.add('hidden')}
-$('#uiLang').value=UI;$('#uiLang').onchange=e=>setUi(e.target.value);
+$('#uiLang').value=UI;if(EN)document.querySelectorAll('a[href="privacy.html"]').forEach(x=>x.setAttribute('href','privacy.html#en'));$('#uiLang').onchange=e=>setUi(e.target.value);
 $('#mUiS').textContent=UI==='el'?'Ελληνικά — πάτα για English':'English — πάτησε για Ελληνικά';$('#mUi').onclick=()=>setUi(UI==='el'?'en':'el');
 $('#mGpos').onclick=()=>{try{localStorage.removeItem('glenread-gpos')}catch(e){}$('#gMenu').classList.remove('custom');closeSheet();toast('Το κουμπί G γύρισε κάτω δεξιά')};
 
@@ -1903,7 +1903,7 @@ function curPos(){
     const r=els[k]?els[k].getBoundingClientRect():{top:0,height:1};const f=Math.min(.98,Math.max(0,(80-r.top)/r.height));
     const pt=(doc.pages[k]||{}).text||'';let i=Math.floor(pt.length*f);const nl=pt.lastIndexOf('\n',i);i=nl>=0?nl+1:Math.max(0,pt.lastIndexOf(' ',i)+1);
     const t=snip(pt.slice(i));
-    return{v:'page',p:k,f,label:t?'«'+t+'…»':'Σελίδα '+(k+1),sub:'Σελίδα '+(k+1)+(els.length>1?' από '+els.length:'')+' · '+when};
+    return{v:'page',p:k,f,label:t?'«'+t+'…»':(EN?'Page ':'Σελίδα ')+(k+1),sub:'Σελίδα '+(k+1)+(els.length>1?' από '+els.length:'')+' · '+when};
   }
   const h=document.body.scrollHeight-innerHeight,y=h>0?scrollY/h:0;
   // το κείμενο που φαίνεται στο πάνω μέρος της οθόνης
