@@ -476,7 +476,14 @@ var D={
 "📷 Κάμερα": "📷 Camera",
 "Αυτό το έγγραφο σβήστηκε": "This document was deleted",
 "⚠️ Η επαναφορά δεν χώρεσε — ο χώρος του κινητού γέμισε": "⚠️ Restore didn't fit — your phone's storage is full",
-"Οι γωνίες δεν σχηματίζουν σελίδα — διόρθωσέ τες": "The corners don't form a page — adjust them"
+"Οι γωνίες δεν σχηματίζουν σελίδα — διόρθωσέ τες": "The corners don't form a page — adjust them",
+"Εξαγωγή σε Word": "Export to Word",
+"Οι λίστες και οι πίνακες βγαίνουν ως πίνακες": "Lists and tables come out as real tables",
+"Εξαγωγή σε Excel": "Export to Excel",
+"Κατάλογοι και λίστες σε στήλες, με έτοιμα φίλτρα": "Catalogs and lists in columns, with filters ready",
+"Ετοιμάζω το Excel…": "Preparing the Excel file…",
+"Ετοιμάζω το Word…": "Preparing the Word file…",
+"Η εξαγωγή δεν έγινε — δοκίμασε ξανά": "Export failed — try again"
 };
 var G=function(s){return D.hasOwnProperty(s)?D[s]:s};
 var P=[

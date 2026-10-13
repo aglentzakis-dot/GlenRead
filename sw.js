@@ -1,5 +1,5 @@
-const CACHE='glenread-2.34';
-const CORE=['./','index.html','manifest.json','icon-192.png','icon-512.png','icon-512-maskable.png','apple-touch-icon.png','privacy.html','G-glenapps.png','antigrafa.js','efarmoges-mas.js','lang-en.js'];
+const CACHE='glenread-2.35';
+const CORE=['./','index.html','manifest.json','icon-192.png','icon-512.png','icon-512-maskable.png','apple-touch-icon.png','privacy.html','G-glenapps.png','antigrafa.js','efarmoges-mas.js','lang-en.js','exagogi.js'];
 // το κοινό αρχείο της σελίδας GlenApps: αν λείπει για λίγο, η εγκατάσταση δεν πρέπει να αποτύχει
 const SHARED=['/efarmoges-mas.js'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE.map(u=>new Request(u,{cache:'reload'}))).then(()=>Promise.all(SHARED.map(u=>c.add(u).catch(()=>{})))))));

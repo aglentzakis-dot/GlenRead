@@ -497,6 +497,8 @@ details summary{cursor:pointer;font-weight:600}
     <button class="mi" id="mAnnPdf"><span class="ic">📑</span><span class="tx"><b>Αποθήκευση PDF με τις σημειώσεις</b><small>Για να το στείλεις ή να το κρατήσεις</small></span></button>
     <button class="mi" id="mShare"><span class="ic">📤</span><span class="tx"><b>Αποστολή κειμένου</b><small>Σε μήνυμα, ταχυδρομείο κ.λπ.</small></span></button>
     <button class="mi" id="mCopy"><span class="ic">📋</span><span class="tx"><b>Αντιγραφή κειμένου</b><small>Όλου, ή μόνο όσου έχεις επιλέξει</small></span></button>
+    <button class="mi" id="mDocx"><span class="ic">📝</span><span class="tx"><b>Εξαγωγή σε Word</b><small>Οι λίστες και οι πίνακες βγαίνουν ως πίνακες</small></span></button>
+    <button class="mi" id="mXlsx"><span class="ic">📊</span><span class="tx"><b>Εξαγωγή σε Excel</b><small>Κατάλογοι και λίστες σε στήλες, με έτοιμα φίλτρα</small></span></button>
     <button class="mi" id="mTxt"><span class="ic">💾</span><span class="tx"><b>Αποθήκευση ως κείμενο</b><small>Αρχείο .txt στο GlenApps › GlenRead › Έγγραφα</small></span></button>
     <button class="mi" id="mRename"><span class="ic">🏷️</span><span class="tx"><b>Μετονομασία</b><small id="mRenameS"></small></span></button>
     </details>
@@ -553,7 +555,7 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.34';
+const VERSION='2.35';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -726,11 +728,15 @@ function cleanResult(data,W,H){
   let lines=data.lines;
   if(!lines&&data.blocks){lines=[];data.blocks.forEach(b=>(b.paragraphs||[]).forEach(p=>(p.lines||[]).forEach(l=>lines.push(l))))}
   if(!lines||!lines.length)return {text:data.text||'',conf:data.confidence||0};
-  const good=lines.filter(l=>{const t=(l.text||'').trim();if(!t)return false;const letters=(t.match(/\p{L}/gu)||[]).length;return l.confidence>=45&&letters>=Math.min(3,t.length*.4)});
+  // κρατάμε και τις γραμμές με μόνο αριθμούς/τιμές (στήλες καταλόγων), αν αναγνωρίστηκαν με σιγουριά
+  const good=lines.filter(l=>{const t=(l.text||'').trim();if(!t)return false;const letters=(t.match(/\p{L}/gu)||[]).length;
+    return l.confidence>=45&&(letters>=Math.min(3,t.length*.3)||(l.confidence>=60&&/\d/.test(t)&&/^[\d\s.,:\/€%+\-–()]+$/.test(t)))});
   const conf=good.length?good.reduce((a,l)=>a+l.confidence*l.text.length,0)/good.reduce((a,l)=>a+l.text.length,0):0;
   const kept=good.reduce((a,l)=>a+l.text.length,0),all=lines.reduce((a,l)=>a+(l.text||'').length,0)||1;
   const r4=v=>Math.round(v*1e4)/1e4;
-  const boxes=W&&H?good.filter(l=>l.bbox).map(l=>[l.text.replace(/\n$/,'').trim(),r4(l.bbox.x0/W),r4(l.bbox.y0/H),r4(l.bbox.x1/W),r4(l.bbox.y1/H)]):null;
+  // θέση κάθε λέξης (αρχή-τέλος) για να βγαίνουν οι στήλες των καταλόγων στο Excel/Word
+  const wx=l=>{const tk=l.text.trim().split(/\s+/),ws=(l.words||[]).filter(w=>w&&w.bbox&&w.text&&w.text.trim());if(!tk[0]||ws.length!==tk.length)return null;const a=[];ws.forEach(w=>a.push(r4(w.bbox.x0/W),r4(w.bbox.x1/W)));return a};
+  const boxes=W&&H?good.filter(l=>l.bbox).map(l=>{const b=[l.text.replace(/\n$/,'').trim(),r4(l.bbox.x0/W),r4(l.bbox.y0/H),r4(l.bbox.x1/W),r4(l.bbox.y1/H)],w=wx(l);if(w)b.push(w);return b}):null;
   return {text:good.map(l=>l.text.replace(/\n$/,'')).join('\n'),conf:conf*Math.min(1,kept/all+.3),lines:boxes};
 }
 // κάθε ανάγνωση έχει όριο χρόνου και σταματά αμέσως με «Ακύρωση» — ποτέ δεν μένει «κολλημένη»
@@ -1322,6 +1328,22 @@ $('#fsMinus').onclick=()=>{fs=Math.max(13,fs-2);setFs()};$('#fsPlus').onclick=()
 const fullText=()=>doc.pages.map(p=>p.text).join('\n\n');
 $('#mCopy').onclick=async()=>{const sel=getSelection().toString()||(Date.now()-lastSelAt<120000?lastSel:'');closeSheet();try{await navigator.clipboard.writeText(sel||fullText());toast(sel?'Αντιγράφηκε η επιλογή':'Αντιγράφηκε όλο το κείμενο')}catch(e){toast('Δεν επιτράπηκε η αντιγραφή')}};
 $('#mShare').onclick=async()=>{closeSheet();if(navigator.share){try{await navigator.share({title:doc.name,text:fullText()})}catch(e){}}else $('#mCopy').onclick()};
+// Εξαγωγή σε Word/Excel: οι κατάλογοι κρατούν τις στήλες τους (κοινό exagogi.js, φορτώνεται μόνο όταν χρειαστεί)
+async function exportDoc(kind){
+  closeSheet();if(!doc)return;flushAll();const d=doc,x=kind==='xlsx';
+  toast(x?'Ετοιμάζω το Excel…':'Ετοιμάζω το Word…');
+  try{await loadLib(JSZIP);await loadLib('exagogi.js');if(!window.GlenExport)throw new Error('nolib');
+    const an=await GlenExport.analyze(d,{draftGet,translated:trDoc===d&&!!trOrig});
+    const r=x?await GlenExport.buildXlsx(an,d):await GlenExport.buildDocx(an,d);
+    const nT=r.info.tables,rows=x?r.info.rows:0;
+    const msg=EN?(x?(nT?`Found <b>${rows}</b> rows in <b>${nT}</b> ${nT===1?'table':'tables'}, with a filter on every column.`:'No table found — each line of text went into its own row, with a filter.')
+        :(nT?`It contains <b>${nT}</b> ${nT===1?'table':'tables'} from the lists in the document.`:''))
+      :x?(nT?`Βρέθηκαν <b>${rows}</b> γραμμές σε <b>${nT}</b> ${nT===1?'πίνακα':'πίνακες'}, με φίλτρα σε κάθε στήλη.`:'Δεν βρέθηκε πίνακας — κάθε γραμμή του κειμένου μπήκε σε δική της σειρά, με φίλτρο.')
+      :(nT?`Μέσα υπάρχουν <b>${nT}</b> ${nT===1?'πίνακας':'πίνακες'} από τις λίστες του εγγράφου.`:'');
+    await shareOrSave(r.blob,d.name+(x?'.xlsx':'.docx'),msg);
+  }catch(e){console.error(e);toast(e.message==='nolib'?'Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.':'Η εξαγωγή δεν έγινε — δοκίμασε ξανά')}
+}
+$('#mDocx').onclick=()=>exportDoc('docx');$('#mXlsx').onclick=()=>exportDoc('xlsx');
 $('#mTxt').onclick=()=>{closeSheet();saveToFolder(new Blob([fullText()],{type:'text/plain;charset=utf-8'}),doc.name+'.txt')};
 let editing=false,editT=null;
 // διόρθωση: κάθε σελίδα χωριστά, ώστε να κρατιούνται οι σελίδες του εγγράφου
@@ -1752,9 +1774,9 @@ async function shareFile(blob,name){
   return saveToFolder(blob,name);
 }
 // μετά τη δημιουργία: αποθήκευση στον φάκελο, με δυνατότητα αποστολής
-async function shareOrSave(blob,name){
+async function shareOrSave(blob,name,extra){
   await saveToFolder(blob,name);
-  dlgOpen('Έτοιμο','<p style="margin:0">Το αρχείο <b class="usr">'+esc(safeName(name))+'</b> αποθηκεύτηκε. Θέλεις να το στείλεις και κάπου (μήνυμα, ταχυδρομείο κ.λπ.);</p>',()=>shareFile(blob,name));
+  dlgOpen('Έτοιμο',(extra?'<p style="margin:0 0 8px">'+extra+'</p>':'')+'<p style="margin:0">Το αρχείο <b class="usr">'+esc(safeName(name))+'</b> αποθηκεύτηκε. Θέλεις να το στείλεις και κάπου (μήνυμα, ταχυδρομείο κ.λπ.);</p>',()=>shareFile(blob,name));
   $('#dlgOk').textContent='📤 Αποστολή';$('#dlgNo').textContent='Όχι, ευχαριστώ';
 }
 
