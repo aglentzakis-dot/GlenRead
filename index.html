@@ -558,7 +558,7 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.36';
+const VERSION='2.37';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -2178,8 +2178,8 @@ $('#instNo').onclick=()=>{try{localStorage.setItem('glenread-inst-later',Date.no
 // ---------- Αναβάθμιση ----------
 // η νέα έκδοση φορτώνει μόνο όταν είσαι στην αρχική και δεν γίνεται κάποια δουλειά (ποτέ στη μέση της ανάγνωσης ή της αναγνώρισης)
 var updPending=false,updDone=false;
-function updReload(){if(updDone)return;const idle=!$('#home').classList.contains('hidden')&&$('#work').classList.contains('hidden')&&$('#dlg').classList.contains('hidden')&&$('#cam').classList.contains('hidden');
-  if(!idle){toast('Νέα έκδοση έτοιμη — θα μπει όταν γυρίσεις στην αρχική');return}updDone=true;flushAll();setTimeout(()=>location.reload(),300)}
+function updReload(){if(updDone)return;try{if(sessionStorage.getItem('glenread-upd')==='1')return}catch(e){}const idle=!$('#home').classList.contains('hidden')&&$('#work').classList.contains('hidden')&&$('#dlg').classList.contains('hidden')&&$('#cam').classList.contains('hidden');
+  if(!idle){toast('Νέα έκδοση έτοιμη — θα μπει όταν γυρίσεις στην αρχική');return}updDone=true;try{sessionStorage.setItem('glenread-upd','1')}catch(e){}flushAll();setTimeout(()=>location.reload(),300)}
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').then(reg=>{
     if(!reg)return;
