@@ -419,6 +419,8 @@ details summary{cursor:pointer;font-weight:600}
     <button class="sec lb" data-q="share"><span>📤</span><small>Αποστολή</small></button>
     <button class="sec lb" data-q="copy"><span>📋</span><small>Αντιγραφή</small></button>
     <button class="sec lb" data-q="full"><span>⛶</span><small>Οθόνη</small></button>
+    <button class="sec lb" data-q="xlsx"><span>📊</span><small>Excel</small></button>
+    <button class="sec lb" data-q="docx"><span>📝</span><small>Word</small></button>
   </div>
   <div id="findBar" class="hidden">
     <div class="row">
@@ -510,6 +512,7 @@ details summary{cursor:pointer;font-weight:600}
     <button class="mi" id="mUi"><span class="ic">🌐</span><span class="tx"><b>Γλώσσα εφαρμογής</b><small id="mUiS">Ελληνικά · English</small></span></button>
     <button class="mi" id="mGpos"><span class="ic">↘️</span><span class="tx"><b>Επαναφορά θέσης του G</b><small>Το κουμπί μενού γυρίζει κάτω δεξιά</small></span></button>
     </details>
+    <button class="mi" id="mExport"><span class="ic">📊</span><span class="tx"><b>Εξαγωγή σε Excel ή Word</b><small>Λίστες και κατάλογοι σε στήλες, με φίλτρα</small></span></button>
     <button class="mi" id="mApps"><span class="ic">✨</span><span class="tx"><b>Οι εφαρμογές μας</b><small>Κι άλλες δωρεάν εφαρμογές GlenApps</small></span></button>
     <button class="mi" id="mHelp"><span class="ic">❓</span><span class="tx"><b>Οδηγός χρήσης</b><small>Τι κάνει κάθε κουμπί</small></span></button>
     <button class="mi" id="mHome"><span class="ic">🏠</span><span class="tx"><b>Πίσω στην αρχική</b><small>Τα πάντα έχουν αποθηκευτεί</small></span></button>
@@ -555,7 +558,7 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.35';
+const VERSION='2.36';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -1333,7 +1336,7 @@ async function exportDoc(kind){
   closeSheet();if(!doc)return;flushAll();const d=doc,x=kind==='xlsx';
   toast(x?'Ετοιμάζω το Excel…':'Ετοιμάζω το Word…');
   try{await loadLib(JSZIP);await loadLib('exagogi.js');if(!window.GlenExport)throw new Error('nolib');
-    const an=await GlenExport.analyze(d,{draftGet,translated:trDoc===d&&!!trOrig});
+    let lastP=0;const an=await GlenExport.analyze(d,{draftGet,translated:trDoc===d&&!!trOrig,progress:(i,n)=>{if(n>15&&Date.now()-lastP>1500){lastP=Date.now();toast((x?'Excel':'Word')+' · '+(EN?'page ':'σελίδα ')+(i+1)+' / '+n+'…')}}});
     const r=x?await GlenExport.buildXlsx(an,d):await GlenExport.buildDocx(an,d);
     const nT=r.info.tables,rows=x?r.info.rows:0;
     const msg=EN?(x?(nT?`Found <b>${rows}</b> rows in <b>${nT}</b> ${nT===1?'table':'tables'}, with a filter on every column.`:'No table found — each line of text went into its own row, with a filter.')
@@ -1343,7 +1346,9 @@ async function exportDoc(kind){
     await shareOrSave(r.blob,d.name+(x?'.xlsx':'.docx'),msg);
   }catch(e){console.error(e);toast(e.message==='nolib'?'Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.':'Η εξαγωγή δεν έγινε — δοκίμασε ξανά')}
 }
-$('#mDocx').onclick=()=>exportDoc('docx');$('#mXlsx').onclick=()=>exportDoc('xlsx');
+$('#mDocx').onclick=()=>exportDoc('docx');
+$('#mExport').onclick=()=>{closeSheet();dlgOpen('📊 Εξαγωγή','<p style="margin:0 0 10px">Οι λίστες, οι κατάλογοι και οι πίνακες βγαίνουν σε στήλες.</p><div class="row" style="flex-direction:column;align-items:stretch;gap:8px"><button id="exX">📊 Excel — με φίλτρα σε κάθε στήλη</button><button class="sec" id="exW">📝 Word — με πίνακες μέσα στο κείμενο</button></div>',null,true);
+  $('#exX').onclick=()=>{dlgClose();exportDoc('xlsx')};$('#exW').onclick=()=>{dlgClose();exportDoc('docx')}};$('#mXlsx').onclick=()=>exportDoc('xlsx');
 $('#mTxt').onclick=()=>{closeSheet();saveToFolder(new Blob([fullText()],{type:'text/plain;charset=utf-8'}),doc.name+'.txt')};
 let editing=false,editT=null;
 // διόρθωση: κάθε σελίδα χωριστά, ώστε να κρατιούνται οι σελίδες του εγγράφου
@@ -1838,7 +1843,7 @@ qbApply();
 const QB_ACT={find:()=>openFind(),view:()=>toggleView(),tr:()=>openTranslate(),speak:()=>$('#mSpeak').onclick(),fsm:()=>$('#fsMinus').onclick(),fsp:()=>$('#fsPlus').onclick(),
   theme:()=>themePop(),
 
-  bm:()=>$('#mBm').onclick(),draw:()=>$('#mDraw').onclick(),share:()=>$('#mShare').onclick(),copy:()=>$('#mCopy').onclick(),save:()=>$('#mAnnPdf').onclick(),full:()=>$('#mFull').onclick(),menu:()=>openSheet()};
+  bm:()=>$('#mBm').onclick(),draw:()=>$('#mDraw').onclick(),share:()=>$('#mShare').onclick(),copy:()=>$('#mCopy').onclick(),xlsx:()=>exportDoc('xlsx'),docx:()=>exportDoc('docx'),save:()=>$('#mAnnPdf').onclick(),full:()=>$('#mFull').onclick(),menu:()=>openSheet()};
 document.querySelectorAll('#qbar [data-q]').forEach(b=>{if(QB_ACT[b.dataset.q])b.onclick=QB_ACT[b.dataset.q]});
 // «Θέμα»: ανοίγει από κάτω οι επιλογές (ίδιες με του μενού) — πατάς και βλέπεις αμέσως το αποτέλεσμα
 function themePop(){

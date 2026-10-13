@@ -44,8 +44,9 @@ function cellVal(s,gd){
   const raw=String(s==null?'':s).trim();let t=raw;if(!t)return null;if(t.length>40)return {s:raw};
   let cur=false,pct=false;
   if(/^€|(€|ευρώ|EUR)$/i.test(t)){cur=true;t=t.replace(/€|ευρώ|EUR/gi,'').trim()}else if(/%$/.test(t)){pct=true;t=t.slice(0,-1).trim()}
-  const dm=t.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4}|\d{2})$/);
-  if(dm&&!cur&&!pct){let d=+dm[1],m=+dm[2],y=+dm[3];if(y<100)y+=2000;if(d>=1&&d<=31&&m>=1&&m<=12)return {n:(Date.UTC(y,m-1,d)-Date.UTC(1899,11,30))/864e5,f:'d'}}
+  // ημερομηνία: με τετραψήφιο έτος, ή 12/05/26 με κάθετες (το 01.11.11 είναι κωδικός, όχι ημερομηνία)
+  const dm=t.match(/^(\d{1,2})([\/.\-])(\d{1,2})\2(\d{4})$/)||t.match(/^(\d{1,2})(\/)(\d{1,2})\/(\d{2})$/);
+  if(dm&&!cur&&!pct){let d=+dm[1],m=+dm[3],y=+dm[4];if(y<100)y+=2000;if(d>=1&&d<=31&&m>=1&&m<=12)return {n:(Date.UTC(y,m-1,d)-Date.UTC(1899,11,30))/864e5,f:'d'}}
   const neg=/^[-−–]/.test(t);t=t.replace(/^[-−–+]\s?/,'');let v=null;
   if(gd){if(/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(t)||/^\d+(,\d+)?$/.test(t))v=+t.replace(/\./g,'').replace(',','.')}
   else if(/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(t)||/^\d+(\.\d+)?$/.test(t))v=+t.replace(/,/g,'');
@@ -66,9 +67,10 @@ function hasHeader(R){
   if(R.length<2)return false;const h=R[0],n=h.length;let hn=0,he=0;
   for(const c of h){if(!c)he++;else if(isNum(c))hn++}
   if(hn>0||he>n/2)return false;
+  const dig=h.some(c=>c&&/\d/.test(c));
   for(let c=0;c<n;c++){if(!h[c])continue;let num=0,tot=0;for(let k=1;k<R.length;k++){const v=R[k][c];if(v){tot++;if(isNum(v))num++}}if(tot&&num/tot>=.6)return true}
   if(h.some(c=>c&&HEAD_KW.test(c.trim())))return true;
-  return h.every(c=>!c||(c===c.toUpperCase()&&/\p{L}/u.test(c)));
+  return !dig&&h.every(c=>!c||(c===c.toUpperCase()&&/\p{L}/u.test(c)));
 }
 // προηγούμενη μικρή γραμμή που μοιάζει με επικεφαλίδα στηλών (π.χ. «Περιγραφή   Τιμή»)
 function headerFromLine(t,n){
@@ -109,7 +111,7 @@ function finishPositioned(rows){
       if(c===0&&isHeadingText(t)||!prev||prev.section!==undefined)R.push({section:t});else prev.cells[c]=prev.cells[c]?prev.cells[c]+' '+t:t;continue}
     R.push({cells})}
   // δύο στήλες με μεγάλα κείμενα = σελίδα σε δύο στήλες (εφημερίδα), όχι πίνακας
-  const lens=[];R.forEach(r=>r.cells&&r.cells.forEach(c=>c&&lens.push(c.length)));if(n===2&&median(lens)>45)return null;
+  if(n===2){const ml=k=>median(R.filter(r=>r.cells&&r.cells[k]).map(r=>r.cells[k].length));if(ml(0)>30&&ml(1)>30)return null}
   return {n,rows:R};
 }
 // πίνακες σε απλό κείμενο: στηλοθέτες, «|», πολλά κενά, CSV, ή γραμμές που τελειώνουν σε αριθμούς/τιμές
@@ -165,11 +167,22 @@ async function analyze(d,opt){
     try{const f=await opt.draftGet('file-'+d.id);if(f&&f.pdf){task=pdfjsLib.getDocument({data:f.pdf.slice(0)});pdf=await task.promise}}catch(e){pdf=null}}
   const pages=[];
   try{
-    for(let i=0;i<d.pages.length;i++){const p=d.pages[i],text=String(p.text||'');let seq=null;
+    // 1ο πέρασμα: οι γραμμές κάθε σελίδας με θέσεις (όπου υπάρχουν και το κείμενο δεν άλλαξε)
+    const PL=[];
+    for(let i=0;i<d.pages.length;i++){const p=d.pages[i],text=String(p.text||'');let L=null;
       if(opt.progress)opt.progress(i,d.pages.length);
-      if(!tr&&Array.isArray(p.lines)&&p.lines.length){const L=ocrPageLines(p);
-        if(sameText(L,text)){if(L.some(l=>l.items.length>1)){seq=analyzePositioned(L);seq.pos=true}else seq=analyzeText(L.map(lineText))}}
-      else if(!tr&&pdf&&!p.ocr&&i<pdf.numPages){try{const L=await pdfPageLines(pdf,i);if(L.length&&sameText(L,text)){seq=analyzePositioned(L);seq.pos=true}}catch(e){}}
+      if(!tr&&Array.isArray(p.lines)&&p.lines.length){L=ocrPageLines(p);if(!sameText(L,text))L=null}
+      else if(!tr&&pdf&&!p.ocr&&i<pdf.numPages){try{L=await pdfPageLines(pdf,i);if(!L.length||!sameText(L,text))L=null}catch(e){L=null}}
+      PL.push(L)}
+    // κεφαλίδες/υποσέλιδα που επαναλαμβάνονται σε κάθε σελίδα (τίτλος, «9/438») δεν ανήκουν στους πίνακες
+    const key=l=>norm(lineText(l)).replace(/\d+/g,'#'),edge=L=>[...L.slice(0,2),...L.slice(-2)];
+    const withL=PL.filter(Boolean);const cnt=new Map(),mid=new Map();
+    withL.forEach(L=>{new Set(edge(L).map(key)).forEach(k=>cnt.set(k,(cnt.get(k)||0)+1));new Set(L.slice(2,-2).map(key)).forEach(k=>mid.set(k,(mid.get(k)||0)+1))});
+    // (μια γραμμή δεδομένων που μοιάζει με άλλες υπάρχει και στη μέση των σελίδων — αυτή δεν πειράζεται)
+    const furn=new Set([...cnt].filter(([k,c])=>k&&withL.length>=3&&c>=Math.max(3,withL.length*.5)&&(mid.get(k)||0)<withL.length*.1).map(([k])=>k));
+    for(let i=0;i<d.pages.length;i++){const p=d.pages[i],text=String(p.text||'');let seq=null,L=PL[i];
+      if(L&&furn.size){const ed=new Set(edge(L));L=L.filter(l=>!(ed.has(l)&&furn.has(key(l))))}
+      if(L){if(L.some(l=>l.items.length>1)){seq=analyzePositioned(L);seq.pos=true}else seq=analyzeText(L.map(lineText))}
       if(!seq)seq=analyzeText(text.split('\n'));
       // επικεφαλίδα στηλών: πρώτη γραμμή του πίνακα ή η γραμμή ακριβώς πάνω του
       seq.forEach((it,k)=>{if(!it.tb)return;const tb=it.tb,data=tb.rows.filter(r=>r.cells);

@@ -483,7 +483,13 @@ var D={
 "Κατάλογοι και λίστες σε στήλες, με έτοιμα φίλτρα": "Catalogs and lists in columns, with filters ready",
 "Ετοιμάζω το Excel…": "Preparing the Excel file…",
 "Ετοιμάζω το Word…": "Preparing the Word file…",
-"Η εξαγωγή δεν έγινε — δοκίμασε ξανά": "Export failed — try again"
+"Η εξαγωγή δεν έγινε — δοκίμασε ξανά": "Export failed — try again",
+"Εξαγωγή σε Excel ή Word": "Export to Excel or Word",
+"Λίστες και κατάλογοι σε στήλες, με φίλτρα": "Lists and catalogs in columns, with filters",
+"📊 Εξαγωγή": "📊 Export",
+"Οι λίστες, οι κατάλογοι και οι πίνακες βγαίνουν σε στήλες.": "Lists, catalogs and tables come out in columns.",
+"📊 Excel — με φίλτρα σε κάθε στήλη": "📊 Excel — with a filter on every column",
+"📝 Word — με πίνακες μέσα στο κείμενο": "📝 Word — with tables inside the text"
 };
 var G=function(s){return D.hasOwnProperty(s)?D[s]:s};
 var P=[
