@@ -489,10 +489,23 @@ var D={
 "📊 Εξαγωγή": "📊 Export",
 "Οι λίστες, οι κατάλογοι και οι πίνακες βγαίνουν σε στήλες.": "Lists, catalogs and tables come out in columns.",
 "📊 Excel — με φίλτρα σε κάθε στήλη": "📊 Excel — with a filter on every column",
-"📝 Word — με πίνακες μέσα στο κείμενο": "📝 Word — with tables inside the text"
+"📝 Word — με πίνακες μέσα στο κείμενο": "📝 Word — with tables inside the text",
+"Ως PDF, φωτογραφία, κείμενο, Word ή Excel": "As PDF, photo, text, Word or Excel",
+"📤 Πώς να σταλεί;": "📤 How to send it?",
+"Όπως το έγγραφο, μαζί με τις σημειώσεις σου": "Like the document, with your notes",
+"Όπως το έγγραφο — το καλύτερο για να το διαβάσει ο άλλος": "Like the document — best for the other person to read",
+"Ως εικόνα — για γρήγορη ματιά στο κινητό": "As an image — for a quick look on the phone",
+"Όλες οι σελίδες ως φωτογραφίες": "All pages as photos",
+"Μόνο τα γράμματα, μέσα στο μήνυμα": "Just the text, inside the message",
+"Για να το διορθώσει ο άλλος": "So the other person can edit it",
+"✓ Κόψιμο και ανάγνωση": "✓ Crop and read",
+"Η φωτογραφία έμεινε στη «Σάρωση» της αρχικής — πάτα «Αναγνώριση κειμένου» όταν θέλεις": "The photo stays in “Scan” on the home screen — tap “Recognize text” when you want",
+"Δεν έγιναν οι φωτογραφίες": "The photos couldn't be made",
+"Το πρωτότυπο δεν κρατήθηκε": "The original wasn't kept"
 };
 var G=function(s){return D.hasOwnProperty(s)?D[s]:s};
 var P=[
+[/^Η σελίδα (\d+) ως εικόνα — για γρήγορη ματιά στο κινητό$/,'Page $1 as an image — for a quick look on the phone'],[/^(\d+) εικόνες$/,'$1 images'],[/^Φωτογραφία (\d+) από (\d+)$/,'Photo $1 of $2'],[/^Ετοιμάζω (\d+) φωτογραφίες…$/,'Preparing $1 photos…'],
 [/^(\d+) σελίδα$/,'$1 page'],[/^(\d+) σελίδες$/,'$1 pages'],[/^(\d+) από (\d+)$/,'$1 of $2'],[/^(\d+) αποτελέσματα$/,'$1 results'],
 [/^Σελίδα (\d+)$/,'Page $1'],[/^Σελίδα (\d+) · (\d+)% · (.*)$/,'Page $1 · $2% · $3'],[/^Σελίδα (\d+) από (\d+) · (.*)$/,'Page $1 of $2 · $3'],[/^🔖 (.*)$/,'🔖 $1'],[/^(\d+)% · (.*)$/,'$1% · $2'],[/^Σελίδα (\d+) · αναγνώριση (\d+)%$/,'Page $1 · recognition $2%'],[/^Σελίδα (\d+) από (\d+)$/,'Page $1 of $2'],
 [/^Σελίδα (\d+) από (\d+) — σκαναρισμένη, αναγνώριση κειμένου(…)?$/,'Page $1 of $2 — scanned, recognising text$3'],

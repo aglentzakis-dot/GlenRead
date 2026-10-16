@@ -273,6 +273,12 @@ details summary{cursor:pointer;font-weight:600}
 #cam .camzoom{touch-action:pan-x;position:absolute;left:16px;right:16px;bottom:calc(120px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;color:#fff;background:#0006;border-radius:14px;padding:8px 12px}
 #cam .camzoom input{flex:1}
 #cam .hint{position:absolute;top:calc(10px + env(safe-area-inset-top));left:8px;right:8px;text-align:center;color:#fff;font-size:13px;line-height:1.35;text-shadow:0 1px 3px #000}
+
+/* «Πώς να σταλεί;» */
+.shws{display:flex;flex-direction:column;gap:8px}
+.shw{display:flex!important;align-items:center;gap:12px;text-align:left;justify-content:flex-start;padding:10px 12px;min-height:56px;width:100%}
+.shw>span:first-child{font-size:26px;flex:none;width:34px;text-align:center}
+.shw b{display:block;font-size:16px}.shw small{display:block;opacity:.75;font-weight:400;font-size:13px;line-height:1.3}
 </style>
 </head>
 <body>
@@ -497,7 +503,7 @@ details summary{cursor:pointer;font-weight:600}
     </details>
     <details class="cat" data-cat="file"><summary><span class="ci">📁</span><span class="ct"><b>Αρχείο</b><small>Αποθήκευση, αποστολή, αντιγραφή, όνομα</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mAnnPdf"><span class="ic">📑</span><span class="tx"><b>Αποθήκευση PDF με τις σημειώσεις</b><small>Για να το στείλεις ή να το κρατήσεις</small></span></button>
-    <button class="mi" id="mShare"><span class="ic">📤</span><span class="tx"><b>Αποστολή κειμένου</b><small>Σε μήνυμα, ταχυδρομείο κ.λπ.</small></span></button>
+    <button class="mi" id="mShare"><span class="ic">📤</span><span class="tx"><b>Αποστολή</b><small>Ως PDF, φωτογραφία, κείμενο, Word ή Excel</small></span></button>
     <button class="mi" id="mCopy"><span class="ic">📋</span><span class="tx"><b>Αντιγραφή κειμένου</b><small>Όλου, ή μόνο όσου έχεις επιλέξει</small></span></button>
     <button class="mi" id="mDocx"><span class="ic">📝</span><span class="tx"><b>Εξαγωγή σε Word</b><small>Οι λίστες και οι πίνακες βγαίνουν ως πίνακες</small></span></button>
     <button class="mi" id="mXlsx"><span class="ic">📊</span><span class="tx"><b>Εξαγωγή σε Excel</b><small>Κατάλογοι και λίστες σε στήλες, με έτοιμα φίλτρα</small></span></button>
@@ -558,7 +564,7 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.37';
+const VERSION='2.38';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -929,7 +935,7 @@ async function openAny(file){
   if(!file)return toast('Δεν ήρθε κανένα αρχείο');
   const name=file.name||'αρχείο',ext=(name.match(/\.([a-z0-9]+)$/i)||[])[1]?.toLowerCase()||'',t=file.type||'';
   if(t==='application/pdf'||ext==='pdf')return openPdf(file);
-  if(t.startsWith('image/')){addImages([file]);return toast('Η φωτογραφία μπήκε — πάτα «Αναγνώριση κειμένου»')}
+  if(t.startsWith('image/'))return openSharedImages([file]);
   const my=newRun(),gone=()=>my!==runId||cancelled;show('work');$('#wTitle').textContent=name;prog(.3,'Διαβάζω το αρχείο…');
   try{
     const buf=await file.arrayBuffer();let pages;
@@ -974,11 +980,21 @@ async function shrink(src,max=3600,info){
   const url=c.toDataURL('image/jpeg',0.92);c.width=c.height=0;return url;
 }
 async function addImages(files){
-  const list=[...files];if(!list.length)return;let blurN=0;
+  const list=[...files],added=[];if(!list.length)return added;let blurN=0;
   for(const f of list){ // μία-μία, όχι όλες μαζί, για να μη γεμίζει η μνήμη
-    try{const u=await autoCrop(await shrink(f));try{if(sharpness(await loadImg(u))<BLUR_LIMIT){shotBlur.add(u);blurN=(blurN||0)+1}}catch(x){}shots.push(u);drawThumbs();shotsSave()}catch(e){toast('Μία φωτογραφία δεν διαβάστηκε — ίσως είναι πολύ μεγάλη')}
+    try{const u=await autoCrop(await shrink(f));try{if(sharpness(await loadImg(u))<BLUR_LIMIT){shotBlur.add(u);blurN=(blurN||0)+1}}catch(x){}shots.push(u);added.push(u);drawThumbs();shotsSave()}catch(e){toast('Μία φωτογραφία δεν διαβάστηκε — ίσως είναι πολύ μεγάλη')}
   }
   if(blurN)toast(`⚠️ ${blurN===1?'Μία φωτογραφία φαίνεται θολή':blurN+' φωτογραφίες φαίνονται θολές'} (κόκκινο πλαίσιο). Για καλύτερη ανάγνωση, ξανατράβηξέ ${blurN===1?'την':'τες'}.`);
+  return added;
+}
+// φωτογραφία που ήρθε με «Κοινοποίηση» ή άνοιξε ως αρχείο: ανοίγει αμέσως το κόψιμο και μετά διαβάζεται
+async function openSharedImages(files){
+  if($('#home').classList.contains('hidden'))goHome();const urls=await addImages(files);if(!urls.length)return;
+  const out=[];
+  const step=k=>{if(k>=urls.length)return ocrShots(out);const i=shots.indexOf(urls[k]);if(i<0)return step(k+1);
+    if(urls.length>1)toast((EN?'Photo ':'Φωτογραφία ')+(k+1)+(EN?' of ':' από ')+urls.length);
+    openCrop(i,u=>{out.push(u);step(k+1)})};
+  step(0);
 }
 // μικρογραφίες: προσθέτει μόνο τις νέες (δεν ξαναφτιάχνει όλες τις μεγάλες εικόνες σε κάθε λήψη)
 function drawThumbs(){
@@ -1061,8 +1077,8 @@ async function rotateUrl(url){const img=await loadImg(url),c=document.createElem
 async function autoCrop(url){if(!autoCropOn())return url;try{const Q=detectPage(await loadImg(url));if(!Q)return url;const out=await warpPage(url,Q);shotOrig.set(out,url);shotQuad.set(out,Q);return out}catch(e){return url}}
 // επεξεργαστής κοψίματος: 4 γωνίες που σέρνονται
 let crop=null;
-async function openCrop(i){const cur=shots[i];if(!cur)return;const src=shotOrig.get(cur)||cur;
-  crop={i,src,Q:shotQuad.get(cur)||null};$('#crop').classList.remove('hidden');$('#cropBusy').classList.add('hidden');
+async function openCrop(i,next){const cur=shots[i];if(!cur)return;const src=shotOrig.get(cur)||cur;
+  crop={i,src,Q:shotQuad.get(cur)||null,next:next||null};$('#cropOk').textContent=next?'✓ Κόψιμο και ανάγνωση':'✂️ Κόψιμο';$('#crop').classList.remove('hidden');$('#cropBusy').classList.add('hidden');
   if(history.state&&history.state.v!=='crop')history.pushState({v:'crop'},'');
   const c=crop;await cropLoad();if(crop!==c)return;if(!c.Q)c.Q=detectPage(c.img)||[[0,0],[1,0],[1,1],[0,1]];cropDraw()}
 async function cropLoad(){const c0=crop,img=await loadImg(c0.src);if(crop!==c0)throw new Error('closed');crop.img=img;const box=$('#cropBox'),bw=box.clientWidth,bh=box.clientHeight,iw=crop.img.naturalWidth,ih=crop.img.naturalHeight;
@@ -1076,7 +1092,8 @@ function cropDraw(){const P=crop.Q.map(q=>[crop.ox+q[0]*crop.w,crop.oy+q[1]*crop
     crop.Q.forEach((q,k)=>{const d=Math.hypot(crop.ox+q[0]*crop.w-x,crop.oy+q[1]*crop.h-y);if(d<bd){bd=d;drag=k}});if(bd>60){drag=-1;return}s.setPointerCapture(e.pointerId);e.preventDefault()});
   s.addEventListener('pointermove',e=>{if(drag<0||!crop||!crop.Q)return;const r=s.getBoundingClientRect();crop.Q[drag]=[Math.min(1,Math.max(0,(e.clientX-r.left-crop.ox)/crop.w)),Math.min(1,Math.max(0,(e.clientY-r.top-crop.oy)/crop.h))];cropDraw()});
   const up=()=>{drag=-1};s.addEventListener('pointerup',up);s.addEventListener('pointercancel',up)})();
-function cropClose(fromPop){$('#crop').classList.add('hidden');crop=null;if(!fromPop&&history.state&&history.state.v==='crop')history.back()}
+function cropClose(fromPop){const c=crop;$('#crop').classList.add('hidden');crop=null;
+  if(c&&c.next&&!c.done)toast('Η φωτογραφία έμεινε στη «Σάρωση» της αρχικής — πάτα «Αναγνώριση κειμένου» όταν θέλεις');if(!fromPop&&history.state&&history.state.v==='crop')history.back()}
 addEventListener('popstate',e=>{if(!$('#crop').classList.contains('hidden')&&!(e.state&&e.state.v==='crop'))cropClose(true)});
 $('#cropNo').onclick=()=>{if(crop&&crop.busy)return;cropClose()};
 $('#cropAll').onclick=()=>{if(!crop||crop.busy||!crop.Q)return;crop.Q=[[0,0],[1,0],[1,1],[0,1]];cropDraw()};
@@ -1091,29 +1108,33 @@ $('#cropOk').onclick=async()=>{if(!crop||crop.busy||!crop.Q)return;crop.busy=tru
     try{if(sharpness(await loadImg(out))<BLUR_LIMIT)shotBlur.add(out)}catch(e){}
     shots[c.i]=out;drawThumbs();camCount();shotsSave();if(!$('#camRev').classList.contains('hidden')&&revU===old){revU=out;$('#camRevImg').src=out}toast(full?'Κρατήθηκε όλη η φωτογραφία':'✂️ Η σελίδα κόπηκε και ισιώθηκε')}
   catch(e){console.error(e);toast(e.message==='shape'?'Οι γωνίες δεν σχηματίζουν σελίδα — διόρθωσέ τες':'Το κόψιμο δεν έγινε — δοκίμασε ξανά');$('#crop').classList.remove('working');c.busy=false;$('#cropBusy').classList.add('hidden');if(e.message==='shape')return}
-  $('#crop').classList.remove('working');cropClose()};
+  $('#crop').classList.remove('working');
+  // συνέχεια (π.χ. ανάγνωση): αφού κλείσει πρώτα το κόψιμο και το βήμα «πίσω»
+  if(c.next){c.done=true;const nx=c.next,u=shots[c.i];const w=new Promise(r=>{let d=false;const h=()=>{if(d)return;d=true;removeEventListener('popstate',h);r()};addEventListener('popstate',h);setTimeout(h,600)});cropClose();await w;nx(u);return}
+  cropClose()};
 (async()=>{let s=[];const ids=await draftGet('shots-ids');
   if(Array.isArray(ids)){for(const k of ids){const u=await draftGet(k);if(typeof u==='string'){s.push(u);shotKey.set(u,k);shotStored.add(k)}}}
   else{const old=await draftGet('shots');if(Array.isArray(old))s=old.filter(u=>typeof u==='string');}
   if(s.length&&!shots.length){shots=s;drawThumbs();toast('Οι φωτογραφίες σου είναι εδώ — συνέχισε από εκεί που είχες μείνει')}
   if(!Array.isArray(ids)){draftDel('shots');if(shots.length)shotsSave()}})();
 const loadImg=src=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=src});
-async function ocrShots(){
-  if(!shots.length)return;const my=newRun(),gone=()=>my!==runId;shotsFlush();show('work');$('#wTitle').textContent='Φωτογραφίες';
-  const pages=[];const d0=new Date();const part={id:Date.now(),date:d0.toISOString(),name:(EN?'Scan ':'Σάρωση ')+d0.toLocaleDateString(LOC)+' '+d0.toLocaleTimeString(LOC,{hour:'2-digit',minute:'2-digit'}),pages,partial:shots.length};
+async function ocrShots(sel){
+  const list=(Array.isArray(sel)?sel:shots).filter(Boolean).slice();
+  if(!list.length)return;const my=newRun(),gone=()=>my!==runId;shotsFlush();show('work');$('#wTitle').textContent='Φωτογραφίες';
+  const pages=[];const d0=new Date();const part={id:Date.now(),date:d0.toISOString(),name:(EN?'Scan ':'Σάρωση ')+d0.toLocaleDateString(LOC)+' '+d0.toLocaleTimeString(LOC,{hour:'2-digit',minute:'2-digit'}),pages,partial:list.length};
   ocrRunning(true);
   try{
-    for(let i=0;i<shots.length;i++){
+    for(let i=0;i<list.length;i++){
       if(cancelled||gone()){if(!gone()){ocrLbl='';ocrRunning(false)}if(pages.length)saveDoc(part);return gone()?null:goHome()}
       if(pages.length)saveDoc(part,true);
-      ocrLbl=`Αναγνώριση σελίδας ${i+1} από ${shots.length}`;prog(i/shots.length,ocrLbl+'…');
-      const cv=imgToCanvas(await loadImg(shots[i]),ocrMax());try{pages.push(await ocrCanvas(cv))}finally{cv.width=cv.height=0}
+      ocrLbl=`Αναγνώριση σελίδας ${i+1} από ${list.length}`;prog(i/list.length,ocrLbl+'…');
+      const cv=imgToCanvas(await loadImg(list[i]),ocrMax());try{pages.push(await ocrCanvas(cv))}finally{cv.width=cv.height=0}
     }
     ocrLbl='';ocrRunning(false);ocrRecycle();
     if(gone()){saveDoc(part);return}
     delete part.partial;if(!await saveDoc(part,true))return failHome();
-    if(!await draftSet('file-'+part.id,{images:shots.slice()}))toast('⚠️ Οι φωτογραφίες δεν χώρεσαν στη μνήμη — το κείμενο κρατήθηκε');
-    shots=[];shotOrig.clear();shotQuad.clear();shotBlur.clear();drawThumbs();shotsSave();if(gone())return;finish(part);
+    if(!await draftSet('file-'+part.id,{images:list}))toast('⚠️ Οι φωτογραφίες δεν χώρεσαν στη μνήμη — το κείμενο κρατήθηκε');
+    const done=new Set(list);shots=shots.filter(u=>!done.has(u));list.forEach(forgetShot);drawThumbs();shotsSave();if(gone())return;finish(part);
   }catch(e){if(e.message!=='cancel')console.error(e);
     if(gone()){if(pages.length)saveDoc(part);return}ocrLbl='';ocrRunning(false);ocrRecycle();
     if(e.message==='cancel'){if(pages.length)saveDoc(part);return goHome()}
@@ -1330,9 +1351,9 @@ $('#fsMinus').onclick=()=>{fs=Math.max(13,fs-2);setFs()};$('#fsPlus').onclick=()
 
 const fullText=()=>doc.pages.map(p=>p.text).join('\n\n');
 $('#mCopy').onclick=async()=>{const sel=getSelection().toString()||(Date.now()-lastSelAt<120000?lastSel:'');closeSheet();try{await navigator.clipboard.writeText(sel||fullText());toast(sel?'Αντιγράφηκε η επιλογή':'Αντιγράφηκε όλο το κείμενο')}catch(e){toast('Δεν επιτράπηκε η αντιγραφή')}};
-$('#mShare').onclick=async()=>{closeSheet();if(navigator.share){try{await navigator.share({title:doc.name,text:fullText()})}catch(e){}}else $('#mCopy').onclick()};
+$('#mShare').onclick=shareAsk;
 // Εξαγωγή σε Word/Excel: οι κατάλογοι κρατούν τις στήλες τους (κοινό exagogi.js, φορτώνεται μόνο όταν χρειαστεί)
-async function exportDoc(kind){
+async function exportDoc(kind,send){
   closeSheet();if(!doc)return;flushAll();const d=doc,x=kind==='xlsx';
   toast(x?'Ετοιμάζω το Excel…':'Ετοιμάζω το Word…');
   try{await loadLib(JSZIP);await loadLib('exagogi.js');if(!window.GlenExport)throw new Error('nolib');
@@ -1343,7 +1364,7 @@ async function exportDoc(kind){
         :(nT?`It contains <b>${nT}</b> ${nT===1?'table':'tables'} from the lists in the document.`:''))
       :x?(nT?`Βρέθηκαν <b>${rows}</b> γραμμές σε <b>${nT}</b> ${nT===1?'πίνακα':'πίνακες'}, με φίλτρα σε κάθε στήλη.`:'Δεν βρέθηκε πίνακας — κάθε γραμμή του κειμένου μπήκε σε δική της σειρά, με φίλτρο.')
       :(nT?`Μέσα υπάρχουν <b>${nT}</b> ${nT===1?'πίνακας':'πίνακες'} από τις λίστες του εγγράφου.`:'');
-    await shareOrSave(r.blob,d.name+(x?'.xlsx':'.docx'),msg);
+    if(send)await shareFile(r.blob,d.name+(x?'.xlsx':'.docx'));else await shareOrSave(r.blob,d.name+(x?'.xlsx':'.docx'),msg);
   }catch(e){console.error(e);toast(e.message==='nolib'?'Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.':'Η εξαγωγή δεν έγινε — δοκίμασε ξανά')}
 }
 $('#mDocx').onclick=()=>exportDoc('docx');
@@ -1709,10 +1730,16 @@ function placeSig(i,p,ok){
 const hex2rgb=h=>{const n=parseInt(h.slice(1),16);return[(n>>16&255)/255,(n>>8&255)/255,(n&255)/255]};
 function txPng(s,W){const sc=3,fz=s.s*W*sc,lines=(s.text||'').split('\n');const c=document.createElement('canvas'),x=c.getContext('2d');x.font=`600 ${fz}px system-ui,sans-serif`;
   c.width=Math.ceil(Math.max(...lines.map(l=>x.measureText(l).width))+4);c.height=Math.ceil(lines.length*fz*1.25+4);x.font=`600 ${fz}px system-ui,sans-serif`;x.fillStyle=s.c;x.textBaseline='top';lines.forEach((l,k)=>x.fillText(l,0,k*fz*1.25));return{url:c.toDataURL('image/png'),w:c.width/sc,h:c.height/sc}}
-$('#mAnnPdf').onclick=async()=>{
-  closeSheet();
+$('#mAnnPdf').onclick=()=>{closeSheet();annPdf(false)};
+// σελίδα (πρωτότυπο + σημειώσεις) σε καμβά
+async function pageCanvas(file,pdfjs,i,maxW){const c=document.createElement('canvas'),ann=(doc.ann||{})[i]||[];
+  if(pdfjs){const pg=await pdfjs.getPage(i+1);const vp0=pg.getViewport({scale:1});const vp=pg.getViewport({scale:maxW/vp0.width});c.width=vp.width;c.height=vp.height;await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise}
+  else{const im=await loadImg(file.images[i]);const k=Math.min(1,maxW/im.naturalWidth);c.width=Math.round(im.naturalWidth*k);c.height=Math.round(im.naturalHeight*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height)}
+  drawAnn(c.getContext('2d'),c.width,c.height,ann);return c}
+async function annPdf(send){
   const file=pv.file||await draftGet('file-'+doc.id);
   if(!file)return toast('Το πρωτότυπο δεν κρατήθηκε — άνοιξε ξανά το PDF για να γράψεις πάνω του');
+  const out2=(blob,name)=>send?shareFile(blob,name):shareOrSave(blob,name);
   const ann=doc.ann||{};toast('Ετοιμάζεται το PDF…');
   try{
     let bytes;
@@ -1732,7 +1759,7 @@ $('#mAnnPdf').onclick=async()=>{
       }
       bytes=await pd.save();
     }else throw new Error('img');
-    shareOrSave(new Blob([bytes],{type:'application/pdf'}),doc.name+' (σημειώσεις).pdf');
+    out2(new Blob([bytes],{type:'application/pdf'}),doc.name+(Object.values(ann).some(L=>L&&L.length)?' (σημειώσεις)':'')+'.pdf');
   }catch(e){
     // εναλλακτικά: εικόνα σελίδας + σημειώσεις
     try{
@@ -1740,18 +1767,49 @@ $('#mAnnPdf').onclick=async()=>{
       const {jsPDF}=window.jspdf;let out=null;const pdfjs=file.pdf&&window.pdfjsLib?await pdfjsLib.getDocument({data:file.pdf.slice(0)}).promise:null;
       const n=pdfjs?pdfjs.numPages:file.images.length;
       for(let i=0;i<n;i++){
-        const c=document.createElement('canvas');
-        if(pdfjs){const pg=await pdfjs.getPage(i+1);const vp0=pg.getViewport({scale:1});const vp=pg.getViewport({scale:1600/vp0.width});c.width=vp.width;c.height=vp.height;await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise}
-        else{const im=await loadImg(file.images[i]);c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0)}
-        const W=c.width,H=c.height;drawAnn(c.getContext('2d'),W,H,ann[i]||[]);
+        const c=await pageCanvas(file,pdfjs,i,pdfjs?1600:4000);
+        const W=c.width,H=c.height;
         const o=W>H?'l':'p';if(!out)out=new jsPDF({unit:'px',format:[W,H],orientation:o,hotfixes:['px_scaling']});else out.addPage([W,H],o);
         out.addImage(c.toDataURL('image/jpeg',.85),'JPEG',0,0,W,H);c.width=c.height=0;
       }
       if(pdfjs)pdfFree(pdfjs);
-      shareOrSave(out.output('blob'),doc.name+' (σημειώσεις).pdf');
+      out2(out.output('blob'),doc.name+(Object.values(ann).some(L=>L&&L.length)?' (σημειώσεις)':'')+'.pdf');
     }catch(e2){console.error(e2);toast('Δεν έγινε το PDF')}
   }
-};
+}
+// σελίδες ως φωτογραφίες (JPG), με τις σημειώσεις
+async function sendImages(which){
+  const file=pv.file||await draftGet('file-'+doc.id);if(!file)return toast('Το πρωτότυπο δεν κρατήθηκε');
+  let pdfjs=null;try{
+    pdfjs=file.pdf&&window.pdfjsLib?await pdfjsLib.getDocument({data:file.pdf.slice(0)}).promise:null;
+    const n=pdfjs?pdfjs.numPages:file.images.length,idx=which==='all'?[...Array(n).keys()]:[Math.min(n-1,Math.max(0,which|0))];
+    toast(idx.length>1?(EN?'Preparing '+idx.length+' photos…':'Ετοιμάζω '+idx.length+' φωτογραφίες…'):(EN?'Preparing the photo…':'Ετοιμάζω τη φωτογραφία…'));
+    const files=[],base=safeName(doc.name);
+    for(const i of idx){const c=await pageCanvas(file,pdfjs,i,2000);const b=await new Promise(r=>c.toBlob(r,'image/jpeg',.88));c.width=c.height=0;
+      files.push(new File([b],base+(n>1?' - '+(EN?'page ':'σελίδα ')+(i+1):'')+'.jpg',{type:'image/jpeg'}))}
+    if(navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files,title:doc.name})}catch(e){}return}
+    for(const f of files)await saveToFolder(f,f.name);
+  }catch(e){console.error(e);toast('Δεν έγιναν οι φωτογραφίες')}finally{if(pdfjs)pdfFree(pdfjs)}
+}
+// «Αποστολή»: ρωτάει πώς — PDF, φωτογραφίες, κείμενο, Word, Excel
+function curPage(){if(!pv.on)return 0;const els=[...document.querySelectorAll('.pvp')];return Math.max(0,els.findIndex(el=>el.getBoundingClientRect().bottom>80))}
+async function shareAsk(){
+  closeSheet();if(!doc)return;
+  const orig=!doc.kind&&(pv.file||await draftGet('file-'+doc.id).catch(()=>null)),n=doc.pages.length,cp=curPage();
+  const B=(id,ic,t,s)=>`<button class="sec shw" id="${id}"><span>${ic}</span><span><b>${t}</b><small>${s}</small></span></button>`;
+  let h='<div class="shws">';
+  if(orig)h+=B('shPdf','📄','PDF',Object.values(doc.ann||{}).some(L=>L&&L.length)?'Όπως το έγγραφο, μαζί με τις σημειώσεις σου':'Όπως το έγγραφο — το καλύτερο για να το διαβάσει ο άλλος');
+  if(orig)h+=B('shImg','🖼️','Φωτογραφία',n>1?'Η σελίδα '+(cp+1)+' ως εικόνα — για γρήγορη ματιά στο κινητό':'Ως εικόνα — για γρήγορη ματιά στο κινητό');
+  if(orig&&n>1&&n<=30)h+=B('shImgAll','🗂️','Όλες οι σελίδες ως φωτογραφίες',n+' εικόνες');
+  h+=B('shTxt','💬','Κείμενο','Μόνο τα γράμματα, μέσα στο μήνυμα');
+  h+=B('shDocx','📝','Word','Για να το διορθώσει ο άλλος');
+  h+=B('shXlsx','📊','Excel','Λίστες και κατάλογοι σε στήλες, με φίλτρα');
+  dlgOpen('📤 Πώς να σταλεί;',h+'</div>',null,true);$('#dlgOk').textContent='Άκυρο';
+  const on=(id,f)=>{const b=$('#'+id);if(b)b.onclick=()=>{dlgClose();f()}};
+  on('shPdf',()=>annPdf(true));on('shImg',()=>sendImages(cp));on('shImgAll',()=>sendImages('all'));
+  on('shTxt',async()=>{if(navigator.share){try{await navigator.share({title:doc.name,text:fullText()})}catch(e){}}else $('#mCopy').onclick()});
+  on('shDocx',()=>exportDoc('docx',true));on('shXlsx',()=>exportDoc('xlsx',true));
+}
 // Αποθήκευση αρχείων στον φάκελο της εφαρμογής: GlenApps › GlenRead › Έγγραφα (ίδια λογική με τα αντίγραφα)
 const safeName=n=>n.replace(/[\\/:*?"<>|]+/g,'-').trim()||'αρχείο';
 async function saveToFolder(blob,name){
@@ -1819,7 +1877,7 @@ if(EN){try{if(!localStorage.getItem('glenread-lang'))$('#lang').value='eng'}catc
     for(const k of keys)await c.delete(k);
     if(!files.length)return toast('Δεν ήρθε κανένα αρχείο');
     const imgs=files.filter(f=>f.type.startsWith('image/'));
-    if(imgs.length===files.length){addImages(imgs);return toast('Οι φωτογραφίες μπήκαν — πάτα «Αναγνώριση κειμένου»')}
+    if(imgs.length===files.length)return openSharedImages(imgs);
     const docs=files.filter(f=>!f.type.startsWith('image/'));openAny(docs[0]);if(files.length>1)setTimeout(()=>toast('Ήρθαν '+files.length+' αρχεία — άνοιξε το πρώτο. Τα άλλα άνοιξέ τα ένα-ένα.'),2800);
   }catch(e){toast('Το αρχείο δεν άνοιξε')}
 })();
