@@ -501,7 +501,20 @@ var D={
 "✓ Κόψιμο και ανάγνωση": "✓ Crop and read",
 "Η φωτογραφία έμεινε στη «Σάρωση» της αρχικής — πάτα «Αναγνώριση κειμένου» όταν θέλεις": "The photo stays in “Scan” on the home screen — tap “Recognize text” when you want",
 "Δεν έγιναν οι φωτογραφίες": "The photos couldn't be made",
-"Το πρωτότυπο δεν κρατήθηκε": "The original wasn't kept"
+"Το πρωτότυπο δεν κρατήθηκε": "The original wasn't kept",
+"Προηγούμενα έγγραφα": "Previous documents",
+"🔍 Αναζήτηση με το όνομα": "🔍 Search by name",
+"Δεν βρέθηκε έγγραφο με αυτό το όνομα.": "No document with that name.",
+"Πρωτότυπο": "Original",
+"Λευκό": "White",
+"Πολύ λευκό": "Extra white",
+"Ασπρόμαυρο": "Black & white",
+"✓ Εφαρμογή": "✓ Apply",
+"✨ Η σελίδα καθαρίστηκε": "✨ Page cleaned",
+"✨ Καθάρισμα σαρώσεων (φωτογραφίες και σκαναρισμένα PDF)": "✨ Clean up scans (photos and scanned PDFs)",
+"Λευκό χαρτί (προτείνεται)": "White paper (recommended)",
+"Πολύ λευκό, πιο σκούρα γράμματα": "Extra white, darker text",
+"Χωρίς — όπως η φωτογραφία": "None — as photographed"
 };
 var G=function(s){return D.hasOwnProperty(s)?D[s]:s};
 var P=[
@@ -514,7 +527,7 @@ var P=[
 [/^η σελίδα φαίνεται γυρισμένη, δοκιμή (\d+)°…$/,'the page looks rotated, trying $1°…'],
 [/^Φόρτωση λεξικών \(μόνο την πρώτη φορά αργεί\)… (\d+)%$/,'Loading dictionaries (slow only the first time)… $1%'],
 [/^1 έως (\d+)$/,'1 to $1'],[/^σελίδα (\d+)$/,'page $1'],
-[/^(.*) · (\d+)(?: από (\d+))? σελ\.( · διακόπηκε)?$/,function(m,a,b,c,d){return a+' · '+b+(c?' of '+c:'')+' pp.'+(d?' · interrupted':'')}],
+[/^(.*) · (\d+)(?: από (\d+))? σελ\.( · διακόπηκε)?( · \d+%)?$/,function(m,a,b,c,d,e){return a+' · '+b+(c?' of '+c:'')+' pp.'+(d?' · interrupted':'')+(e||'')}],
 [/^Αποθηκεύτηκε: GlenApps › GlenRead › (?:Έγγραφα|Documents) › (.*)$/,'Saved: GlenApps › GlenRead › Documents › $1'],
 [/^Αποθηκεύτηκε στις Λήψεις: (.*)$/,'Saved to Downloads: $1'],
 [/^Υπάρχει ήδη σελιδοδείκτης εδώ: (.*)$/,'There’s already a bookmark here: $1'],
