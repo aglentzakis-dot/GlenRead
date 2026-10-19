@@ -1,0 +1,5 @@
+Βιβλιοθήκες τρίτων, αυτούσιες από τις επίσημες εκδόσεις τους:
+- pdfjs/: pdf.js 4.10.38 (Mozilla, Apache-2.0) — github.com/mozilla/pdf.js/releases/tag/v4.10.38 (legacy)
+- lib/jspdf.umd.min.js: jsPDF 2.5.1 (MIT) — github.com/parallax/jsPDF, ετικέτα v2.5.1
+- lib/jszip.min.js: JSZip 3.10.1 (MIT) — github.com/Stuk/jszip, ετικέτα v3.10.1
+- tess/core/: tesseract.js-core 5.1.1 (Apache-2.0) — github.com/naptha/tesseract.js-core, ετικέτα v5.1.1

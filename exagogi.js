@@ -164,7 +164,7 @@ function analyzeText(lines){
 async function analyze(d,opt){
   opt=opt||{};const tr=opt.translated;let pdf=null,task=null;
   if(!tr&&!d.kind&&d.pages.some(p=>!p.ocr)&&window.pdfjsLib&&opt.draftGet){
-    try{const f=await opt.draftGet('file-'+d.id);if(f&&f.pdf){task=pdfjsLib.getDocument({data:f.pdf.slice(0)});pdf=await task.promise}}catch(e){pdf=null}}
+    try{const f=await opt.draftGet('file-'+d.id);if(f&&f.pdf){task=(window.pdfLoad?window.pdfLoad(f.pdf.slice(0)):pdfjsLib.getDocument({data:f.pdf.slice(0),isEvalSupported:false}));pdf=await task.promise}}catch(e){pdf=null}}
   const pages=[];
   try{
     // 1ο πέρασμα: οι γραμμές κάθε σελίδας με θέσεις (όπου υπάρχουν και το κείμενο δεν άλλαξε)

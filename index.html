@@ -2,6 +2,9 @@
 <html lang="el">
 <head>
 <meta charset="utf-8">
+<meta name="app-version" content="2.40">
+<!-- Ασφάλεια: η σελίδα φορτώνει κώδικα μόνο από εδώ και από συγκεκριμένες, κλειδωμένες εκδόσεις βιβλιοθηκών· στέλνει δεδομένα μόνο στο Google Drive του χρήστη· καμία εκτέλεση κειμένου ως κώδικα (eval) -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://cdn.jsdelivr.net/npm/mammoth@1.8.0/ https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/ https://accounts.google.com/gsi/; worker-src 'self' blob:; connect-src 'self' https://aglentzakis-dot.github.io data: blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://tessdata.projectnaptha.com https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com/gsi/; img-src 'self' https://aglentzakis-dot.github.io data: blob:; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; font-src 'self' data:; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>GlenRead</title>
 <meta name="theme-color" content="#FDD117">
@@ -573,19 +576,24 @@ window.LANG_READY=true; // τα αγγλικά ενεργοποιούνται μ
 window.UI=!LANG_READY?'el':(function(){try{var v=localStorage.getItem('glenread-ui');if(v==='el'||v==='en')return v}catch(e){}return /^el\b/i.test(navigator.language||'el')?'el':'en'})();
 document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-en.js"><\/script>');
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<!-- pdf.js 4.10.38 (διορθωμένο κενό CVE-2024-4367), φιλοξενείται εδώ -->
+<script type="module">import * as P from './pdfjs/pdf.mjs';P.GlobalWorkerOptions.workerSrc=new URL('pdfjs/pdf.worker.mjs',location.href).href;window.pdfjsLib=P;dispatchEvent(new Event('pdfjs-ready'))</script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="lib/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="antigrafa.js"></script>
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.39';
+const VERSION='2.40';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
-if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+// pdf.js φορτώνεται ως άρθρωμα (λίγο αργότερα από αυτό το σενάριο): όποιος το χρειάζεται, περιμένει
+const pdfReady=()=>window.pdfjsLib?Promise.resolve(window.pdfjsLib):new Promise((ok,no)=>{const t=setTimeout(()=>no(new Error('nolib')),20000);addEventListener('pdfjs-ready',()=>{clearTimeout(t);ok(window.pdfjsLib)},{once:true})});
+// ΚΑΘΕ άνοιγμα PDF περνά από εδώ: χωρίς εκτέλεση κώδικα από το αρχείο (isEvalSupported:false), χωρίς σενάρια PDF
+function pdfLoad(data){return pdfjsLib.getDocument({data,isEvalSupported:false,enableXfa:false,disableFontFace:false,standardFontDataUrl:new URL('pdfjs/standard_fonts/',location.href).href})}
+window.pdfLoad=pdfLoad;
 
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2600)};
 const show=id=>{if(id!=='home'&&history.state&&history.state.v!=='view')history.pushState({v:'view'},'');['home','work','read'].forEach(s=>$('#'+s).classList.toggle('hidden',s!==id));document.body.classList.toggle('reading',id==='read');if(id==='read'){if(typeof pinApply==='function'){pinApply();rdApply();if(RD.awake)awake(true)}}else{document.body.removeAttribute('data-th');if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}scrollTo(0,0);if(typeof setHH==='function')setHH();if(id==='home'&&typeof efmShow==='function')efmShow()};
@@ -743,6 +751,10 @@ async function getWorker(){
   const opt={logger:m=>{if(m.status==='recognizing text'&&ocrLbl){prog(null,ocrLbl+' — '+Math.round((m.progress||0)*100)+'%');return}if(m.status&&m.status.includes('loading')&&m.progress<1)prog(null,'Φόρτωση λεξικών (μόνο την πρώτη φορά αργεί)… '+Math.round((m.progress||0)*100)+'%')}};
   // γρήγορα λεξικά: φιλοξενούνται στη δική μας σελίδα
   if(ocrFast())opt.langPath=new URL('tessdata/fast',location.href).href;
+  // ο «πυρήνας» της αναγνώρισης φιλοξενείται εδώ (αυθεντικός, από την επίσημη έκδοση 5.1.1)
+  opt.corePath=new URL('tess/core/',location.href).href;
+  // ο βοηθός από τη συγκεκριμένη, κλειδωμένη έκδοση (ίδια διεύθυνση με αυτή που επιτρέπει ο κανόνας ασφαλείας)
+  opt.workerPath='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js';
   // και η φόρτωση των λεξικών σταματά με «Ακύρωση»
   if(cancelled)throw new Error('cancel');
   const cp=new Promise((_,no)=>{ocrStop=()=>no(new Error('cancel'))}),wp=Tesseract.createWorker(lang,1,opt);
@@ -833,9 +845,9 @@ async function openPdf(file){
   const my=newRun(),gone=()=>my!==runId;show('work');$('#wTitle').textContent=file.name;prog(0,'Άνοιγμα αρχείου…');
   let pdf=null,task=null,part=null;const pages=[];
   try{
-    if(!window.pdfjsLib)throw new Error('nolib');
+    await pdfReady().catch(()=>{});if(!window.pdfjsLib)throw new Error('nolib');
     const buf=await file.arrayBuffer();const orig=buf.slice(0);
-    task=pdfjsLib.getDocument({data:buf});pdf=await task.promise;
+    task=pdfLoad(buf);pdf=await task.promise;
     part={id:Date.now(),date:new Date().toISOString(),name:file.name.replace(/\.pdf$/i,''),pages,partial:pdf.numPages};
     for(let p=1;p<=pdf.numPages;p++){
       if(cancelled||gone()){if(!gone()){ocrLbl='';ocrRunning(false)}if(pages.length)saveDoc(part);pdfFree(pdf);return gone()?null:goHome()}
@@ -878,7 +890,7 @@ async function openPdf(file){
 // ---------- Όλα τα αρχεία κειμένου ----------
 const libs={};
 function loadLib(url){return libs[url]||(libs[url]=new Promise((ok,no)=>{const s=document.createElement('script');s.src=url;s.onload=ok;s.onerror=()=>{delete libs[url];no(new Error('nolib'))};document.head.appendChild(s)}))}
-const JSZIP='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',MAMMOTH='https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js';
+const JSZIP='lib/jszip.min.js',MAMMOTH='https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js';
 // κείμενο σε σωστή κωδικοποίηση: πρώτα UTF-8, αλλιώς ελληνικά Windows (παλιά αρχεία)
 function decodeText(buf){
   const b=new Uint8Array(buf);
@@ -1538,7 +1550,7 @@ const thumbQ=[];let thumbBusy=false;
 async function thumbFor(id){const k='thumb-'+id;const t=await draftGet(k);if(typeof t==='string')return t;
   const f=await draftGet('file-'+id).catch(()=>null);if(!f)return null;let c=null,pdf=null;
   try{if(f.images&&f.images[0]){const im=await loadImg(f.images[0]);c=document.createElement('canvas');c.width=180;c.height=Math.round(im.naturalHeight*180/im.naturalWidth);c.getContext('2d').drawImage(im,0,0,c.width,c.height)}
-    else if(f.pdf&&window.pdfjsLib){pdf=await pdfjsLib.getDocument({data:f.pdf.slice(0)}).promise;const pg=await pdf.getPage(1),v0=pg.getViewport({scale:1}),vp=pg.getViewport({scale:180/v0.width});c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);await pg.render({canvasContext:x,viewport:vp}).promise}
+    else if(f.pdf&&await pdfReady().catch(()=>null)){pdf=await pdfLoad(f.pdf.slice(0)).promise;const pg=await pdf.getPage(1),v0=pg.getViewport({scale:1}),vp=pg.getViewport({scale:180/v0.width});c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);await pg.render({canvasContext:x,viewport:vp}).promise}
     if(!c)return null;const u=c.toDataURL('image/jpeg',.7);c.width=c.height=0;await draftSet(k,u);return u}catch(e){return null}finally{if(pdf)pdfFree(pdf)}}
 function thumbFill(){if(thumbBusy)return;const el=thumbQ.shift();if(!el)return;thumbBusy=true;
   thumbFor(el.dataset.th).then(u=>{if(u){el.style.backgroundImage=`url("${u}")`;el.textContent=''}}).finally(()=>{thumbBusy=false;setTimeout(thumbFill,30)})}
@@ -1583,8 +1595,8 @@ async function pvOpen(o){o=o||{};
   doc.ann=doc.ann||{};pv.undo=[];pv.redo=[];pv.pages=[];pv.z=1;box.style.setProperty('--z',1);
   try{
     if(pv.file.pdf){
-      if(!window.pdfjsLib)throw new Error('nolib');
-      const pdf=await pdfjsLib.getDocument({data:pv.file.pdf.slice(0)}).promise;
+      await pdfReady().catch(()=>{});if(!window.pdfjsLib)throw new Error('nolib');
+      const pdf=await pdfLoad(pv.file.pdf.slice(0)).promise;
       if(stale()){pdfFree(pdf);return}pv.pdf=pdf;const sizes=[];
       for(let i=1;i<=pdf.numPages;i++){const vp=(await pdf.getPage(i)).getViewport({scale:1});if(stale())return;sizes.push({w:vp.width,h:vp.height})}
       pv.pages=sizes;
@@ -1885,7 +1897,7 @@ async function annPdf(send){
     // εναλλακτικά: εικόνα σελίδας + σημειώσεις
     try{
       if(!window.jspdf)return toast('Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.');
-      const {jsPDF}=window.jspdf;let out=null;const pdfjs=file.pdf&&window.pdfjsLib?await pdfjsLib.getDocument({data:file.pdf.slice(0)}).promise:null;
+      const {jsPDF}=window.jspdf;let out=null;const pdfjs=file.pdf&&await pdfReady().catch(()=>null)?await pdfLoad(file.pdf.slice(0)).promise:null;
       const n=pdfjs?pdfjs.numPages:file.images.length;
       for(let i=0;i<n;i++){
         const c=await pageCanvas(file,pdfjs,i,pdfjs?1600:4000);
@@ -1902,7 +1914,7 @@ async function annPdf(send){
 async function sendImages(which){
   const file=pv.file||await draftGet('file-'+doc.id);if(!file)return toast('Το πρωτότυπο δεν κρατήθηκε');
   let pdfjs=null;try{
-    pdfjs=file.pdf&&window.pdfjsLib?await pdfjsLib.getDocument({data:file.pdf.slice(0)}).promise:null;
+    pdfjs=file.pdf&&await pdfReady().catch(()=>null)?await pdfLoad(file.pdf.slice(0)).promise:null;
     const n=pdfjs?pdfjs.numPages:file.images.length,idx=which==='all'?[...Array(n).keys()]:[Math.min(n-1,Math.max(0,which|0))];
     toast(idx.length>1?(EN?'Preparing '+idx.length+' photos…':'Ετοιμάζω '+idx.length+' φωτογραφίες…'):(EN?'Preparing the photo…':'Ετοιμάζω τη φωτογραφία…'));
     const files=[],base=safeName(doc.name);
