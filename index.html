@@ -2,7 +2,7 @@
 <html lang="el">
 <head>
 <meta charset="utf-8">
-<meta name="app-version" content="2.40">
+<meta name="app-version" content="2.41">
 <!-- Ασφάλεια: η σελίδα φορτώνει κώδικα μόνο από εδώ και από συγκεκριμένες, κλειδωμένες εκδόσεις βιβλιοθηκών· στέλνει δεδομένα μόνο στο Google Drive του χρήστη· καμία εκτέλεση κειμένου ως κώδικα (eval) -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://cdn.jsdelivr.net/npm/mammoth@1.8.0/ https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/ https://accounts.google.com/gsi/; worker-src 'self' blob:; connect-src 'self' https://aglentzakis-dot.github.io data: blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://tessdata.projectnaptha.com https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com/gsi/; img-src 'self' https://aglentzakis-dot.github.io data: blob:; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; font-src 'self' data:; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -585,7 +585,7 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.40';
+const VERSION='2.41';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -967,13 +967,17 @@ async function openAny(file){
   if(t.startsWith('image/'))return openSharedImages([file]);
   const my=newRun(),gone=()=>my!==runId||cancelled;show('work');$('#wTitle').textContent=name;prog(.3,'Διαβάζω το αρχείο…');
   try{
-    const buf=await file.arrayBuffer();let pages;
+    const buf=await file.arrayBuffer();let pages,slides=null;
     if(['docx','dotx','docm'].includes(ext)||t.includes('wordprocessingml')){await loadLib(MAMMOTH);const r=await mammoth.extractRawText({arrayBuffer:buf});pages=[{text:r.value}]}
     else if(ext==='doc'||t==='application/msword'){pages=[{text:docText(buf)}];toast('Παλιό αρχείο Word: διαβάστηκε το κείμενο, χωρίς μορφοποίηση')}
     else if(['odt','ott'].includes(ext)||t.includes('opendocument.text'))pages=[{text:await odtText(buf)}];
     else if(ext==='rtf'||t.includes('rtf'))pages=[{text:rtfText(decodeText(buf))}];
     else if(ext==='epub'||t==='application/epub+zip')pages=await epubPages(buf);
-    else if(ext==='pptx'||t.includes('presentationml'))pages=await pptxPages(buf);
+    else if(ext==='pptx'||t.includes('presentationml')){pages=await pptxPages(buf);
+      // οι διαφάνειες όπως είναι (κείμενα, πίνακες, εικόνες) — για την προβολή «Σελίδα»
+      try{await loadLib('parousiasi.js');prog(.4,EN?'Drawing the slides…':'Ζωγραφίζω τις διαφάνειες…');
+        const sl=await GlenSlides.render(buf.slice(0),{width:1600,progress:(i,n)=>prog(.4+.6*i/n,(EN?'Slide ':'Διαφάνεια ')+i+(EN?' of ':' από ')+n)});
+        if(sl.length&&sl.length===pages.length)slides=sl}catch(e){console.warn(e)}}
     else if(['html','htm','xhtml'].includes(ext)||t==='text/html')pages=[{text:htmlText(decodeText(buf))}];
     else{const txt=decodeText(buf);const bad=(txt.slice(0,4000).match(/[\u0000-\u0008\u000E-\u001F�]/g)||[]).length;
       if(bad>40){failHome();return toast('Αυτό το αρχείο δεν είναι κείμενο που μπορώ να διαβάσω')}
@@ -981,7 +985,10 @@ async function openAny(file){
     if(gone())return;
     pages=pages.map(p=>({text:(p.text||'').replace(/\r\n?/g,'\n'),conf:100,ocr:false}));
     if(!pages.length||pages.every(p=>!p.text.trim())){failHome();return toast('Δεν βρέθηκε κείμενο μέσα στο αρχείο')}
-    prog(1);finish({name:name.replace(/\.[^.]+$/,''),pages,kind:KIND[ext]||'κείμενο'});
+    if(gone())return;
+    let fid;if(slides){fid=Date.now();pages.forEach((p,i)=>{p.cl='off';if(slides[i].lines.length)p.lines=slides[i].lines});
+      if(!await draftSet('file-'+fid,{images:slides.map(s=>s.url)}))slides=null}
+    prog(1);finish({...(slides?{id:fid,slides:true}:{}),name:name.replace(/\.[^.]+$/,''),pages,kind:KIND[ext]||'κείμενο'});
   }catch(e){console.error(e);if(gone())return;failHome();toast(e.message==='nolib'?'Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.':'Δεν άνοιξε το αρχείο. Ίσως είναι κατεστραμμένο ή με κωδικό.')}
 }
 
@@ -1388,7 +1395,7 @@ function openReader(){
   if(!(l&&l.id===doc.id))l=posGet(doc.id);
   const same=!!(l&&l.id===doc.id);posT=null;
   try{localStorage.setItem('glenread-last',JSON.stringify(same?l:{id:doc.id,y:0}))}catch(e){}posSave(same?l:{id:doc.id,y:0});
-  pvClose();viewLabels();const wantPage=!doc.kind&&!(same&&l.v==='text'&&l.y>0); // πρώτη φορά: η σελίδα· μετά: όπου είχες μείνει
+  pvClose();viewLabels();const wantPage=(!doc.kind||doc.slides)&&!(same&&l.v==='text'&&l.y>0); // πρώτη φορά: η σελίδα· μετά: όπου είχες μείνει
   if(wantPage)pvOpen({auto:true}).then(()=>{if(same&&l.v==='page'&&pv.on)setTimeout(()=>{const el=$(`.pvp[data-i="${l.p||0}"]`);if(el){const r=el.getBoundingClientRect();scrollTo(0,scrollY+r.top+r.height*(l.f||0)-80)}},60)});
   else if(same&&l.y>0)setTimeout(()=>scrollTo(0,l.y*(document.body.scrollHeight-innerHeight)),60);
   if(doc.partial)toast('Αυτό το έγγραφο είχε διακοπεί — έχει μόνο τις σελίδες που πρόλαβαν');
