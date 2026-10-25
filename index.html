@@ -2,7 +2,7 @@
 <html lang="el">
 <head>
 <meta charset="utf-8">
-<meta name="app-version" content="2.41">
+<meta name="app-version" content="2.42">
 <!-- Ασφάλεια: η σελίδα φορτώνει κώδικα μόνο από εδώ και από συγκεκριμένες, κλειδωμένες εκδόσεις βιβλιοθηκών· στέλνει δεδομένα μόνο στο Google Drive του χρήστη· καμία εκτέλεση κειμένου ως κώδικα (eval) -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://cdn.jsdelivr.net/npm/mammoth@1.8.0/ https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/ https://accounts.google.com/gsi/; worker-src 'self' blob:; connect-src 'self' https://aglentzakis-dot.github.io data: blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://tessdata.projectnaptha.com https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com/gsi/; img-src 'self' https://aglentzakis-dot.github.io data: blob:; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; font-src 'self' data:; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -293,6 +293,13 @@ details summary{cursor:pointer;font-weight:600}
 
 /* «Πώς να σταλεί;» */
 .shws{display:flex;flex-direction:column;gap:8px}
+.pwwarn{margin:0 0 10px;padding:10px 12px;border:2px solid #c62828;border-radius:12px;background:rgba(198,40,40,.08);line-height:1.45}
+.pwwarn button{margin-top:6px}
+.pwc.need{border:2px solid #c62828}
+.shdest{display:flex;gap:6px;margin:0 0 10px}
+.shdest button{flex:1;min-height:48px}
+.shdest button.on{outline:3px solid var(--acc2);outline-offset:-3px;font-weight:700}
+.pwin{width:100%;box-sizing:border-box;font-size:18px;padding:10px;margin:4px 0 8px;border-radius:10px;border:1.5px solid #888}
 .shw{display:flex!important;align-items:center;gap:12px;text-align:left;justify-content:flex-start;padding:10px 12px;min-height:56px;width:100%}
 .shw>span:first-child{font-size:26px;flex:none;width:34px;text-align:center}
 .shw b{display:block;font-size:16px}.shw small{display:block;opacity:.75;font-weight:400;font-size:13px;line-height:1.3}
@@ -385,9 +392,18 @@ details summary{cursor:pointer;font-weight:600}
     </details>
   </div>
   <div class="card">
+    <p class="pwwarn hidden" id="pwWarn">🔴 <b>Τα αντίγραφα ασφαλείας έχουν σταματήσει:</b> όρισε κωδικό αντιγράφων για να κλειδώνονται. <button class="sec" id="pwWarnGo">Ορισμός τώρα</button></p>
     <details id="bkBox">
       <summary>💾 Αντίγραφα ασφαλείας</summary>
       <p class="muted">Τα έγγραφα μένουν μόνο στο κινητό σου. Αν καθαρίσεις τα δεδομένα του προγράμματος περιήγησης ή αλλάξεις κινητό, χάνονται — γι' αυτό κράτα αντίγραφο.</p>
+      <div class="card pwc" id="pwCard" style="margin:10px 0;padding:12px">
+        <p style="margin:0 0 6px"><b>🔒 Κωδικός αντιγράφων</b> — <span id="pwState">δεν έχει οριστεί</span></p>
+        <p class="muted" style="margin:0 0 8px">Τα αντίγραφα έχουν <b>όλα τα έγγραφά σου</b>, γι' αυτό κλειδώνονται με κρυπτογράφηση AES-256 πριν φύγουν από την εφαρμογή — στο Drive και στον φάκελο. <b>Χωρίς κωδικό δεν γράφεται κανένα αντίγραφο.</b> Σε αυτό το κινητό ανοίγουν μόνα τους· σε καινούργιο κινητό θα σου ζητηθεί ο κωδικός. <b>Αν τον ξεχάσεις, κανείς δεν μπορεί να τα ανοίξει — ούτε εμείς.</b> Γράψ' τον κάπου ασφαλές, όχι στο ίδιο κινητό.</p>
+        <div class="row">
+          <button id="pwSet">🔒 Ορισμός κωδικού</button>
+          <button class="sec hidden" id="pwChange">Αλλαγή κωδικού</button>
+        </div>
+      </div>
       <div class="card" style="margin:10px 0;padding:12px">
         <p style="margin:0 0 6px"><b>☁️ Google Drive</b> — <span id="gdState">δεν έχει συνδεθεί</span></p>
         <p class="muted" style="margin:0 0 8px">Με το Google Drive τα έγγραφά σου είναι ασφαλή ακόμα κι αν χαλάσει ή χαθεί το κινητό. Ένα πάτημα για σύνδεση, μετά ανεβαίνουν μόνα τους μετά από κάθε αλλαγή, στο <b>GlenApps › GlenRead</b> του δικού σου Drive.</p>
@@ -442,7 +458,7 @@ details summary{cursor:pointer;font-weight:600}
     <button class="sec lb" data-q="fsp"><span>Α+</span><small>Μεγαλύτερα</small></button>
     <button class="sec lb" data-q="theme"><span>🌓</span><small>Θέμα</small></button>
     <button class="sec lb" data-q="bm"><span>🔖</span><small>Σελιδοδείκτης</small></button>
-    <button class="sec lb" data-q="share"><span>📤</span><small>Αποστολή</small></button>
+    <button class="sec lb" data-q="share"><span>📤</span><small>Κοινοποίηση</small></button>
     <button class="sec lb" data-q="copy"><span>📋</span><small>Αντιγραφή</small></button>
     <button class="sec lb" data-q="full"><span>⛶</span><small>Οθόνη</small></button>
     <button class="sec lb" data-q="xlsx"><span>📊</span><small>Excel</small></button>
@@ -523,7 +539,7 @@ details summary{cursor:pointer;font-weight:600}
     </details>
     <details class="cat" data-cat="file"><summary><span class="ci">📁</span><span class="ct"><b>Αρχείο</b><small>Αποθήκευση, αποστολή, αντιγραφή, όνομα</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mAnnPdf"><span class="ic">📑</span><span class="tx"><b>Αποθήκευση PDF με τις σημειώσεις</b><small>Για να το στείλεις ή να το κρατήσεις</small></span></button>
-    <button class="mi" id="mShare"><span class="ic">📤</span><span class="tx"><b>Αποστολή</b><small>Ως PDF, φωτογραφία, κείμενο, Word ή Excel</small></span></button>
+    <button class="mi" id="mShare"><span class="ic">📤</span><span class="tx"><b>Κοινοποίηση ή αποθήκευση</b><small>Σε όποια εφαρμογή θέλεις ή σε φάκελο που διαλέγεις — ως PDF, φωτογραφία, κείμενο, Word ή Excel</small></span></button>
     <button class="mi" id="mCopy"><span class="ic">📋</span><span class="tx"><b>Αντιγραφή κειμένου</b><small>Όλου, ή μόνο όσου έχεις επιλέξει</small></span></button>
     <button class="mi" id="mDocx"><span class="ic">📝</span><span class="tx"><b>Εξαγωγή σε Word</b><small>Οι λίστες και οι πίνακες βγαίνουν ως πίνακες</small></span></button>
     <button class="mi" id="mXlsx"><span class="ic">📊</span><span class="tx"><b>Εξαγωγή σε Excel</b><small>Κατάλογοι και λίστες σε στήλες, με έτοιμα φίλτρα</small></span></button>
@@ -585,7 +601,7 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.41';
+const VERSION='2.42';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -629,12 +645,82 @@ async function appDir(ask){
   const g=await root.getDirectoryHandle('GlenApps',{create:true});return g.getDirectoryHandle(BK.folder,{create:true});
 }
 const today=()=>new Date().toISOString().slice(0,10);
-async function backupData(){return JSON.stringify({app:BK.app,version:VERSION,date:new Date().toISOString(),docs:await allDocs()})}
+const hms=()=>new Date().toTimeString().slice(0,8).replace(/:/g,'');
+// Κρυπτογράφηση αντιγράφων (κοινό antigrafa.js: PBKDF2 150.000 + AES-GCM-256).
+// Κανόνας: ΚΑΝΕΝΑ αντίγραφο δεν φεύγει από την εφαρμογή ακρυπτογράφητο.
+const GD=()=>window.GlenDrive;
+const bkCount=t=>{try{const g=GD(),n=g&&g.crypt.count(t);if(n!=null)return n;const o=JSON.parse(t);return Array.isArray(o.docs)?o.docs.length:null}catch(e){return null}};
+const bkLockedTxt=t=>{try{return !!(GD()&&GD().crypt.isLocked(t))}catch(e){return false}};
+async function hasPw(){const g=GD();if(!g)return false;try{await g.ready()}catch(e){}return g.hasPassword()}
+async function lockData(plain){
+  if(!await hasPw()){pwNeed=true;pwPaint();return null}
+  const out=await GD().lock(plain);
+  return bkLockedTxt(out)?out:null; // ασφάλεια: αν για οποιονδήποτε λόγο δεν κλειδώθηκε, δεν γράφεται
+}
+let pwNeed=false;
+async function pwPaint(){
+  const on=await hasPw(),g=GD();let used=false;
+  try{used=!!(await hget())||(g&&g.state().on)}catch(e){}
+  $('#pwState').textContent=!g?'δεν φορτώθηκε':on?'✓ ορίστηκε — τα αντίγραφα κλειδώνονται':'🔴 δεν έχει οριστεί — δεν γράφονται αντίγραφα';
+  $('#pwSet').classList.toggle('hidden',on);$('#pwChange').classList.toggle('hidden',!on);
+  $('#pwCard').classList.toggle('need',!on);
+  $('#pwWarn').classList.toggle('hidden',on||!(used||pwNeed));
+}
+// διάλογος κωδικού· fields: [[id,ετικέτα]] → Promise({id:τιμή}|null)
+function pwDlg(title,intro,fields,okTxt){
+  return new Promise(res=>{
+    dlgOpen(title,(intro?'<p style="margin:0 0 8px">'+intro+'</p>':'')+fields.map(([id,l])=>`<label style="display:block">${l}<input class="pwin" type="password" id="${id}" autocomplete="new-password" autocapitalize="off" spellcheck="false"></label>`).join('')+'<label style="display:flex;gap:10px;align-items:center;justify-content:flex-start;width:auto"><input type="checkbox" id="pwShow" style="width:22px;height:22px;min-height:0;flex:none;margin:0;padding:0"><span>Εμφάνιση κωδικού</span></label><p class="muted" id="pwErr" style="margin:6px 0 0;color:var(--bad)"></p>',
+      ()=>{const v={};fields.forEach(([id])=>v[id]=$('#'+id).value);setTimeout(()=>res(v),0)});
+    dlgCancel=()=>res(null);$('#dlgOk').textContent=okTxt||'Εντάξει';
+    $('#pwShow').onchange=e=>fields.forEach(([id])=>$('#'+id).type=e.target.checked?'text':'password');
+    setTimeout(()=>{try{$('#'+fields[0][0]).focus()}catch(e){}},50);
+  });
+}
+const pwWeak=p=>p.length<8?'Ο κωδικός θέλει τουλάχιστον 8 χαρακτήρες.':/^(.)\1+$/.test(p)||/^(0123|1234|2345|abcd|qwer|1111|0000|password|κωδικ)/i.test(p)?'Πολύ εύκολος κωδικός — διάλεξε κάτι που δεν μαντεύεται.':'';
+async function pwSetFlow(){
+  const g=GD();if(!g)return toast('Το κλείδωμα δεν φορτώθηκε — άνοιξε ξανά την εφαρμογή'),false;
+  if(!(window.crypto&&crypto.subtle))return toast('Αυτό το πρόγραμμα περιήγησης δεν υποστηρίζει κρυπτογράφηση'),false;
+  let msg='Τουλάχιστον 8 χαρακτήρες. Καλύτερα μια φράση με 3–4 λέξεις. <b>Αν τον ξεχάσεις, τα αντίγραφα δεν ανοίγουν — από κανέναν.</b>';
+  while(true){
+    const v=await pwDlg('🔒 Κωδικός αντιγράφων',msg,[['pw1','Νέος κωδικός'],['pw2','Ξανά, για επιβεβαίωση']],'Ορισμός');
+    if(!v)return false;
+    const w=pwWeak(v.pw1);if(w){msg='<b style="color:var(--bad)">'+w+'</b>';continue}
+    if(v.pw1!==v.pw2){msg='<b style="color:var(--bad)">Οι δύο κωδικοί δεν είναι ίδιοι.</b>';continue}
+    try{const ok=await g.setPassword(v.pw1);if(ok===false)throw 0}catch(e){toast('Ο κωδικός δεν αποθηκεύτηκε');return false}
+    pwNeed=false;await pwPaint();toast('🔒 Ο κωδικός ορίστηκε· από τώρα τα αντίγραφα κλειδώνονται');
+    autoBackup(false);try{g.state().on&&g.changed()}catch(e){}
+    return true;
+  }
+}
+async function pwChangeFlow(){
+  const g=GD();let msg='';
+  while(true){
+    const v=await pwDlg('🔒 Αλλαγή κωδικού',msg||'Τα παλιά αντίγραφα συνεχίζουν να ανοίγουν με τον <b>παλιό</b> κωδικό· τα νέα κλειδώνονται με τον νέο.',[['pw0','Τωρινός κωδικός'],['pw1','Νέος κωδικός'],['pw2','Νέος, ξανά']],'Αλλαγή');
+    if(!v)return;
+    const w=pwWeak(v.pw1);if(w){msg='<b style="color:var(--bad)">'+w+'</b>';continue}
+    if(v.pw1!==v.pw2){msg='<b style="color:var(--bad)">Οι δύο νέοι κωδικοί δεν είναι ίδιοι.</b>';continue}
+    if(!await g.changePassword(v.pw0,v.pw1)){msg='<b style="color:var(--bad)">Ο τωρινός κωδικός είναι λάθος.</b>';continue}
+    toast('Ο κωδικός άλλαξε');pwPaint();autoBackup(false);try{g.state().on&&g.changed()}catch(e){}return;
+  }
+}
+const askPw=n=>pwDlg('🔒 Κλειδωμένο αντίγραφο',n?'<b style="color:var(--bad)">Λάθος κωδικός.</b> Δοκίμασε ξανά ('+(3-n)+' ακόμα).':'Αυτό το αντίγραφο κλειδώθηκε με κωδικό. Γράψε τον κωδικό αντιγράφων που είχες ορίσει.',[['pwo','Κωδικός']],'Άνοιγμα').then(v=>v?v.pwo:null);
+$('#pwSet').onclick=()=>pwSetFlow();
+$('#pwChange').onclick=()=>pwChangeFlow();
+$('#pwWarnGo').onclick=()=>{$('#bkBox').open=true;pwSetFlow()};
 let bkTimer=null;
 async function changed(){try{docsCache=await allDocs();docsReady=true}catch(e){}try{window.GlenDrive&&GlenDrive.changed()}catch(e){}clearTimeout(bkTimer);bkTimer=setTimeout(()=>autoBackup(false),3000)}
+// Γράφει το αντίγραφο της ημέρας στον φάκελο. Κανόνες: ποτέ 0 έγγραφα, ποτέ ακρυπτογράφητο,
+// και αν το νέο έχει λιγότερα έγγραφα από το υπάρχον, κρατά πρώτα το παλιό ως «-prin-ΩΩΛΛΔΔ» (τα 10 νεότερα).
 async function autoBackup(ask){
   try{const dir=await appDir(ask);if(!dir)return false;
-    const f=await dir.getFileHandle(`${BK.prefix}-${today()}.json`,{create:true});const w=await f.createWritable();await w.write(await backupData());await w.close();
+    const docs=await allDocs();if(!docs.length)return 'empty';
+    const data=await lockData(JSON.stringify({app:BK.app,version:VERSION,date:new Date().toISOString(),docs}));
+    if(!data)return 'nopass';
+    const name=`${BK.prefix}-${today()}.json`;
+    try{const old=await (await (await dir.getFileHandle(name)).getFile()).text();const n=bkCount(old);
+      if(n!=null&&n>docs.length){const c=await dir.getFileHandle(`${BK.prefix}-${today()}-prin-${hms()}.json`,{create:true});const cw=await c.createWritable();await cw.write(old);await cw.close()}}catch(e){}
+    const f=await dir.getFileHandle(name,{create:true});const w=await f.createWritable();await w.write(data);await w.close();
+    try{const pr=[];for await(const [n,h] of dir.entries())if(h.kind==='file'&&n.startsWith(BK.prefix)&&n.includes('-prin-'))pr.push(n);pr.sort().reverse();for(const n of pr.slice(10))await dir.removeEntry(n)}catch(e){}
     bkUI();return true}catch(e){console.warn(e);return false}
 }
 async function bkUI(){
@@ -642,58 +728,89 @@ async function bkUI(){
   $('#bkState').textContent=root?('«'+root.name+'» › GlenApps › GlenRead'):'δεν έχει οριστεί';
   $('#bkForget').classList.toggle('hidden',!root);$('#bkPick').textContent=root?'📁 Αλλαγή φακέλου':'📁 Επιλογή φακέλου';
   if(!('showDirectoryPicker' in window)){$('#bkPick').disabled=true;$('#bkState').textContent='το κινητό δεν υποστηρίζει φάκελο — χρησιμοποίησε το «Αντίγραφο τώρα»'}
+  pwPaint();
 }
+const bkMsg=r=>r==='nopass'?'🔴 Δεν γράφτηκε: όρισε πρώτα κωδικό αντιγράφων':r==='empty'?'Δεν υπάρχουν ακόμη έγγραφα για αντίγραφο':'';
 $('#bkPick').onclick=async()=>{
-  try{const h=await showDirectoryPicker({id:BK.key,mode:'readwrite',startIn:'downloads'});await hset(h);await autoBackup(true);toast('Ο φάκελος ορίστηκε· γράφτηκε το πρώτο αντίγραφο');bkUI()}
-  catch(e){if(e.name!=='AbortError')toast('Δεν ορίστηκε φάκελος')}
+  if(!await hasPw()&&!await pwSetFlow())return;
+  let h;try{h=await showDirectoryPicker({id:BK.key,mode:'readwrite',startIn:'documents'})}catch(e){if(e.name!=='AbortError')toast('Δεν ορίστηκε φάκελος');return}
+  await hset(h);const r=await autoBackup(true);
+  if(r===true)toast('Ο φάκελος ορίστηκε· γράφτηκε το πρώτο κλειδωμένο αντίγραφο');
+  else if(bkMsg(r))toast(bkMsg(r));
+  else{ // ο φάκελος δεν κράτησε άδεια εγγραφής (συμβαίνει σε μερικά Android)
+    dlgOpen('Ο φάκελος δεν κρατήθηκε','<p style="margin:0">Το κινητό δεν έδωσε άδεια εγγραφής σε αυτόν τον φάκελο. Δοκίμασε ξανά και διάλεξε έναν φάκελο μέσα στα <b>Έγγραφα</b> ή στις <b>Λήψεις</b> (όχι τη ρίζα του κινητού).</p>',()=>$('#bkPick').onclick());$('#dlgOk').textContent='Δοκίμασε ξανά';
+  }
+  bkUI();
 };
 $('#bkForget').onclick=async()=>{if(confirm('Αποσύνδεση φακέλου; Τα αρχεία που υπάρχουν ΔΕΝ σβήνονται.')){await hset(null);bkUI();$('#bkList').innerHTML=''}};
 $('#bkNow').onclick=async()=>{
-  if(await autoBackup(true))return toast('Το αντίγραφο γράφτηκε στο GlenApps › GlenRead');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([await backupData()],{type:'application/json'}));a.download=`${BK.prefix}-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),60000);toast('Το αντίγραφο κατέβηκε στις Λήψεις');
+  if(!await hasPw()&&!await pwSetFlow())return;
+  const r=await autoBackup(true);
+  if(r===true)return toast('🔒 Το κλειδωμένο αντίγραφο γράφτηκε στο GlenApps › GlenRead');
+  if(bkMsg(r))return toast(bkMsg(r));
+  const docs=await allDocs();if(!docs.length)return toast(bkMsg('empty'));
+  const data=await lockData(JSON.stringify({app:BK.app,version:VERSION,date:new Date().toISOString(),docs}));if(!data)return toast(bkMsg('nopass'));
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download=`${BK.prefix}-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),60000);toast('🔒 Το κλειδωμένο αντίγραφο κατέβηκε στις Λήψεις');
 };
 $('#bkRestore').onclick=async()=>{
   const dir=await appDir(true).catch(()=>null);
   if(!dir)return $('#bkFile').click();
   const files=[];try{for await(const [n,h] of dir.entries())if(h.kind==='file'&&n.startsWith(BK.prefix)&&n.endsWith('.json'))files.push([n,h])}catch(e){return $('#bkFile').click()}
-  files.sort((a,b)=>b[0].localeCompare(a[0]));const top=files.slice(0,10);
-  $('#bkList').innerHTML=(top.length?top.map(([n],i)=>`<div class="it"><div><strong>${esc(n.replace(BK.prefix+'-','').replace('.json',''))}</strong>${i===0?'<span class="muted">νεότερο</span>':''}</div><button class="sec" data-f="${esc(n)}">Επαναφορά</button></div>`).join(''):'<p class="muted">Δεν βρέθηκαν αντίγραφα στον φάκελο.</p>')+'<p><button class="sec" id="bkOther">Άλλο αρχείο…</button></p>';
+  files.sort((a,b)=>b[0].localeCompare(a[0]));const top=files.slice(0,10),info=[];
+  for(const [n,h] of top){try{const t=await (await h.getFile()).text();info.push({n,c:bkCount(t),l:bkLockedTxt(t)})}catch(e){info.push({n,c:null,l:false})}}
+  const plain=[];for(const [n,h] of files){if(!info.find(x=>x.n===n)){try{const t=await (await h.getFile()).text();if(!bkLockedTxt(t))plain.push(n)}catch(e){}}else if(!info.find(x=>x.n===n).l)plain.push(n)}
+  const lbl=n=>{const m=n.replace(BK.prefix+'-','').replace('.json','').split('-prin-');return m[1]?m[0]+' · πριν από αλλαγή '+m[1].replace(/(..)(..)(..)/,'$1:$2'):m[0]};
+  $('#bkList').innerHTML=(info.length?info.map((x,i)=>`<div class="it"><div><strong>${esc(lbl(x.n))}</strong><span class="muted">${x.l?'🔒 κλειδωμένο':'⚠ ακρυπτογράφητο'}${x.c!=null?' · '+x.c+' έγγραφα':''}${i===0?' · νεότερο':''}</span></div><button class="sec" data-f="${esc(x.n)}">Επαναφορά</button></div>`).join(''):'<p class="muted">Δεν βρέθηκαν αντίγραφα στον φάκελο.</p>')
+    +(plain.length&&info.some(x=>x.l)?`<p class="pwwarn" style="margin-top:8px">⚠ Υπάρχουν <b>${plain.length}</b> παλιά αντίγραφα <b>χωρίς κλείδωμα</b> στον φάκελο. <button class="sec" id="bkWipe">🧹 Διαγραφή των ακρυπτογράφητων</button></p>`:'')
+    +'<p><button class="sec" id="bkOther">Άλλο αρχείο…</button></p>';
   $('#bkOther').onclick=()=>$('#bkFile').click();
+  const wipe=$('#bkWipe');if(wipe)wipe.onclick=async()=>{if(!confirm(`Να διαγραφούν ${plain.length} ακρυπτογράφητα αντίγραφα από τον φάκελο; Τα κλειδωμένα μένουν.`))return;let k=0;for(const n of plain){try{await dir.removeEntry(n);k++}catch(e){}}toast('Διαγράφηκαν '+k+' ακρυπτογράφητα αντίγραφα');$('#bkRestore').onclick()};
   $('#bkList').querySelectorAll('[data-f]').forEach(b=>b.onclick=async()=>{let t;try{const h=await dir.getFileHandle(b.dataset.f);t=await (await h.getFile()).text()}catch(e){return toast('Το αρχείο δεν διαβάστηκε')}restore(t)});
 };
 $('#bkFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(f)restore(await f.text())};
 async function restore(txt){
+  if(bkLockedTxt(txt)){
+    const t=await GD().open(txt,askPw);
+    if(t==null)return toast('Το αντίγραφο δεν άνοιξε — χρειάζεται ο σωστός κωδικός');
+    txt=t;
+  }
   try{const o=JSON.parse(txt);if(![BK.app,'gdoc'].includes(o.app)||!Array.isArray(o.docs))throw 0;
     const ok=o.docs.filter(d=>d&&typeof d==='object'&&(typeof d.id==='number'||typeof d.id==='string')&&Array.isArray(d.pages)).map(d=>Object.assign({},d,{name:String(d.name||'Έγγραφο'),pages:d.pages.filter(x=>x&&typeof x==='object').map(x=>Object.assign({},x,{text:String(x.text||'')}))}));
     if(!ok.length)throw 0;
     const have=new Set((await allDocs()).map(d=>d.id));const nu=ok.filter(d=>!have.has(d.id));
-    if(!nu.length)return toast('Όλα τα έγγραφα του αντιγράφου υπάρχουν ήδη');
-    if(!confirm(`Επαναφορά ${nu.length} εγγράφων από ${new Date(o.date).toLocaleString(LOC)}; Τα έγγραφα που έχεις τώρα δεν αλλάζουν, προστίθενται μόνο όσα λείπουν.`+(ok.length>nu.length?` (${ok.length-nu.length} υπάρχουν ήδη και μένουν όπως είναι.)`:'')))return;
+    if(!nu.length)return toast('Όλα τα έγγραφα του αντιγράφου ('+ok.length+') υπάρχουν ήδη');
+    if(!confirm(`Το αντίγραφο της ${new Date(o.date).toLocaleString(LOC)} έχει ${ok.length} έγγραφα. Επαναφορά ${nu.length} που λείπουν; Τα έγγραφα που έχεις τώρα δεν αλλάζουν.`+(ok.length>nu.length?` (${ok.length-nu.length} υπάρχουν ήδη και μένουν όπως είναι.)`:'')))return;
     try{await store('readwrite',s=>{nu.forEach(d=>s.put(d))})}catch(e){console.warn(e);return toast('⚠️ Η επαναφορά δεν χώρεσε — ο χώρος του κινητού γέμισε')}
-    toast('Η επαναφορά έγινε');changed();drawLast();
+    toast('Η επαναφορά έγινε: '+nu.length+' έγγραφα');changed();drawLast();
   }catch(e){toast('Αυτό δεν είναι αντίγραφο του GlenRead')}
 }
 bkUI();
 
-// ---------- Google Drive (κοινό antigrafa.js) ----------
-const GD=()=>window.GlenDrive;
+// ---------- Google Drive (κοινό antigrafa.js, με υποχρεωτικό κλείδωμα) ----------
 const gdStore={get:()=>{try{return JSON.parse(localStorage.getItem('glenread-gdrive')||'{}')}catch(e){return {}}},set:v=>{try{localStorage.setItem('glenread-gdrive',JSON.stringify(v))}catch(e){}}};
 function gdPaint(){
   const g=GD();if(!g){$('#gdState').textContent='δεν φορτώθηκε (χρειάζεται σύνδεση)';$('#gdConnect').disabled=true;return}
   const s=g.state();
-  $('#gdState').textContent=s.on?(s.needTap?'περιμένει ένα πάτημα για να ανεβάσει τις αλλαγές':s.pending?'ανεβαίνει σε λίγο…':s.last?'✓ ασφαλή · τελευταίο '+new Date(s.last).toLocaleString(LOC):'συνδέθηκε'):'δεν έχει συνδεθεί';
+  $('#gdState').textContent=s.on?(s.err==='pass'?'🔴 σταμάτησε — όρισε κωδικό αντιγράφων':s.needTap?'περιμένει ένα πάτημα για να ανεβάσει τις αλλαγές':s.pending?'ανεβαίνει σε λίγο…':s.last?'🔒 ασφαλή · τελευταίο '+new Date(s.last).toLocaleString(LOC):'συνδέθηκε'):'δεν έχει συνδεθεί';
   $('#gdConnect').classList.toggle('hidden',!!s.on);['#gdNow','#gdList','#gdOff'].forEach(id=>$(id).classList.toggle('hidden',!s.on));
+  pwPaint();
 }
-try{GD()&&GD().init({app:'glenread',folder:'GlenRead',prefix:'glenread-antigrafo',payload:()=>{if(!docsReady)throw new Error('notready');return JSON.stringify({app:BK.app,version:VERSION,date:new Date().toISOString(),docs:docsCache})},t:(t,e)=>{if(e)for(const k in e)t=t.replace('{'+k+'}',e[k]);return t},toast,store:gdStore,onState:gdPaint})}catch(e){console.warn(e)}
+try{GD()&&GD().init({app:'glenread',folder:'GlenRead',prefix:'glenread-antigrafo',kodikos:true,
+  count:t=>bkCount(t),
+  // το Drive παίρνει ΜΟΝΟ κλειδωμένο κείμενο· χωρίς κωδικό → «nopass», δεν ανεβαίνει τίποτα
+  wrap:async t=>{const g=GD();await g.ready();if(!g.hasPassword()){pwNeed=true;pwPaint();return null}const o=await g.lock(t);return g.crypt.isLocked(o)?o:null},
+  payload:()=>{if(!docsReady)throw new Error('notready');return JSON.stringify({app:BK.app,version:VERSION,date:new Date().toISOString(),docs:docsCache})},t:(t,e)=>{if(e)for(const k in e)t=t.replace('{'+k+'}',e[k]);return t},toast,store:gdStore,onState:gdPaint})}catch(e){console.warn(e)}
 gdPaint();
-$('#gdConnect').onclick=async()=>{try{docsCache=await allDocs();docsReady=true;await GD().connect();toast('Συνδέθηκε με Google Drive');}catch(e){toast('Η σύνδεση δεν ολοκληρώθηκε')}gdPaint()};
-$('#gdNow').onclick=async()=>{try{docsCache=await allDocs();docsReady=true;await GD().uploadNow();toast('Ανέβηκε στο Google Drive')}catch(e){toast('Δεν ανέβηκε — έλεγξε τη σύνδεση')}gdPaint()};
+const gdRes=r=>{if(r==='nopass'){toast('🔴 Δεν ανέβηκε: όρισε πρώτα κωδικό αντιγράφων');return false}if(r==='empty'){toast('Δεν υπάρχουν ακόμη έγγραφα για αντίγραφο');return false}if(r==='restore'){toast('Βρέθηκαν αντίγραφα στο Drive — διάλεξε ποιο θα επαναφέρεις');$('#gdList').onclick();return false}return true};
+$('#gdConnect').onclick=async()=>{if(!await hasPw()&&!await pwSetFlow())return;try{docsCache=await allDocs();docsReady=true;if(gdRes(await GD().connect()))toast('Συνδέθηκε με Google Drive· τα αντίγραφα ανεβαίνουν κλειδωμένα');}catch(e){toast('Η σύνδεση δεν ολοκληρώθηκε')}gdPaint()};
+$('#gdNow').onclick=async()=>{if(!await hasPw()&&!await pwSetFlow())return;try{docsCache=await allDocs();docsReady=true;if(gdRes(await GD().uploadNow()))toast('🔒 Ανέβηκε κλειδωμένο στο Google Drive')}catch(e){toast('Δεν ανέβηκε — έλεγξε τη σύνδεση')}gdPaint()};
 $('#gdOff').onclick=()=>{if(confirm('Αποσύνδεση από το Google Drive; Τα αντίγραφα που υπάρχουν εκεί δεν σβήνονται.')){GD().disconnect();$('#gdFiles').innerHTML='';gdPaint()}};
 $('#gdList').onclick=async()=>{
   $('#gdFiles').innerHTML='<p class="muted">Φόρτωση…</p>';
   try{const l=(await GD().list()).slice(0,10);
-    $('#gdFiles').innerHTML=l.length?l.map((f,i)=>`<div class="it"><div><strong>${esc(f.name.replace(BK.prefix+'-','').replace('.json',''))}</strong>${i===0?'<span class="muted">νεότερο</span>':''}</div><button class="sec" data-gd="${esc(f.id)}">Επαναφορά</button></div>`).join(''):'<p class="muted">Δεν υπάρχουν ακόμη αντίγραφα στο Drive.</p>';
-    $('#gdFiles').querySelectorAll('[data-gd]').forEach(b=>b.onclick=async()=>{try{restore(await GD().download(b.dataset.gd))}catch(e){toast('Το αρχείο δεν διαβάστηκε')}});
+    const lbl=n=>{const m=n.replace(BK.prefix+'-','').replace('.json','').split('-prin-');return m[1]?m[0]+' · πριν από αλλαγή '+m[1].replace(/(..)(..)(..)/,'$1:$2'):m[0]};
+    $('#gdFiles').innerHTML=l.length?l.map((f,i)=>`<div class="it"><div><strong>${esc(lbl(f.name))}</strong><span class="muted">${f.appProperties&&f.appProperties.n?esc(f.appProperties.n)+' έγγραφα':''}${i===0?' · νεότερο':''}</span></div><button class="sec" data-gd="${esc(f.id)}">Επαναφορά</button></div>`).join(''):'<p class="muted">Δεν υπάρχουν ακόμη αντίγραφα στο Drive.</p>';
+    $('#gdFiles').querySelectorAll('[data-gd]').forEach(b=>b.onclick=async()=>{let t;try{t=await GD().download(b.dataset.gd)}catch(e){return toast('Το αρχείο δεν διαβάστηκε')}restore(t)});
   }catch(e){$('#gdFiles').innerHTML='<p class="muted">Δεν φορτώθηκε η λίστα. Έλεγξε τη σύνδεση στο διαδίκτυο.</p>'}
 };
 
@@ -1927,6 +2044,7 @@ async function sendImages(which){
     const files=[],base=safeName(doc.name);
     for(const i of idx){const c=await pageCanvas(file,pdfjs,i,2000);const b=await new Promise(r=>c.toBlob(r,'image/jpeg',.88));c.width=c.height=0;
       files.push(new File([b],base+(n>1?' - '+(EN?'page ':'σελίδα ')+(i+1):'')+'.jpg',{type:'image/jpeg'}))}
+    if(shDest==='pick')return void await pickSave(files);
     if(navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files,title:doc.name})}catch(e){}return}
     for(const f of files)await saveToFolder(f,f.name);
   }catch(e){console.error(e);toast('Δεν έγιναν οι φωτογραφίες')}finally{if(pdfjs)pdfFree(pdfjs)}
@@ -1937,17 +2055,22 @@ async function shareAsk(){
   closeSheet();if(!doc)return;
   const orig=!doc.kind&&(pv.file||await draftGet('file-'+doc.id).catch(()=>null)),n=doc.pages.length,cp=curPage();
   const B=(id,ic,t,s)=>`<button class="sec shw" id="${id}"><span>${ic}</span><span><b>${t}</b><small>${s}</small></span></button>`;
-  let h='<div class="shws">';
+  let h='<div class="shdest"><button class="sec" id="sdShare">📲 Σε εφαρμογή</button><button class="sec" id="sdPick">📁 Σε φάκελο που διαλέγω</button></div><p class="muted" id="sdHint" style="margin:0 0 8px"></p><div class="shws">';
   if(orig)h+=B('shPdf','📄','PDF',Object.values(doc.ann||{}).some(L=>L&&L.length)?'Όπως το έγγραφο, μαζί με τις σημειώσεις σου':'Όπως το έγγραφο — το καλύτερο για να το διαβάσει ο άλλος');
   if(orig)h+=B('shImg','🖼️','Φωτογραφία',n>1?'Η σελίδα '+(cp+1)+' ως εικόνα — για γρήγορη ματιά στο κινητό':'Ως εικόνα — για γρήγορη ματιά στο κινητό');
   if(orig&&n>1&&n<=30)h+=B('shImgAll','🗂️','Όλες οι σελίδες ως φωτογραφίες',n+' εικόνες');
   h+=B('shTxt','💬','Κείμενο','Μόνο τα γράμματα, μέσα στο μήνυμα');
   h+=B('shDocx','📝','Word','Για να το διορθώσει ο άλλος');
   h+=B('shXlsx','📊','Excel','Λίστες και κατάλογοι σε στήλες, με φίλτρα');
-  dlgOpen('📤 Πώς να σταλεί;',h+'</div>',null,true);$('#dlgOk').textContent='Άκυρο';
+  dlgOpen('📤 Κοινοποίηση ή αποθήκευση',h+'</div>',null,true);$('#dlgOk').textContent='Άκυρο';
+  const paint=()=>{$('#sdShare').classList.toggle('on',shDest!=='pick');$('#sdPick').classList.toggle('on',shDest==='pick');
+    $('#sdHint').innerHTML=shDest==='pick'?'Θα ανοίξει το κινητό για να διαλέξεις <b>φάκελο και όνομα</b>.':'Θα ανοίξει η λίστα του κινητού με <b>όλες τις εφαρμογές</b> (Viber, WhatsApp, Gmail, Drive, Bluetooth…).'};
+  shDest=lsGet('glenread-shdest')==='pick'?'pick':'share';paint();
+  $('#sdShare').onclick=()=>{shDest='share';lsSet('glenread-shdest','share');paint()};
+  $('#sdPick').onclick=()=>{shDest='pick';lsSet('glenread-shdest','pick');paint()};
   const on=(id,f)=>{const b=$('#'+id);if(b)b.onclick=()=>{dlgClose();f()}};
   on('shPdf',()=>annPdf(true));on('shImg',()=>sendImages(cp));on('shImgAll',()=>sendImages('all'));
-  on('shTxt',async()=>{if(navigator.share){try{await navigator.share({title:doc.name,text:fullText()})}catch(e){}}else $('#mCopy').onclick()});
+  on('shTxt',async()=>{if(shDest==='pick')return void pickSave([new File([fullText()],safeName(doc.name)+'.txt',{type:'text/plain;charset=utf-8'})]);if(navigator.share){try{await navigator.share({title:doc.name,text:fullText()})}catch(e){}}else $('#mCopy').onclick()});
   on('shDocx',()=>exportDoc('docx',true));on('shXlsx',()=>exportDoc('xlsx',true));
 }
 // Αποθήκευση αρχείων στον φάκελο της εφαρμογής: GlenApps › GlenRead › Έγγραφα (ίδια λογική με τα αντίγραφα)
@@ -1971,16 +2094,46 @@ async function saveToFolder(blob,name){
   }
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),60000);toast('Αποθηκεύτηκε στις Λήψεις: '+name);return true;
 }
+// Προορισμός: «share» = λίστα του κινητού με όλες τις εφαρμογές · «pick» = φάκελος που διαλέγει ο χρήστης
+let shDest='share';
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const MIME={pdf:'application/pdf',png:'image/png',jpg:'image/jpeg',txt:'text/plain',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'};
+// Αποθήκευση σε φάκελο της επιλογής του χρήστη: 1 αρχείο → «Αποθήκευση ως» (φάκελος + όνομα)· πολλά → επιλογή φακέλου· αλλιώς Λήψεις
+const needTap=e=>e&&(e.name==='SecurityError'||e.name==='NotAllowedError');
+// αν πέρασε πολλή ώρα από το πάτημα (π.χ. φτιάχτηκε μεγάλο PDF), το κινητό θέλει νέο πάτημα για να ανοίξει την επιλογή φακέλου
+const pickAgain=files=>new Promise(res=>{dlgOpen('Έτοιμο','<p style="margin:0">Το αρχείο <b class="usr">'+esc(files[0].name)+'</b>'+(files.length>1?' και άλλα '+(files.length-1):'')+' είναι έτοιμο. Πάτα για να διαλέξεις πού θα αποθηκευτεί.</p>',()=>res(pickSave(files,true)));$('#dlgOk').textContent='📁 Διάλεξε φάκελο';dlgCancel=()=>res(false)});
+async function pickSave(files,again){
+  const one=files.length===1&&'showSaveFilePicker' in window;
+  if(one){const f=files[0],ext=(f.name.match(/\.([^.]+)$/)||[])[1]||'';
+    try{const opt={suggestedName:f.name,id:'glenread-out',startIn:'documents'};if(MIME[ext.toLowerCase()])opt.types=[{description:ext.toUpperCase(),accept:{[MIME[ext.toLowerCase()]]:['.'+ext]}}];
+      const h=await showSaveFilePicker(opt);const w=await h.createWritable();await w.write(f);await w.close();toast('Αποθηκεύτηκε: '+h.name);return true}
+    catch(e){if(e.name==='AbortError')return false;if(needTap(e)&&!again)return pickAgain(files);console.warn(e)}}
+  if('showDirectoryPicker' in window){
+    let dir;try{dir=await showDirectoryPicker({id:'glenread-out',mode:'readwrite',startIn:'documents'})}catch(e){if(e.name==='AbortError')return false;if(needTap(e)&&!again)return pickAgain(files)}
+    if(dir){try{let last='';for(const f of files){const m=safeName(f.name).match(/^(.*?)(\.[^.]+)?$/);let fin=safeName(f.name),k=2;
+        while(true){try{await dir.getFileHandle(fin);fin=`${m[1]} (${k++})${m[2]||''}`}catch(e){break}}
+        const fh=await dir.getFileHandle(fin,{create:true});const w=await fh.createWritable();await w.write(f);await w.close();last=fin}
+      toast(files.length>1?'Αποθηκεύτηκαν '+files.length+' αρχεία στον «'+dir.name+'»':'Αποθηκεύτηκε: '+dir.name+' › '+last);return true}
+    catch(e){console.warn(e);toast('Ο φάκελος δεν δέχτηκε το αρχείο — δοκίμασε άλλον (π.χ. μέσα στα Έγγραφα)');return false}}
+  }
+  for(const f of files){const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),60000)}
+  toast('Το κινητό δεν επιτρέπει επιλογή φακέλου — αποθηκεύτηκε στις Λήψεις');return true;
+}
 async function shareFile(blob,name){
   const f=new File([blob],safeName(name),{type:blob.type});
-  if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:f.name});return true}catch(e){if(e.name==='AbortError')return false}}
+  if(shDest==='pick')return pickSave([f]);
+  if(!(navigator.canShare&&navigator.canShare({files:[f]}))){
+    // μερικά κινητά δεν κοινοποιούν Word/Excel· τότε ρωτάμε πού να αποθηκευτεί
+    toast('Αυτό το κινητό δεν στέλνει αυτόν τον τύπο αρχείου κατευθείαν σε εφαρμογή — διάλεξε πού να αποθηκευτεί');return pickSave([f]);
+  }
+  try{await navigator.share({files:[f],title:f.name});return true}catch(e){if(e.name==='AbortError')return false}
   return saveToFolder(blob,name);
 }
 // μετά τη δημιουργία: αποθήκευση στον φάκελο, με δυνατότητα αποστολής
 async function shareOrSave(blob,name,extra){
   await saveToFolder(blob,name);
-  dlgOpen('Έτοιμο',(extra?'<p style="margin:0 0 8px">'+extra+'</p>':'')+'<p style="margin:0">Το αρχείο <b class="usr">'+esc(safeName(name))+'</b> αποθηκεύτηκε. Θέλεις να το στείλεις και κάπου (μήνυμα, ταχυδρομείο κ.λπ.);</p>',()=>shareFile(blob,name));
-  $('#dlgOk').textContent='📤 Αποστολή';$('#dlgNo').textContent='Όχι, ευχαριστώ';
+  dlgOpen('Έτοιμο',(extra?'<p style="margin:0 0 8px">'+extra+'</p>':'')+'<p style="margin:0">Το αρχείο <b class="usr">'+esc(safeName(name))+'</b> αποθηκεύτηκε. Θέλεις να το στείλεις και σε κάποια εφαρμογή (Viber, WhatsApp, ταχυδρομείο, Drive κ.λπ.);</p>',()=>{shDest='share';shareFile(blob,name)});
+  $('#dlgOk').textContent='📤 Κοινοποίηση';$('#dlgNo').textContent='Όχι, ευχαριστώ';
 }
 
 // ---------- Πρόσφατα ----------
