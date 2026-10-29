@@ -1,5 +1,5 @@
-const CACHE='glenread-2.43';
-const CORE=['./','index.html','plaisio.js','manifest.json','icon-192.png','icon-512.png','icon-512-maskable.png','apple-touch-icon.png','privacy.html','G-glenapps.png','antigrafa.js','efarmoges-mas.js','lang-en.js','exagogi.js','parousiasi.js','pdfjs/pdf.mjs','pdfjs/pdf.worker.mjs','lib/jspdf.umd.min.js','lib/jszip.min.js'];
+const CACHE='glenread-2.44';
+const CORE=['./','index.html','plaisio.js','manifest.json','icon-192.png','icon-512.png','icon-512-maskable.png','apple-touch-icon.png','privacy.html','G-glenapps.png','antigrafa.js','metafora-rythmisi.js','metafora-lipsi.js','efarmoges-mas.js','lang-en.js','exagogi.js','parousiasi.js','pdfjs/pdf.mjs','pdfjs/pdf.worker.mjs','lib/jspdf.umd.min.js','lib/jszip.min.js'];
 // το κοινό αρχείο της σελίδας GlenApps: αν λείπει για λίγο, η εγκατάσταση δεν πρέπει να αποτύχει
 const SHARED=['/efarmoges-mas.js'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE.map(u=>new Request(u,{cache:'reload'}))).then(()=>Promise.all(SHARED.map(u=>c.add(u).catch(()=>{})))))));

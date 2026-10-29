@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="plaisio.js"></script>
-<meta name="app-version" content="2.43">
+<meta name="app-version" content="2.44">
 <!-- Ασφάλεια: η σελίδα φορτώνει κώδικα μόνο από εδώ και από συγκεκριμένες, κλειδωμένες εκδόσεις βιβλιοθηκών· στέλνει δεδομένα μόνο στο Google Drive του χρήστη· καμία εκτέλεση κειμένου ως κώδικα (eval) -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://cdn.jsdelivr.net/npm/mammoth@1.8.0/ https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/ https://accounts.google.com/gsi/; worker-src 'self' blob:; connect-src 'self' https://aglentzakis-dot.github.io data: blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://tessdata.projectnaptha.com https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com/gsi/; img-src 'self' https://aglentzakis-dot.github.io data: blob:; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; font-src 'self' data:; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -317,6 +317,11 @@ details summary{cursor:pointer;font-weight:600}
 
 <!-- ΑΡΧΙΚΗ -->
 <section id="home">
+  <div class="card hidden" id="mtfBox" style="border:2px solid var(--acc2)">
+    <p style="margin:0 0 6px"><b>🏠 Το GlenRead μετακόμισε στη δική του διεύθυνση</b></p>
+    <p class="muted" style="margin:0 0 8px">Αν είχες έγγραφα στην παλιά διεύθυνση (aglentzakis-dot.github.io/GlenRead), φέρε τα εδώ με ένα πάτημα. Μεταφέρονται κατευθείαν από το κινητό σου — δεν περνούν από κανέναν διακομιστή.</p>
+    <div class="row"><button id="mtfGo">📦 Μεταφορά εγγράφων</button><button class="sec" id="mtfNo">Δεν είχα έγγραφα</button></div>
+  </div>
   <div class="card hidden" id="instBox" style="border:2px solid var(--acc2)">
     <div class="row" style="flex-wrap:nowrap;align-items:flex-start">
       <img src="icon-192.png" alt="" style="width:52px;height:52px;border-radius:12px;flex:0 0 auto">
@@ -599,10 +604,12 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="lib/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="antigrafa.js"></script>
+<script src="metafora-rythmisi.js"></script>
+<script src="metafora-lipsi.js"></script>
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.43';
+const VERSION='2.44';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -1679,8 +1686,14 @@ async function thumbFor(id){const k='thumb-'+id;const t=await draftGet(k);if(typ
     if(!c)return null;const u=c.toDataURL('image/jpeg',.7);c.width=c.height=0;await draftSet(k,u);return u}catch(e){return null}finally{if(pdf)pdfFree(pdf)}}
 function thumbFill(){if(thumbBusy)return;const el=thumbQ.shift();if(!el)return;thumbBusy=true;
   thumbFor(el.dataset.th).then(u=>{if(u){el.style.backgroundImage=`url("${u}")`;el.textContent=''}}).finally(()=>{thumbBusy=false;setTimeout(thumbFill,30)})}
+// Νέα διεύθυνση (glenread.glenapps.gr): πρόταση μεταφοράς από την παλιά, όσο δεν υπάρχουν έγγραφα εδώ
+const NEW_HOST=/(^|\.)glenapps\.gr$/.test(location.hostname);
+function mtfPaint(n){let off=false;try{off=localStorage.getItem('glenread-metafora-ok')==='1'}catch(e){}$('#mtfBox').classList.toggle('hidden',!NEW_HOST||off||n>0)}
+$('#mtfGo').onclick=()=>{window.open('https://aglentzakis-dot.github.io/metafora/','_blank','noopener')};
+$('#mtfNo').onclick=()=>{try{localStorage.setItem('glenread-metafora-ok','1')}catch(e){}mtfPaint(0)};
 async function drawLast(){
   const box=$('#lastBox');let metas=[];try{metas=await docsMeta()}catch(e){}
+  mtfPaint(metas.length);
   if(!metas.length){box.classList.add('hidden');return}
   const P=posAll(),key=m=>(P[String(m.id)]&&P[String(m.id)].t)||0;
   // πρώτα όσα άνοιξες πρόσφατα, μετά τα νεότερα
@@ -2180,7 +2193,14 @@ if(EN){try{if(!localStorage.getItem('glenread-lang'))$('#lang').value='eng'}catc
 })();
 
 // άνοιγμα PDF που «μοιράστηκε» προς την εφαρμογή
-if('launchQueue' in window)launchQueue.setConsumer(async p=>{if(p.files&&p.files[0])openAny(await p.files[0].getFile())});
+// «Άνοιγμα με → GlenRead» (Windows/υπολογιστής): ένα αρχείο ανοίγει κατευθείαν· πολλές φωτογραφίες πάνε μαζί στο κόψιμο
+if('launchQueue' in window)launchQueue.setConsumer(async p=>{
+  if(!p.files||!p.files.length)return;
+  const fs=[];for(const h of p.files){try{fs.push(await h.getFile())}catch(e){}}
+  if(!fs.length)return;
+  if(fs.length>1&&fs.every(f=>/^image\//.test(f.type)))return openSharedImages(fs);
+  openAny(fs[0]);
+});
 
 const setHH=()=>document.documentElement.style.setProperty('--hh',(document.body.classList.contains('reading')?0:$('.hdr').offsetHeight)+'px');
 addEventListener('resize',setHH);setHH();setTimeout(setHH,500);

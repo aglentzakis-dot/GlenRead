@@ -600,7 +600,11 @@ var D={
 "Το κινητό δεν επιτρέπει επιλογή φακέλου — αποθηκεύτηκε στις Λήψεις": "The phone doesn't allow choosing a folder — saved to Downloads",
 "Αυτό το κινητό δεν στέλνει αυτόν τον τύπο αρχείου κατευθείαν σε εφαρμογή — διάλεξε πού να αποθηκευτεί": "This phone can't send this file type straight to an app — choose where to save it",
 "αποθηκεύτηκε. Θέλεις να το στείλεις και σε κάποια εφαρμογή (Viber, WhatsApp, ταχυδρομείο, Drive κ.λπ.);": "was saved. Do you want to send it to an app too (Viber, WhatsApp, email, Drive etc.)?",
-"Όχι, ευχαριστώ": "No, thanks"
+"Όχι, ευχαριστώ": "No, thanks",
+"🏠 Το GlenRead μετακόμισε στη δική του διεύθυνση": "🏠 GlenRead has moved to its own address",
+"Αν είχες έγγραφα στην παλιά διεύθυνση (aglentzakis-dot.github.io/GlenRead), φέρε τα εδώ με ένα πάτημα. Μεταφέρονται κατευθείαν από το κινητό σου — δεν περνούν από κανέναν διακομιστή.": "If you had documents at the old address (aglentzakis-dot.github.io/GlenRead), bring them here with one tap. They move straight from your device — they don't pass through any server.",
+"📦 Μεταφορά εγγράφων": "📦 Move documents",
+"Δεν είχα έγγραφα": "I had no documents"
 };
 var G=function(s){return D.hasOwnProperty(s)?D[s]:s};
 var P=[

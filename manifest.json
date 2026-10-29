@@ -53,6 +53,19 @@
         ],
         "application/epub+zip": [
           ".epub"
+        ],
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation": [
+          ".pptx"
+        ],
+        "image/jpeg": [
+          ".jpg",
+          ".jpeg"
+        ],
+        "image/png": [
+          ".png"
+        ],
+        "image/webp": [
+          ".webp"
         ]
       }
     }
@@ -102,5 +115,10 @@
         }
       ]
     }
+  },
+  "id": "./",
+  "description": "Διάβασε PDF, Word, PowerPoint και φωτογραφίες εγγράφων, με αναγνώριση κειμένου. Όλα μένουν στη συσκευή σου.",
+  "launch_handler": {
+    "client_mode": "focus-existing"
   }
 }
