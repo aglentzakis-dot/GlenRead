@@ -3,3 +3,4 @@
 - lib/jspdf.umd.min.js: jsPDF 2.5.1 (MIT) — github.com/parallax/jsPDF, ετικέτα v2.5.1
 - lib/jszip.min.js: JSZip 3.10.1 (MIT) — github.com/Stuk/jszip, ετικέτα v3.10.1
 - tess/core/: tesseract.js-core 5.1.1 (Apache-2.0) — github.com/naptha/tesseract.js-core, ετικέτα v5.1.1
+- fonts/OpenDyslexic-*.woff2: OpenDyslexic (Abbie Gonzalez, SIL Open Font License 1.1 — fonts/OFL-OpenDyslexic.txt) — github.com/antijingoist/opendyslexic, compiled/, commit 1824da5 (11/8/2025), αμετάβλητα
