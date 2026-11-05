@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="plaisio.js"></script>
-<meta name="app-version" content="2.47">
+<meta name="app-version" content="2.48">
 <!-- Ασφάλεια: η σελίδα φορτώνει κώδικα μόνο από εδώ και από συγκεκριμένες, κλειδωμένες εκδόσεις βιβλιοθηκών· στέλνει δεδομένα μόνο στο Google Drive του χρήστη· καμία εκτέλεση κειμένου ως κώδικα (eval) -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://cdn.jsdelivr.net/npm/mammoth@1.8.0/ https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/ https://accounts.google.com/gsi/; worker-src 'self' blob:; connect-src 'self' https: data: blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://tessdata.projectnaptha.com https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com/gsi/; img-src 'self' https://aglentzakis-dot.github.io data: blob:; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; font-src 'self' data:; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -308,6 +308,12 @@ body.reading.ffd #reader{letter-spacing:0;word-spacing:.08em;font-style:normal}
 .spbar button{min-width:44px;min-height:44px;padding:0 6px;border-radius:22px;font-size:20px;background:transparent;color:inherit;box-shadow:none;border:0}
 .spbar #spPlay{background:var(--acc);color:#1d1d1b}
 .spbar #spRate{min-width:44px;text-align:center;font-weight:700}.spbar #spPos{font-size:12px;min-width:34px}
+#srcBox summary{cursor:pointer;list-style:none;padding:2px 0}#srcBox summary::-webkit-details-marker{display:none}
+#srcBox summary::after{content:'▾';float:right;opacity:.6}#srcBox[open] summary::after{content:'▴'}
+.srch{margin:12px 0 4px;font-size:13px;font-weight:700;opacity:.7}
+.src{display:flex;align-items:center;gap:6px;padding:8px 0;border-top:1px solid rgba(128,128,128,.18)}
+.src .si{flex:1;min-width:0;overflow-wrap:anywhere}.src .si b{display:block;font-size:15px;overflow-wrap:anywhere}.src>button{flex:none}.src .si small{display:block;font-size:12.5px;opacity:.75;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.src button{min-height:42px;padding:0 10px}.src .fav{min-width:42px;padding:0;font-size:20px;background:transparent;box-shadow:none;border:0;color:#E0A100}
 .chl{display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow:auto}.chl button{text-align:left;justify-content:flex-start}
 #reader .pg.ch{font-size:1.15em;font-weight:700;opacity:.85;margin-top:1.4em}
 .pwwarn{margin:0 0 10px;padding:10px 12px;border:2px solid #c62828;border-radius:12px;background:rgba(198,40,40,.08);line-height:1.45}
@@ -365,6 +371,12 @@ body.reading.ffd #reader{letter-spacing:0;word-spacing:.08em;font-style:normal}
     <p class="muted" style="margin:12px 0 0"><b>100% δωρεάν, χωρίς διαφημίσεις</b>, χωρίς συνδρομή, χωρίς ανέβασμα: τα έγγραφά σου μένουν στο κινητό — φεύγουν μόνο αν το ζητήσεις εσύ (π.χ. μετάφραση Google ή αποστολή).</p>
   </div>
 
+  <details class="card" id="srcBox">
+    <summary><b>🔎 Πού βρίσκω βιβλία</b></summary>
+    <p class="muted" style="margin:8px 0">Δωρεάν και νόμιμα βιβλία. Πάτα «Άνοιγμα», κατέβασε το βιβλίο (καλύτερα <b>EPUB</b>) και μετά άνοιξέ το εδώ με το «📂 Άνοιγμα αρχείου». Πάτα ☆ για να μπει στα αγαπημένα.</p>
+    <div id="srcList"></div>
+    <button class="sec" id="srcAdd" style="width:100%;margin-top:8px">➕ Πρόσθεσε δικό σου σύνδεσμο</button>
+  </details>
   <div class="card hidden" id="shelfBox">
     <div class="row" style="flex-wrap:nowrap"><strong style="flex:1">📚 Τα βιβλία μου</strong><span class="muted" id="shelfN"></span></div>
     <div class="shelf" id="shelf"></div>
@@ -629,12 +641,12 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="lib/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="antigrafa.js"></script>
-<script src="metafora-rythmisi.js?v=2.47"></script>
-<script src="metafora-lipsi.js?v=2.47"></script>
+<script src="metafora-rythmisi.js?v=2.48"></script>
+<script src="metafora-lipsi.js?v=2.48"></script>
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.47';
+const VERSION='2.48';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -744,8 +756,50 @@ let bkTimer=null;
 // τι μπαίνει στο αντίγραφο: τα έγγραφα (με σελιδοδείκτες/σημειώσεις/ράφι), οι θέσεις ανάγνωσης και τα εξώφυλλα του ραφιού
 let bkCovers={};
 async function coversRefresh(docs){const o={};for(const d of docs)if(d&&d.book){const u=await draftGet('thumb-'+d.id).catch(()=>null);if(typeof u==='string'&&u.startsWith('data:image/')&&u.length<400000)o[String(d.id)]=u}bkCovers=o}
+// ---------- Πού βρίσκω βιβλία: έτοιμες νόμιμες πηγές + δικοί σου σύνδεσμοι + αγαπημένα (όλα μόνο στη συσκευή) ----------
+// Μόνο ιστότοποι που μοιράζουν νόμιμα ελεύθερα βιβλία (κοινό κτήμα ή ανοιχτές άδειες).
+const SRC_DEF=[
+  {id:'openbook',n:'Openbook',d:'Η μεγάλη ελληνική ανοιχτή βιβλιοθήκη (κυρίως PDF)',u:'https://www.openbook.gr/'},
+  {id:'gut-el',n:'Project Gutenberg — ελληνικά',d:'Κλασικά ελληνικά βιβλία σε EPUB',u:'https://www.gutenberg.org/browse/languages/el'},
+  {id:'vikithiki',n:'Βικιθήκη',d:'Ελεύθερα ελληνικά κείμενα — «Λήψη ως EPUB» σε κάθε έργο',u:'https://el.wikisource.org/'},
+  {id:'gut',n:'Project Gutenberg',d:'Πάνω από 70.000 ελεύθερα βιβλία σε πολλές γλώσσες',u:'https://www.gutenberg.org/'},
+  {id:'stdeb',n:'Standard Ebooks',d:'Κλασικά βιβλία στα αγγλικά, προσεγμένα EPUB',u:'https://standardebooks.org/ebooks'}];
+const SRC_KEY='glenread-piges',SRC_MAX=100;
+function srcGet(){let o={};try{o=JSON.parse(localStorage.getItem(SRC_KEY)||'{}')||{}}catch(e){}
+  return{mine:Array.isArray(o.mine)?o.mine:[],fav:Array.isArray(o.fav)?o.fav:[]}}
+function srcSet(o){try{localStorage.setItem(SRC_KEY,JSON.stringify({mine:o.mine.slice(0,SRC_MAX),fav:o.fav.slice(0,SRC_MAX*2)}))}catch(e){toast('Δεν αποθηκεύτηκε — ο χώρος γέμισε')}try{changed()}catch(e){}}
+// έλεγχος στοιχείου (και για όσα έρχονται από αντίγραφο)
+function srcClean(x){if(!x||typeof x!=='object')return null;const c=urlCheck(x.u);if(c.err)return null;
+  const n=String(x.n||'').replace(/[\u0000-\u001f]/g,'').trim().slice(0,80)||c.u.hostname;const id=/^m[\w-]{1,40}$/.test(String(x.id||''))?String(x.id):'m'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  return{id,n,u:c.u.href}}
+const isFileLink=u=>{try{return /\.(epub|pdf|docx|txt|odt|pptx)$/i.test(new URL(u).pathname)}catch(e){return false}};
+function drawSrc(){
+  const o=srcGet(),F=new Set(o.fav),all=[...SRC_DEF.map(x=>({...x,def:1})),...o.mine.map(srcClean).filter(Boolean)];
+  const row=x=>{let h='';try{h=new URL(x.u).hostname.replace(/^www\./,'')}catch(e){}
+    return `<div class="src"><button class="fav" data-fav="${esc(x.id)}" aria-label="${F.has(x.id)?'Βγάλε από τα αγαπημένα':'Βάλε στα αγαπημένα'}">${F.has(x.id)?'★':'☆'}</button><div class="si"><b class="${x.def?'':'usr'}">${esc(x.n)}</b><small class="${x.def?'':'usr'}">${esc(x.d||h)}</small></div>${isFileLink(x.u)?`<button data-rd="${esc(x.id)}">📖 Άνοιγμα</button>`:`<button data-go="${esc(x.id)}">Άνοιγμα</button>`}${x.def?'':`<button class="sec" data-ed="${esc(x.id)}" aria-label="Αλλαγή">✏️</button><button class="sec" data-rm="${esc(x.id)}" aria-label="Σβήσιμο">🗑</button>`}</div>`};
+  const fav=all.filter(x=>F.has(x.id)),def=all.filter(x=>x.def&&!F.has(x.id)),mine=all.filter(x=>!x.def&&!F.has(x.id));
+  $('#srcList').innerHTML=(fav.length?'<div class="srch">★ Αγαπημένα</div>'+fav.map(row).join(''):'')
+    +(def.length?'<div class="srch">Δωρεάν βιβλιοθήκες</div>'+def.map(row).join(''):'')
+    +(mine.length?'<div class="srch">Οι σύνδεσμοί μου</div>'+mine.map(row).join(''):'');
+  $('#srcList').onclick=e=>{const b=e.target.closest('button');if(!b)return;const id=b.dataset.fav||b.dataset.go||b.dataset.rd||b.dataset.ed||b.dataset.rm;const x=all.find(y=>y.id===id);if(!x)return;
+    if(b.dataset.fav){const o=srcGet();o.fav=o.fav.includes(id)?o.fav.filter(f=>f!==id):[...o.fav,id];srcSet(o);drawSrc();return}
+    if(b.dataset.go){const c=urlCheck(x.u);if(c.err)return toast(c.err);window.open(c.u.href,'_blank','noopener,noreferrer');return}
+    if(b.dataset.rd)return askUrl(x.u);
+    if(b.dataset.ed)return srcDlg(x);
+    if(b.dataset.rm){if(!confirm('Να σβηστεί ο σύνδεσμος «'+x.n+'»;'))return;const o=srcGet();o.mine=o.mine.filter(m=>m.id!==id);o.fav=o.fav.filter(f=>f!==id);srcSet(o);drawSrc()}};
+}
+function srcDlg(x){
+  dlgOpen(x?'✏️ Αλλαγή συνδέσμου':'➕ Δικός σου σύνδεσμος',`<label style="display:block">Όνομα<input id="srN" maxlength="80" value="${x?esc(x.n):''}" placeholder="π.χ. Η βιβλιοθήκη του δήμου"></label><label style="display:block;margin-top:8px">Σύνδεσμος (https://…)<input id="srU" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" value="${x?esc(x.u):''}" placeholder="https://…"></label><label style="display:flex;gap:10px;align-items:center;margin-top:10px"><input type="checkbox" id="srF" style="width:22px;height:22px;min-height:0;flex:none;margin:0" ${x&&srcGet().fav.includes(x.id)?'checked':''}><span>★ Στα αγαπημένα</span></label><p class="muted" style="margin:8px 0 0">Μπορεί να είναι ιστότοπος ή κατευθείαν αρχείο βιβλίου (.epub, .pdf). Μένει μόνο σε αυτή τη συσκευή. Βάζε μόνο ιστότοπους που μοιράζουν βιβλία νόμιμα.</p>`,
+    ()=>{const c=srcClean({id:x&&x.id,n:$('#srN').value,u:$('#srU').value}),fv=$('#srF').checked;
+      setTimeout(()=>{if(!c)return toast(urlCheck($('#srU')?$('#srU').value:'').err||'Ο σύνδεσμος δεν είναι σωστός — μόνο https://');
+        const o=srcGet();if(!x&&o.mine.length>=SRC_MAX)return toast('Έφτασες τους '+SRC_MAX+' συνδέσμους');
+        if(!x&&o.mine.some(m=>m.u===c.u))return toast('Αυτός ο σύνδεσμος υπάρχει ήδη');
+        o.mine=x?o.mine.map(m=>m.id===x.id?c:m):[...o.mine,c];o.fav=o.fav.filter(f=>f!==c.id);if(fv)o.fav.push(c.id);srcSet(o);drawSrc();toast(x?'Αποθηκεύτηκε':'➕ Ο σύνδεσμος προστέθηκε')},0)});
+  $('#dlgOk').textContent='Αποθήκευση';setTimeout(()=>{try{$(x?'#srU':'#srN').focus()}catch(e){}},60);
+}
+$('#srcAdd').onclick=()=>srcDlg(null);
 function bkPayload(docs){const P=posAll(),ids=new Set(docs.map(d=>String(d.id))),pos={};for(const k in P)if(ids.has(k))pos[k]=P[k];
-  return JSON.stringify({app:BK.app,version:VERSION,date:new Date().toISOString(),docs,pos,covers:bkCovers})}
+  return JSON.stringify({app:BK.app,version:VERSION,date:new Date().toISOString(),docs,pos,covers:bkCovers,piges:srcGet()})}
 async function changed(){try{docsCache=await allDocs();docsReady=true;await coversRefresh(docsCache)}catch(e){}try{window.GlenDrive&&GlenDrive.changed()}catch(e){}clearTimeout(bkTimer);bkTimer=setTimeout(()=>autoBackup(false),3000)}
 // Γράφει το αντίγραφο της ημέρας στον φάκελο. Κανόνες: ποτέ 0 έγγραφα, ποτέ ακρυπτογράφητο,
 // και αν το νέο έχει λιγότερα έγγραφα από το υπάρχον, κρατά πρώτα το παλιό ως «-prin-ΩΩΛΛΔΔ» (τα 10 νεότερα).
@@ -819,6 +873,10 @@ async function restore(txt){
     if(!nu.length)return toast('Όλα τα έγγραφα του αντιγράφου ('+ok.length+') υπάρχουν ήδη');
     if(!confirm(`Το αντίγραφο της ${new Date(o.date).toLocaleString(LOC)} έχει ${ok.length} έγγραφα. Επαναφορά ${nu.length} που λείπουν; Τα έγγραφα που έχεις τώρα δεν αλλάζουν.`+(ok.length>nu.length?` (${ok.length-nu.length} υπάρχουν ήδη και μένουν όπως είναι.)`:'')))return;
     try{await store('readwrite',s=>{nu.forEach(d=>s.put(d))})}catch(e){console.warn(e);return toast('⚠️ Η επαναφορά δεν χώρεσε — ο χώρος του κινητού γέμισε')}
+    // δικοί σου σύνδεσμοι βιβλίων και αγαπημένα: προστίθενται όσα λείπουν (με έλεγχο)
+    try{if(o.piges&&typeof o.piges==='object'){const cur=srcGet(),urls=new Set(cur.mine.map(m=>m.u)),ids=new Set([...SRC_DEF.map(x=>x.id),...cur.mine.map(m=>m.id)]);
+      for(const m of (Array.isArray(o.piges.mine)?o.piges.mine:[]).slice(0,SRC_MAX)){const c=srcClean(m);if(c&&!urls.has(c.u)&&cur.mine.length<SRC_MAX){cur.mine.push(c);urls.add(c.u);ids.add(c.id)}}
+      for(const f of (Array.isArray(o.piges.fav)?o.piges.fav:[]))if(typeof f==='string'&&ids.has(f)&&!cur.fav.includes(f))cur.fav.push(f);srcSet(cur);drawSrc()}}catch(e){}
     // θέσεις ανάγνωσης και εξώφυλλα μόνο για όσα επανήλθαν (δεν αλλάζουμε όσα ήδη υπάρχουν)
     try{const P=o.pos&&typeof o.pos==='object'?o.pos:{};nu.forEach(d=>{const l=P[String(d.id)];if(l&&typeof l==='object'&&!posGet(d.id)){const c={id:d.id};['y','p','f'].forEach(k=>{if(typeof l[k]==='number'&&isFinite(l[k]))c[k]=Math.max(0,l[k])});if(l.v==='page'||l.v==='text')c.v=l.v;posSave(c)}})}catch(e){}
     try{const C=o.covers&&typeof o.covers==='object'?o.covers:{};for(const d of nu){const u=C[String(d.id)];if(typeof u==='string'&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(u)&&u.length<400000)await draftSet('thumb-'+d.id,u)}}catch(e){}
@@ -1799,6 +1857,7 @@ function drawShelf(metas){
   $('#shelf').querySelectorAll('[data-cv]').forEach(el=>draftGet('thumb-'+el.dataset.cv).then(u=>{if(typeof u==='string'&&u.startsWith('data:image/')){el.style.backgroundImage=`url("${u}")`;el.classList.add('img')}}).catch(()=>{}));
   $('#shelf').onclick=async e=>{const b=e.target.closest('.bk');if(!b)return;flushAll();const id=b.dataset.id,k=isNaN(+id)?id:+id;const f=await getDoc(k).catch(()=>null);if(!f){toast('Αυτό το έγγραφο σβήστηκε');return drawLast()}doc=f;openReader()};
 }
+drawSrc();
 async function drawLast(){
   const box=$('#lastBox');let metas=[];try{metas=await docsMeta()}catch(e){}
   mtfPaint(metas.length);drawShelf(metas);

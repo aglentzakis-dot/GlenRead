@@ -667,7 +667,34 @@ var D={
 "Πιο γρήγορα": "Faster",
 "Παύση": "Pause",
 "Συνέχεια": "Resume",
-"Σταμάτημα": "Stop"
+"Σταμάτημα": "Stop",
+"🔎 Πού βρίσκω βιβλία": "🔎 Where to find books",
+"Δωρεάν και νόμιμα βιβλία. Πάτα «Άνοιγμα», κατέβασε το βιβλίο (καλύτερα": "Free and legal books. Tap “Open”, download the book (preferably",
+") και μετά άνοιξέ το εδώ με το «📂 Άνοιγμα αρχείου». Πάτα ☆ για να μπει στα αγαπημένα.": ") and then open it here with “📂 Open file”. Tap ☆ to add to favourites.",
+"➕ Πρόσθεσε δικό σου σύνδεσμο": "➕ Add your own link",
+"★ Αγαπημένα": "★ Favourites",
+"Δωρεάν βιβλιοθήκες": "Free libraries",
+"Οι σύνδεσμοί μου": "My links",
+"📖 Άνοιγμα": "📖 Open",
+"Βγάλε από τα αγαπημένα": "Remove from favourites",
+"Βάλε στα αγαπημένα": "Add to favourites",
+"Η μεγάλη ελληνική ανοιχτή βιβλιοθήκη (κυρίως PDF)": "The big Greek open library (mostly PDF)",
+"Project Gutenberg — ελληνικά": "Project Gutenberg — Greek",
+"Κλασικά ελληνικά βιβλία σε EPUB": "Classic Greek books in EPUB",
+"Βικιθήκη": "Greek Wikisource",
+"Ελεύθερα ελληνικά κείμενα — «Λήψη ως EPUB» σε κάθε έργο": "Free Greek texts — “Download as EPUB” on each work",
+"Πάνω από 70.000 ελεύθερα βιβλία σε πολλές γλώσσες": "Over 70,000 free books in many languages",
+"Κλασικά βιβλία στα αγγλικά, προσεγμένα EPUB": "Classic books in English, carefully made EPUBs",
+"✏️ Αλλαγή συνδέσμου": "✏️ Edit link",
+"➕ Δικός σου σύνδεσμος": "➕ Your own link",
+"Όνομα": "Name",
+"Σύνδεσμος (https://…)": "Link (https://…)",
+"★ Στα αγαπημένα": "★ In favourites",
+"Μπορεί να είναι ιστότοπος ή κατευθείαν αρχείο βιβλίου (.epub, .pdf). Μένει μόνο σε αυτή τη συσκευή. Βάζε μόνο ιστότοπους που μοιράζουν βιβλία νόμιμα.": "It can be a website or a direct book file (.epub, .pdf). It stays only on this device. Only add websites that share books legally.",
+"Ο σύνδεσμος δεν είναι σωστός — μόνο https://": "The link isn't valid — https:// only",
+"Αυτός ο σύνδεσμος υπάρχει ήδη": "This link already exists",
+"➕ Ο σύνδεσμος προστέθηκε": "➕ Link added",
+"Δεν αποθηκεύτηκε — ο χώρος γέμισε": "Not saved — storage is full"
 };
 var G=function(s){return D.hasOwnProperty(s)?D[s]:s};
 var P=[
@@ -721,7 +748,9 @@ var P=[
 [/^(?:και άλλα (\d+) )?είναι έτοιμο\. Πάτα για να διαλέξεις πού θα αποθηκευτεί\.$/,function(k,n){return (n?'and '+n+' more ':'')+'is ready. Tap to choose where to save it.'}],
 [/^Δεν βρέθηκε (.+) φωνή εγκατεστημένη στη συσκευή$/,function(k,l){return 'No '+({'ελληνικά':'Greek','αγγλικά':'English','κατάλληλη':'suitable'}[l]||l)+' voice installed on the device'}],
 [/^Κατεβάζω… ([\d.]+) MB$/,'Downloading… $1 MB'],
-[/^Κεφάλαιο (\d+)$/,'Chapter $1']
+[/^Κεφάλαιο (\d+)$/,'Chapter $1'],
+[/^Να σβηστεί ο σύνδεσμος «(.+)»;$/,'Delete the link “$1”?'],
+[/^Έφτασες τους (\d+) συνδέσμους$/,'You reached $1 links']
 ];
 var GR=/[Ͱ-Ͽἀ-῿]/;
 function one(k){if(D.hasOwnProperty(k))return D[k];for(var i=0;i<P.length;i++){var r=P[i][0];if(r.test(k))return k.replace(r,P[i][1])}return null}
