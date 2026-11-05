@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="plaisio.js"></script>
-<meta name="app-version" content="2.48">
+<meta name="app-version" content="2.49">
 <!-- Ασφάλεια: η σελίδα φορτώνει κώδικα μόνο από εδώ και από συγκεκριμένες, κλειδωμένες εκδόσεις βιβλιοθηκών· στέλνει δεδομένα μόνο στο Google Drive του χρήστη· καμία εκτέλεση κειμένου ως κώδικα (eval) -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://cdn.jsdelivr.net/npm/mammoth@1.8.0/ https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/ https://accounts.google.com/gsi/; worker-src 'self' blob:; connect-src 'self' https: data: blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://tessdata.projectnaptha.com https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com/gsi/; img-src 'self' https://aglentzakis-dot.github.io data: blob:; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; font-src 'self' data:; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -314,7 +314,43 @@ body.reading.ffd #reader{letter-spacing:0;word-spacing:.08em;font-style:normal}
 .src{display:flex;align-items:center;gap:6px;padding:8px 0;border-top:1px solid rgba(128,128,128,.18)}
 .src .si{flex:1;min-width:0;overflow-wrap:anywhere}.src .si b{display:block;font-size:15px;overflow-wrap:anywhere}.src>button{flex:none}.src .si small{display:block;font-size:12.5px;opacity:.75;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .src button{min-height:42px;padding:0 10px}.src .fav{min-width:42px;padding:0;font-size:20px;background:transparent;box-shadow:none;border:0;color:#E0A100}
+select{max-width:100%}.tabp label select{width:100%}
+/* --- κάτω μπάρα καρτελών (όπως οι εφαρμογές ανάγνωσης) --- */
+#tabs{display:none}
+body.onhome #tabs{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--card,#fff);border-top:1px solid rgba(128,128,128,.25);padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));justify-content:space-around;box-shadow:0 -2px 10px rgba(0,0,0,.06)}
+body.onhome main{padding-bottom:96px}
+#tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none!important;border:0!important;box-shadow:none!important;color:var(--ink)!important;min-height:58px;padding:4px 0;font-size:11.5px;font-weight:600;opacity:.75}
+#tabs button i{font-style:normal;font-size:22px;line-height:30px;width:58px;border-radius:16px;text-align:center}
+#tabs button.on{opacity:1}#tabs button.on i{background:#FDD117}
+.tabh{font-size:22px;margin:4px 4px 12px}
+.sech{font-weight:800;font-size:15px;margin:0 0 10px}
+.bigbook{display:flex!important;align-items:center;gap:14px;width:100%;padding:14px 16px;margin:0 0 14px;border-radius:18px;text-align:left;min-height:96px;background:linear-gradient(135deg,#2b3a67,#46327a)!important;color:#fff!important;border:0!important;box-shadow:0 4px 14px rgba(43,58,103,.35)}
+.bigbook .bbc{display:flex;flex:none}.bigbook .bbc span{font-size:40px}
+.bigbook .bbc img{width:42px;height:62px;object-fit:cover;border-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,.4);margin-left:-14px;border:2px solid #fff}.bigbook .bbc img:first-child{margin-left:0}
+.bigbook .bbt{flex:1;min-width:0}.bigbook .bbt b{display:block;font-size:21px}.bigbook .bbt small{display:block;font-size:13.5px;opacity:.85;font-weight:400}
+.bigbook .bbg{font-size:34px;opacity:.8}
+#lastBox .lth{width:64px;height:86px}#lastBox strong{font-size:17px}
+.shelf{grid-template-columns:repeat(auto-fill,minmax(100px,120px))!important;gap:16px!important;justify-content:start}
+.src .fav{min-width:52px!important;width:52px;height:52px;border-radius:50%!important;border:2px solid #E0A100!important;font-size:30px!important;line-height:1;color:#E0A100!important;background:transparent!important}
+.src .fav.on{background:#FFE9A8!important}
+/* --- βιβλία: γύρισμα σελίδας --- */
+body.paged #read{min-height:100vh}body.paged #read .card{padding:0;touch-action:none}
+body.paged #reader{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 40px);bottom:calc(env(safe-area-inset-bottom,0px) + 86px);max-width:none;margin:0;overflow:hidden;column-fill:auto;touch-action:none;-webkit-user-select:text;user-select:text}
+body.paged.pinned #reader{top:calc(env(safe-area-inset-top,0px) + 100px)}
+@media (min-width:820px){body.paged #reader{left:calc(50% - 380px);right:calc(50% - 380px)}}
+body.paged #reader .pg{break-before:column;margin-top:0}
+.bv{display:none}
+body.paged .bv{display:block;position:fixed;left:0;right:0;text-align:center;font-size:13px;opacity:.62;z-index:6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 84px;pointer-events:none;color:var(--ink)}
+body.paged.pinned #bvTop{display:none}
+#bvTop{top:calc(env(safe-area-inset-top,0px) + 12px)}#bvBot{bottom:calc(env(safe-area-inset-bottom,0px) + 34px);font-weight:600}
+#bvAa{display:none}
+body.bookmode #bvAa{display:flex;align-items:center;justify-content:center;position:fixed;left:14px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:58px;height:58px;min-height:0;padding:0;border-radius:50%;z-index:8;font-weight:800;font-size:21px;background:#fff!important;color:#1d1d1b!important;border:4px solid #FDD117!important;box-shadow:0 3px 12px rgba(0,0,0,.25)}
+body.selon #bvAa{display:none}
+#bkSet{position:fixed;left:0;right:0;bottom:0;z-index:70;max-height:78vh;overflow:auto;background:var(--card,#fff);color:var(--ink);border-radius:22px 22px 0 0;padding:14px 16px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -6px 28px rgba(0,0,0,.3);max-width:760px;margin:0 auto}
+#bkSet .opt{margin:10px 0;flex-direction:column;align-items:stretch;gap:6px}#bkSet .opt>span{flex:none;font-weight:700}
+#bkSet .seg:not(.thg),#sheet .seg:not(.thg){flex-wrap:wrap}#bkSet .seg:not(.thg) button,#sheet .seg:not(.thg) button{flex:1 1 auto}
 .chl{display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow:auto}.chl button{text-align:left;justify-content:flex-start}
+#reader .pg.ch.dup{height:0;margin:0!important;padding:0!important;border:0!important;overflow:hidden}
 #reader .pg.ch{font-size:1.15em;font-weight:700;opacity:.85;margin-top:1.4em}
 .pwwarn{margin:0 0 10px;padding:10px 12px;border:2px solid #c62828;border-radius:12px;background:rgba(198,40,40,.08);line-height:1.45}
 .pwwarn button{margin-top:6px}
@@ -339,11 +375,14 @@ body.reading.ffd #reader{letter-spacing:0;word-spacing:.08em;font-style:normal}
 
 <!-- ΑΡΧΙΚΗ -->
 <section id="home">
+  <p class="pwwarn hidden" id="pwWarn">🔴 <b>Τα αντίγραφα ασφαλείας έχουν σταματήσει:</b> όρισε κωδικό αντιγράφων για να κλειδώνονται. <button class="sec" id="pwWarnGo">Ορισμός τώρα</button></p>
   <div class="card hidden" id="mtfBox" style="border:2px solid var(--acc2)">
     <p style="margin:0 0 6px"><b>🏠 Το GlenRead μετακόμισε στη δική του διεύθυνση</b></p>
     <p class="muted" style="margin:0 0 8px">Αν είχες έγγραφα στην παλιά διεύθυνση (aglentzakis-dot.github.io/GlenRead), φέρε τα εδώ με ένα πάτημα. Μεταφέρονται κατευθείαν από το κινητό σου — δεν περνούν από κανέναν διακομιστή.</p>
     <div class="row"><button id="mtfGo">📦 Μεταφορά εγγράφων</button><button class="sec" id="mtfNo">Δεν είχα έγγραφα</button></div>
   </div>
+
+  <div class="tabp" data-p="arxiki">
   <div class="card hidden" id="instBox" style="border:2px solid var(--acc2)">
     <div class="row" style="flex-wrap:nowrap;align-items:flex-start">
       <img src="icon-192.png" alt="" style="width:52px;height:52px;border-radius:12px;flex:0 0 auto">
@@ -357,33 +396,22 @@ body.reading.ffd #reader{letter-spacing:0;word-spacing:.08em;font-style:normal}
       <button class="sec" id="instNo">🌐 Συνέχεια στο πρόγραμμα περιήγησης</button>
     </div>
   </div>
-  <div class="card">
-    <div class="big">
-      <button class="tile" id="bPdf"><span>📂</span>Άνοιγμα αρχείου<small style="font-weight:400;font-size:11.5px;opacity:.75">PDF, Word, κείμενο, βιβλία…</small></button>
-      <button class="tile" id="bCam"><span>📷</span>Φωτογράφιση σελίδων</button>
-      <button class="tile sec" id="bImg"><span>🖼️</span>Από φωτογραφίες</button>
-      <button class="tile sec" id="bHist"><span>🕘</span>Πρόσφατα</button>
-    </div>
-    <input type="file" id="fPdf" accept="application/pdf,.pdf,.docx,.dotx,.docm,.doc,.odt,.ott,.rtf,.txt,.text,.md,.markdown,.csv,.tsv,.log,.json,.xml,.html,.htm,.xhtml,.epub,.pptx,.srt,.vtt,.ini,text/*,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,application/rtf,application/epub+zip,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/json,application/xml" hidden>
-    <button class="sec wide" id="bUrl" style="width:100%;margin-top:10px">🔗 Άνοιγμα από σύνδεσμο</button>
-    <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
-    <input type="file" id="fImg" accept="image/*" multiple hidden>
-    <p class="muted" style="margin:12px 0 0"><b>100% δωρεάν, χωρίς διαφημίσεις</b>, χωρίς συνδρομή, χωρίς ανέβασμα: τα έγγραφά σου μένουν στο κινητό — φεύγουν μόνο αν το ζητήσεις εσύ (π.χ. μετάφραση Google ή αποστολή).</p>
-  </div>
-
-  <details class="card" id="srcBox">
-    <summary><b>🔎 Πού βρίσκω βιβλία</b></summary>
-    <p class="muted" style="margin:8px 0">Δωρεάν και νόμιμα βιβλία. Πάτα «Άνοιγμα», κατέβασε το βιβλίο (καλύτερα <b>EPUB</b>) και μετά άνοιξέ το εδώ με το «📂 Άνοιγμα αρχείου». Πάτα ☆ για να μπει στα αγαπημένα.</p>
-    <div id="srcList"></div>
-    <button class="sec" id="srcAdd" style="width:100%;margin-top:8px">➕ Πρόσθεσε δικό σου σύνδεσμο</button>
-  </details>
-  <div class="card hidden" id="shelfBox">
-    <div class="row" style="flex-wrap:nowrap"><strong style="flex:1">📚 Τα βιβλία μου</strong><span class="muted" id="shelfN"></span></div>
-    <div class="shelf" id="shelf"></div>
-  </div>
+  <button class="bigbook" id="goBooks"><span class="bbc" id="bbCovers"><span>📚</span></span><span class="bbt"><b>Τα βιβλία μου</b><small id="bbSub">Το ράφι σου και δωρεάν βιβλία</small></span><span class="bbg">›</span></button>
   <div class="card hidden" id="lastBox">
     <div class="row" style="flex-wrap:nowrap"><div id="lastTh" class="lth"></div><div style="flex:1;min-width:0"><strong>📖 Συνέχεια ανάγνωσης</strong><div class="muted" id="lastName" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div></div><button id="lastOpen">Άνοιγμα</button></div>
     <div id="rcarWrap" class="hidden"><div class="rhd">Προηγούμενα έγγραφα</div><div class="rcar" id="rcar"></div></div>
+  </div>
+  <div class="card"><div class="sech">Νέο έγγραφο</div>
+    <div class="big acts">
+      <button class="tile" id="bPdf"><span>📂</span>Άνοιγμα αρχείου<small style="font-weight:400;font-size:11.5px;opacity:.75">PDF, Word, κείμενο, βιβλία…</small></button>
+      <button class="tile" id="bCam"><span>📷</span>Φωτογράφιση σελίδων</button>
+      <button class="tile sec" id="bImg"><span>🖼️</span>Από φωτογραφίες</button>
+      <button class="tile sec" id="bUrl"><span>🔗</span>Από σύνδεσμο</button>
+    </div>
+    <input type="file" id="fPdf" accept="application/pdf,.pdf,.docx,.dotx,.docm,.doc,.odt,.ott,.rtf,.txt,.text,.md,.markdown,.csv,.tsv,.log,.json,.xml,.html,.htm,.xhtml,.epub,.pptx,.srt,.vtt,.ini,text/*,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,application/rtf,application/epub+zip,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/json,application/xml" hidden>
+    <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
+    <input type="file" id="fImg" accept="image/*" multiple hidden>
+    <p class="muted" style="margin:12px 0 0"><b>100% δωρεάν, χωρίς διαφημίσεις</b>, χωρίς συνδρομή, χωρίς ανέβασμα: τα έγγραφά σου μένουν στο κινητό — φεύγουν μόνο αν το ζητήσεις εσύ (π.χ. μετάφραση Google ή αποστολή).</p>
   </div>
   <div class="card hidden" id="scanBox">
     <strong>Σελίδες για αναγνώριση</strong>
@@ -395,43 +423,36 @@ body.reading.ffd #reader{letter-spacing:0;word-spacing:.08em;font-style:normal}
     </div>
     <p class="muted">Συμβουλή: φωτογράφισε ίσια, με καλό φως, χωρίς σκιά από το κινητό.</p>
   </div>
+  </div>
 
-  <div class="card hidden" id="histBox">
-    <div class="row"><strong style="flex:1">Πρόσφατα έγγραφα</strong><button class="sec" id="bHistClose">✕</button></div>
+  <div class="tabp hidden" data-p="vivlia">
+    <h2 class="tabh">📚 Βιβλία</h2>
+  <div class="card" id="shelfBox">
+    <div class="row" style="flex-wrap:nowrap"><strong style="flex:1">📚 Τα βιβλία μου</strong><span class="muted" id="shelfN"></span></div>
+    <div class="shelf" id="shelf"></div>
+    <div id="shelfEmpty" class="hidden" style="text-align:center;padding:14px 4px"><div style="font-size:48px">📚</div><p style="margin:6px 0 12px"><b>Το ράφι σου είναι άδειο</b><br><span class="muted">Βρες δωρεάν βιβλία παρακάτω ή πρόσθεσε ένα δικό σου.</span></p></div>
+    <button id="bAddBook" style="width:100%;margin-top:10px">➕ Πρόσθεσε βιβλίο</button>
+  </div>
+  <details class="card" id="srcBox" open>
+    <summary><b>🔎 Πού βρίσκω βιβλία</b></summary>
+    <p class="muted" style="margin:8px 0">Δωρεάν και νόμιμα βιβλία. Πάτα «Άνοιγμα», κατέβασε το βιβλίο (καλύτερα <b>EPUB</b>) και μετά άνοιξέ το εδώ με το «📂 Άνοιγμα αρχείου». Πάτα ☆ για να μπει στα αγαπημένα.</p>
+    <div id="srcList"></div>
+    <button class="sec" id="srcAdd" style="width:100%;margin-top:8px">➕ Πρόσθεσε δικό σου σύνδεσμο</button>
+  </details>
+  </div>
+
+  <div class="tabp hidden" data-p="eggrafa">
+    <h2 class="tabh">📄 Έγγραφα</h2>
+  <div class="card" id="histBox">
+    <div class="row"><strong style="flex:1">🕘 Όλα τα έγγραφα</strong><button class="sec hidden" id="bHistClose">✕</button><button class="hidden" id="bHist"></button></div>
     <input type="search" id="histQ" placeholder="🔍 Αναζήτηση με το όνομα">
     <div class="list" id="histList"></div>
   </div>
+  </div>
 
+  <div class="tabp hidden" data-p="rythmiseis">
+    <h2 class="tabh">⚙️ Ρυθμίσεις</h2>
   <div class="card">
-    <details>
-      <summary>Ρυθμίσεις αναγνώρισης</summary>
-      <p><label>Γλώσσα κειμένου<br>
-        <select id="lang">
-          <option value="ell+eng">Ελληνικά και Αγγλικά</option>
-          <option value="ell">Μόνο Ελληνικά</option>
-          <option value="eng">Μόνο Αγγλικά</option>
-        </select></label></p>
-      <p><label>Ταχύτητα αναγνώρισης<br>
-        <select id="ocrMode">
-          <option value="fast">Γρήγορη (προτείνεται)</option>
-          <option value="careful">Προσεκτική — πιο αργή, για μικρά ή θολά γράμματα </option>
-        </select></label></p>
-      <p><label><input type="checkbox" id="autoCrop" checked> Αυτόματο κόψιμο και ίσιωμα της σελίδας στις φωτογραφίες</label></p>
-      <p><label>✨ Καθάρισμα σαρώσεων (φωτογραφίες και σκαναρισμένα PDF)<br><select id="cleanSel"><option value="soft">Λευκό χαρτί (προτείνεται)</option><option value="strong">Πολύ λευκό, πιο σκούρα γράμματα</option><option value="bw">Ασπρόμαυρο</option><option value="off">Χωρίς — όπως η φωτογραφία</option></select></label></p>
-      <p><label><input type="checkbox" id="pre" checked> Καθαρισμός φωτογραφίας πριν την αναγνώριση (ασπρόμαυρο, αντίθεση)</label></p>
-      <p><label><input type="checkbox" id="forceOcr"> Αναγνώριση ακόμη κι όταν το PDF έχει ήδη κείμενο</label></p>
-      <p><label>🌐 Γλώσσα εφαρμογής · App language<br><select id="uiLang"><option value="el">Ελληνικά</option><option value="en">English</option></select></label></p>
-      <p class="muted">Την πρώτη φορά η αναγνώριση κατεβάζει τα λεξικά γλώσσας (μία φορά, χρειάζεται σύνδεση). Μετά δουλεύει και χωρίς ίντερνετ.</p>
-    </details>
-  </div>
-    <div class="card">
-    <details id="appsBox">
-      <summary>✨ Οι εφαρμογές μας</summary>
-      <div id="efmPage" style="margin-top:10px"></div>
-    </details>
-  </div>
-  <div class="card">
-    <p class="pwwarn hidden" id="pwWarn">🔴 <b>Τα αντίγραφα ασφαλείας έχουν σταματήσει:</b> όρισε κωδικό αντιγράφων για να κλειδώνονται. <button class="sec" id="pwWarnGo">Ορισμός τώρα</button></p>
     <details id="bkBox">
       <summary>💾 Αντίγραφα ασφαλείας</summary>
       <p class="muted">Τα έγγραφα μένουν μόνο στο κινητό σου. Αν καθαρίσεις τα δεδομένα του προγράμματος περιήγησης ή αλλάξεις κινητό, χάνονται — γι' αυτό κράτα αντίγραφο.</p>
@@ -470,9 +491,42 @@ body.reading.ffd #reader{letter-spacing:0;word-spacing:.08em;font-style:normal}
     </details>
   </div>
   <div class="card">
+    <details open>
+      <summary>🔎 Ρυθμίσεις αναγνώρισης</summary>
+      <p><label>Γλώσσα κειμένου<br>
+        <select id="lang">
+          <option value="ell+eng">Ελληνικά και Αγγλικά</option>
+          <option value="ell">Μόνο Ελληνικά</option>
+          <option value="eng">Μόνο Αγγλικά</option>
+        </select></label></p>
+      <p><label>Ταχύτητα αναγνώρισης<br>
+        <select id="ocrMode">
+          <option value="fast">Γρήγορη (προτείνεται)</option>
+          <option value="careful">Προσεκτική — πιο αργή, για μικρά ή θολά γράμματα </option>
+        </select></label></p>
+      <p><label><input type="checkbox" id="autoCrop" checked> Αυτόματο κόψιμο και ίσιωμα της σελίδας στις φωτογραφίες</label></p>
+      <p><label>✨ Καθάρισμα σαρώσεων (φωτογραφίες και σκαναρισμένα PDF)<br><select id="cleanSel"><option value="soft">Λευκό χαρτί (προτείνεται)</option><option value="strong">Πολύ λευκό, πιο σκούρα γράμματα</option><option value="bw">Ασπρόμαυρο</option><option value="off">Χωρίς — όπως η φωτογραφία</option></select></label></p>
+      <p><label><input type="checkbox" id="pre" checked> Καθαρισμός φωτογραφίας πριν την αναγνώριση (ασπρόμαυρο, αντίθεση)</label></p>
+      <p><label><input type="checkbox" id="forceOcr"> Αναγνώριση ακόμη κι όταν το PDF έχει ήδη κείμενο</label></p>
+      <p><label>🌐 Γλώσσα εφαρμογής · App language<br><select id="uiLang"><option value="el">Ελληνικά</option><option value="en">English</option></select></label></p>
+      <p class="muted">Την πρώτη φορά η αναγνώριση κατεβάζει τα λεξικά γλώσσας (μία φορά, χρειάζεται σύνδεση). Μετά δουλεύει και χωρίς ίντερνετ.</p>
+    </details>
+  </div>
+  <div class="card">
     <div class="row"><span class="muted" style="flex:1">Έκδοση <b id="ver2"></b></span><button class="sec" id="bUpd">🔄 Έλεγχος αναβάθμισης</button></div>
   </div>
   <p class="muted" style="text-align:center;font-size:13px">© 2026 Ανδρέας Μ. Γλεντζάκης · GlenApps · Με επιφύλαξη παντός δικαιώματος<br><a href="privacy.html" style="color:inherit">Πολιτική απορρήτου</a></p>
+  </div>
+
+  <div class="tabp hidden" data-p="efarmoges">
+    <h2 class="tabh">✨ Οι εφαρμογές μας</h2>
+  <div class="card">
+    <details id="appsBox" open>
+      <summary>✨ Οι εφαρμογές μας</summary>
+      <div id="efmPage" style="margin-top:10px"></div>
+    </details>
+  </div>
+  </div>
 </section>
 
 <!-- ΕΠΕΞΕΡΓΑΣΙΑ -->
@@ -516,6 +570,14 @@ body.reading.ffd #reader{letter-spacing:0;word-spacing:.08em;font-style:normal}
     <div id="reader"></div>
   </div>
   <div id="pagesView" class="hidden"></div>
+  <div id="bvTop" class="bv"></div><div id="bvBot" class="bv"></div>
+  <button id="bvAa" aria-label="Ρυθμίσεις ανάγνωσης βιβλίου">Αα</button>
+  <div id="bkSet" class="hidden" role="dialog" aria-label="Ρυθμίσεις ανάγνωσης βιβλίου">
+    <div class="row" style="flex-wrap:nowrap;margin-bottom:6px"><strong style="flex:1;font-size:18px">Αα · Ανάγνωση βιβλίου</strong><button class="sec" id="bsClose" aria-label="Κλείσιμο">✕</button></div>
+    <div class="opt"><span>Μέγεθος</span><div class="seg"><button id="bsMinus" style="font-size:15px">Α−</button><button id="bsVal" disabled>19</button><button id="bsPlus" style="font-size:22px">Α+</button></div></div>
+    <div class="opt"><span>Γρήγορα</span><div class="seg fsq"><button data-fs="19">Κανονικά</button><button data-fs="26" style="font-size:1.1em">Μεγάλα</button><button data-fs="34" style="font-size:1.25em">👓 Πολύ μεγάλα</button></div></div>
+    <div id="bsMore"></div>
+  </div>
   <div id="inkBar" class="hidden">
     <div class="ibgrip" id="ibGrip"><span></span><small id="ibLbl">Σύρε κάτω για να μαζέψεις</small></div>
     <button data-tool="pan"><span>✋</span><small>Κύλιση</small></button>
@@ -556,11 +618,12 @@ body.reading.ffd #reader{letter-spacing:0;word-spacing:.08em;font-style:normal}
     </details>
     <details class="cat" data-cat="look"><summary><span class="ci">Aa</span><span class="ct"><b>Εμφάνιση κειμένου</b><small>Μέγεθος, θέμα, γραμματοσειρά, διάστιχο</small></span><span class="cv">›</span></summary>
     <div class="opt"><span>Μέγεθος</span><div class="seg"><button id="fsMinus">Α−</button><button id="fsVal" disabled>19</button><button id="fsPlus">Α+</button></div></div>
-    <div class="opt"><span>Γρήγορα</span><div class="seg" id="fsQuick"><button data-fs="19">Κανονικά</button><button data-fs="26" style="font-size:1.1em">Μεγάλα</button><button data-fs="34" style="font-size:1.25em">👓 Πολύ μεγάλα</button></div></div>
+    <div class="opt"><span>Γρήγορα</span><div class="seg fsq" id="fsQuick"><button data-fs="19">Κανονικά</button><button data-fs="26" style="font-size:1.1em">Μεγάλα</button><button data-fs="34" style="font-size:1.25em">👓 Πολύ μεγάλα</button></div></div>
     <div class="opt thopt"><span>Θέμα</span><div class="seg thg" data-k="th"><button data-v="light" style="background:#fffdf5;color:#1d1d1b" title="Φωτεινό">Αα<small>Φωτεινό</small></button><button data-v="sepia" style="background:#f4ecd8;color:#5b4636" title="Σέπια">Αα<small>Σέπια</small></button><button data-v="paper" style="background:#fbfaf6;color:#2b2b2b" title="Χαρτί">Αα<small>Χαρτί</small></button><button data-v="mint" style="background:#e9f5ee;color:#1f3a2b" title="Μέντα">Αα<small>Μέντα</small></button><button data-v="gray" style="background:#e6e6e6;color:#222" title="Γκρι">Αα<small>Γκρι</small></button><button data-v="contrast" style="background:#ffffff;color:#000000" title="Υψηλή αντίθεση">Αα<small>Αντίθεση</small></button><button data-v="night" style="background:#121212;color:#dcdcdc" title="Νύχτα">Αα<small>Νύχτα</small></button><button data-v="navy" style="background:#0f1b2d;color:#d6e2f0" title="Μπλε νύχτας">Αα<small>Μπλε</small></button><button data-v="amoled" style="background:#000000;color:#c8c8c8" title="Απόλυτο μαύρο">Αα<small>Μαύρο</small></button><button data-v="yellow" style="background:#000000;color:#ffe14d" title="Κίτρινο σε μαύρο">Αα<small>Κίτρινο</small></button></div></div>
     <div class="opt"><span>Γραμματοσειρά</span><div class="seg" data-k="ff"><button data-v="s">Απλή</button><button data-v="r" style="font-family:Georgia,serif">Κλασική</button><button data-v="e">Ευανάγνωστη</button><button data-v="d" style="font-family:OpenDyslexic,sans-serif">Για δυσλεξία</button></div></div>
     <div class="opt"><span>Διάστιχο</span><div class="seg" data-k="lh"><button data-v="1.4">Πυκνό</button><button data-v="1.65">Κανονικό</button><button data-v="2">Αραιό</button><button data-v="2.4">Πολύ αραιό</button></div></div>
     <div class="opt"><span>Περιθώρια</span><div class="seg" data-k="mg"><button data-v="10">Στενά</button><button data-v="18">Κανονικά</button><button data-v="34">Φαρδιά</button></div></div>
+    <div class="opt"><span>Βιβλία</span><div class="seg" data-k="flow"><button data-v="pages">📖 Γύρισμα σελίδας</button><button data-v="scroll">↕ Κύλιση</button></div></div>
     </details>
     <details class="cat" data-cat="lang"><summary><span class="ci">🌐</span><span class="ct"><b>Ακρόαση και μετάφραση</b><small>Ανάγνωση φωναχτά, ταχύτητα, μετάφραση</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mSpeak"><span class="ic" id="mSpeakI">🔊</span><span class="tx"><b id="mSpeakT">Ανάγνωση φωναχτά</b><small>Διαβάζει το κείμενο (ή όσο έχεις επιλέξει)</small></span></button>
@@ -602,6 +665,13 @@ body.reading.ffd #reader{letter-spacing:0;word-spacing:.08em;font-style:normal}
     <button class="mi" id="mHome"><span class="ic">🏠</span><span class="tx"><b>Πίσω στην αρχική</b><small>Τα πάντα έχουν αποθηκευτεί</small></span></button>
   </div>
 </div>
+<nav id="tabs" aria-label="Κύριες ενότητες">
+  <button data-t="arxiki" class="on"><i>🏠</i><span>Αρχική</span></button>
+  <button data-t="vivlia"><i>📚</i><span>Βιβλία</span></button>
+  <button data-t="eggrafa"><i>📄</i><span>Έγγραφα</span></button>
+  <button data-t="rythmiseis"><i>⚙️</i><span>Ρυθμίσεις</span></button>
+  <button data-t="efarmoges"><i>✨</i><span>Εφαρμογές</span></button>
+</nav>
 <div class="spbar hidden" id="spBar" role="toolbar" aria-label="Ανάγνωση φωναχτά"><button id="spBack" aria-label="Προηγούμενη πρόταση">⏮</button><button id="spSlow" aria-label="Πιο αργά">🐢</button><span id="spRate">1×</span><button id="spFast" aria-label="Πιο γρήγορα">🐇</button><button id="spPlay" aria-label="Παύση">⏸</button><button id="spStop" aria-label="Σταμάτημα">⏹</button><span id="spPos" class="muted"></span></div>
 <div class="dlg hidden" id="dlg"><div class="bx"><h4 id="dlgT"></h4><div id="dlgB"></div><div class="row"><button class="sec" id="dlgNo">Ακύρωση</button><button id="dlgOk">Εντάξει</button></div></div></div>
 <div id="crop" class="hidden"><div class="cbox" id="cropBox"><canvas id="cropC"></canvas><svg id="cropS"></svg><div class="chint">Σύρε τις 4 κίτρινες γωνίες πάνω στις άκρες της σελίδας</div><div class="busy hidden" id="cropBusy">Ισιώνω τη σελίδα…</div></div>
@@ -641,12 +711,12 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="lib/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="antigrafa.js"></script>
-<script src="metafora-rythmisi.js?v=2.48"></script>
-<script src="metafora-lipsi.js?v=2.48"></script>
+<script src="metafora-rythmisi.js?v=2.49"></script>
+<script src="metafora-lipsi.js?v=2.49"></script>
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.48';
+const VERSION='2.49';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -657,7 +727,7 @@ function pdfLoad(data){return pdfjsLib.getDocument({data,isEvalSupported:false,e
 window.pdfLoad=pdfLoad;
 
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2600)};
-const show=id=>{if(id!=='home'&&history.state&&history.state.v!=='view')history.pushState({v:'view'},'');['home','work','read'].forEach(s=>$('#'+s).classList.toggle('hidden',s!==id));document.body.classList.toggle('reading',id==='read');if(id==='read'){if(typeof pinApply==='function'){pinApply();rdApply();if(RD.awake)awake(true)}}else{document.body.removeAttribute('data-th');if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}scrollTo(0,0);if(typeof setHH==='function')setHH();if(id==='home'&&typeof efmShow==='function')efmShow()};
+const show=id=>{if(id!=='home'&&history.state&&history.state.v!=='view')history.pushState({v:'view'},'');['home','work','read'].forEach(s=>$('#'+s).classList.toggle('hidden',s!==id));document.body.classList.toggle('reading',id==='read');document.body.classList.toggle('onhome',id==='home');if(id!=='read'){PG.on=false;document.body.classList.remove('paged','bookmode');$('#bkSet').classList.add('hidden')}if(id==='read'){if(typeof pinApply==='function'){pinApply();rdApply();if(RD.awake)awake(true)}}else{document.body.removeAttribute('data-th');if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}scrollTo(0,0);if(typeof setHH==='function')setHH();if(id==='home'&&typeof efmShow==='function')efmShow()};
 const prog=(p,m)=>{if(p!=null)$('#prog i').style.width=Math.round(p*100)+'%';if(m)$('#wMsg').textContent=m};
 let cancelled=false, doc=null, trOrig=null, trDoc=null; // doc = {id,name,pages:[{text,conf,ocr}],date}
 
@@ -751,7 +821,7 @@ async function pwChangeFlow(){
 const askPw=n=>pwDlg('🔒 Κλειδωμένο αντίγραφο',n?'<b style="color:var(--bad)">Λάθος κωδικός.</b> Δοκίμασε ξανά ('+(3-n)+' ακόμα).':'Αυτό το αντίγραφο κλειδώθηκε με κωδικό. Γράψε τον κωδικό αντιγράφων που είχες ορίσει.',[['pwo','Κωδικός']],'Άνοιγμα').then(v=>v?v.pwo:null);
 $('#pwSet').onclick=()=>pwSetFlow();
 $('#pwChange').onclick=()=>pwChangeFlow();
-$('#pwWarnGo').onclick=()=>{$('#bkBox').open=true;pwSetFlow()};
+$('#pwWarnGo').onclick=()=>{tab('rythmiseis');$('#bkBox').open=true;pwSetFlow()};
 let bkTimer=null;
 // τι μπαίνει στο αντίγραφο: τα έγγραφα (με σελιδοδείκτες/σημειώσεις/ράφι), οι θέσεις ανάγνωσης και τα εξώφυλλα του ραφιού
 let bkCovers={};
@@ -776,7 +846,7 @@ const isFileLink=u=>{try{return /\.(epub|pdf|docx|txt|odt|pptx)$/i.test(new URL(
 function drawSrc(){
   const o=srcGet(),F=new Set(o.fav),all=[...SRC_DEF.map(x=>({...x,def:1})),...o.mine.map(srcClean).filter(Boolean)];
   const row=x=>{let h='';try{h=new URL(x.u).hostname.replace(/^www\./,'')}catch(e){}
-    return `<div class="src"><button class="fav" data-fav="${esc(x.id)}" aria-label="${F.has(x.id)?'Βγάλε από τα αγαπημένα':'Βάλε στα αγαπημένα'}">${F.has(x.id)?'★':'☆'}</button><div class="si"><b class="${x.def?'':'usr'}">${esc(x.n)}</b><small class="${x.def?'':'usr'}">${esc(x.d||h)}</small></div>${isFileLink(x.u)?`<button data-rd="${esc(x.id)}">📖 Άνοιγμα</button>`:`<button data-go="${esc(x.id)}">Άνοιγμα</button>`}${x.def?'':`<button class="sec" data-ed="${esc(x.id)}" aria-label="Αλλαγή">✏️</button><button class="sec" data-rm="${esc(x.id)}" aria-label="Σβήσιμο">🗑</button>`}</div>`};
+    return `<div class="src"><button class="fav${F.has(x.id)?' on':''}" data-fav="${esc(x.id)}" aria-pressed="${F.has(x.id)}" aria-label="${F.has(x.id)?'Βγάλε από τα αγαπημένα':'Βάλε στα αγαπημένα'}">${F.has(x.id)?'★':'☆'}</button><div class="si"><b class="${x.def?'':'usr'}">${esc(x.n)}</b><small class="${x.def?'':'usr'}">${esc(x.d||h)}</small></div>${isFileLink(x.u)?`<button data-rd="${esc(x.id)}">📖 Άνοιγμα</button>`:`<button data-go="${esc(x.id)}">Άνοιγμα</button>`}${x.def?'':`<button class="sec" data-ed="${esc(x.id)}" aria-label="Αλλαγή">✏️</button><button class="sec" data-rm="${esc(x.id)}" aria-label="Σβήσιμο">🗑</button>`}</div>`};
   const fav=all.filter(x=>F.has(x.id)),def=all.filter(x=>x.def&&!F.has(x.id)),mine=all.filter(x=>!x.def&&!F.has(x.id));
   $('#srcList').innerHTML=(fav.length?'<div class="srch">★ Αγαπημένα</div>'+fav.map(row).join(''):'')
     +(def.length?'<div class="srch">Δωρεάν βιβλιοθήκες</div>'+def.map(row).join(''):'')
@@ -1656,7 +1726,9 @@ function openReader(){
   try{localStorage.setItem('glenread-last',JSON.stringify(same?l:{id:doc.id,y:0}))}catch(e){}posSave(same?l:{id:doc.id,y:0});
   pvClose();viewLabels();const wantPage=(!doc.kind||doc.slides)&&!(same&&l.v==='text'&&l.y>0); // πρώτη φορά: η σελίδα· μετά: όπου είχες μείνει
   if(wantPage)pvOpen({auto:true}).then(()=>{if(same&&l.v==='page'&&pv.on)setTimeout(()=>{const el=$(`.pvp[data-i="${l.p||0}"]`);if(el){const r=el.getBoundingClientRect();scrollTo(0,scrollY+r.top+r.height*(l.f||0)-80)}},60)});
+  else if(pgWant())pgSync(same&&l.y>0?l.y:0);
   else if(same&&l.y>0)setTimeout(()=>scrollTo(0,l.y*(document.body.scrollHeight-innerHeight)),60);
+  if(!pgWant()){PG.on=false;document.body.classList.remove('paged');pgSync()}
   if(doc.partial)toast('Αυτό το έγγραφο είχε διακοπεί — έχει μόνο τις σελίδες που πρόλαβαν');
   const low=doc.pages.map((p,i)=>p.ocr&&p.conf<70?i+1:0).filter(Boolean);
   const bad=doc.pages.length&&doc.pages.every(p=>p.ocr&&(p.conf<50||!p.text.trim()));
@@ -1670,7 +1742,7 @@ function render(q){
   $('#reader').innerHTML=doc.pages.map((p,i)=>{
     const raw=p.text||'(κενή σελίδα)';let t;
     if(q){const re=new RegExp(norm(q).split('').map(ch=>accentClass(ch)).join(''),'gi');t='';let last=0,m;while((m=re.exec(raw))){if(!m[0].length){re.lastIndex++;continue}t+=esc(raw.slice(last,m.index))+`<mark data-n="${n++}">${esc(m[0])}</mark>`;last=m.index+m[0].length}t+=esc(raw.slice(last))}else t=esc(raw);
-    return (doc.pages.length>1?(doc.book?`<div class="pg ch">${esc(p.title||(EN?'Chapter ':'Κεφάλαιο ')+(i+1))}</div>`:`<div class="pg">Σελίδα ${i+1}${p.ocr?' · αναγνώριση '+p.conf+'%':''}</div>`):'')+t;
+    return (doc.pages.length>1?(doc.book?(()=>{const tt=p.title||(EN?'Chapter ':'Κεφάλαιο ')+(i+1),dup=!!p.title&&(p.text||'').trimStart().slice(0,tt.length+2).toLowerCase().startsWith(tt.toLowerCase());return `<div class="pg ch${dup?' dup':''}" data-t="${esc(tt)}">${dup?'':esc(tt)}</div>`})():`<div class="pg">Σελίδα ${i+1}${p.ocr?' · αναγνώριση '+p.conf+'%':''}</div>`):'')+t;
   }).join('');
   return n;
 }
@@ -1685,21 +1757,28 @@ $('#bNext').onclick=nextHit;
 
 // ---------- Ρυθμίσεις εμφάνισης κειμένου ----------
 let RD={th:'light',ff:'s',lh:'1.65',mg:'18',rate:'1',awake:false};
-try{Object.assign(RD,JSON.parse(localStorage.getItem('glenread-rd')||'{}'))}catch(e){}
+try{Object.assign(RD,JSON.parse(localStorage.getItem('glenread-rd')||'{}'))}catch(e){}if(RD.flow!=='scroll')RD.flow='pages';
 const FONTS={s:'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif',r:'Georgia,"Noto Serif","Times New Roman",serif',e:'Verdana,Tahoma,"Noto Sans",sans-serif',d:'OpenDyslexic,Verdana,"Noto Sans",sans-serif'};
 function rdApply(){
   try{localStorage.setItem('glenread-rd',JSON.stringify(RD))}catch(e){}
   const r=document.documentElement.style;r.setProperty('--ff',FONTS[RD.ff]||FONTS.s);r.setProperty('--lh',RD.lh);r.setProperty('--mg',RD.mg+'px');
   document.body.dataset.th=RD.th;document.body.classList.toggle('ffr',RD.ff==='e'||RD.ff==='d');document.body.classList.toggle('ffd',RD.ff==='d');
-  try{document.querySelectorAll('#fsQuick button').forEach(b=>b.classList.toggle('on',+b.dataset.fs===Math.round(fs)))}catch(e){}
-  document.querySelectorAll('#sheet .seg[data-k]').forEach(sg=>sg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===String(RD[sg.dataset.k]))));
+  try{document.querySelectorAll('.fsq button').forEach(b=>b.classList.toggle('on',+b.dataset.fs===Math.round(fs)))}catch(e){}
+  document.querySelectorAll('.seg[data-k]').forEach(sg=>sg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===String(RD[sg.dataset.k]))));
+  try{$('#bsVal').textContent=Math.round(fs)}catch(e){}
+  if(typeof pgSoon==='function')pgSoon();
   $('#mAwake').classList.toggle('on',!!RD.awake);
 }
-document.querySelectorAll('#sheet .seg[data-k]').forEach(sg=>sg.onclick=e=>{const b=e.target.closest('button');if(!b)return;RD[sg.dataset.k]=b.dataset.v;rdApply()});
+// πάνελ «Αα» των βιβλίων: ίδιες ρυθμίσεις με το μενού (ίδιος μηχανισμός)
+['th','ff','lh','mg','flow'].forEach(k=>{const sg=document.querySelector('#sheet .seg[data-k="'+k+'"]');if(sg)$('#bsMore').appendChild(sg.closest('.opt').cloneNode(true))});
+document.querySelectorAll('.seg[data-k]').forEach(sg=>sg.onclick=e=>{const b=e.target.closest('button');if(!b)return;RD[sg.dataset.k]=b.dataset.v;rdApply()});
 const FS_MAX=64;let fs=19;try{fs=Math.min(FS_MAX,Math.max(13,+localStorage.getItem('glenread-fs')||19))}catch(e){}
 const setFs=()=>{document.documentElement.style.setProperty('--fs',fs+'px');$('#fsVal').textContent=Math.round(fs);try{localStorage.setItem('glenread-fs',Math.round(fs))}catch(e){}};setFs();
 $('#fsMinus').onclick=()=>{fs=Math.max(13,fs-2);setFs();rdApply()};$('#fsPlus').onclick=()=>{fs=Math.min(FS_MAX,fs+2);setFs();rdApply()};
-$('#fsQuick').onclick=e=>{const b=e.target.closest('[data-fs]');if(!b)return;fs=+b.dataset.fs;setFs();rdApply()};
+document.querySelectorAll('.fsq').forEach(q=>q.onclick=e=>{const b=e.target.closest('[data-fs]');if(!b)return;fs=+b.dataset.fs;setFs();rdApply()});
+$('#bsMinus').onclick=()=>$('#fsMinus').click();$('#bsPlus').onclick=()=>$('#fsPlus').click();
+$('#bvAa').onclick=()=>{rdApply();$('#bkSet').classList.remove('hidden')};$('#bsClose').onclick=()=>$('#bkSet').classList.add('hidden');
+document.addEventListener('pointerdown',e=>{const k=$('#bkSet');if(!k.classList.contains('hidden')&&!k.contains(e.target)&&e.target.id!=='bvAa')k.classList.add('hidden')},true);
 // μεγέθυνση γραμμάτων με δύο δάχτυλα στο κείμενο (χωρίς να μεγαλώνει όλη η οθόνη)
 (()=>{const P=new Map();let d0=0,f0=0;const card=$('#read .card');
   const dist=()=>{const[a,b]=[...P.values()];return Math.hypot(a.x-b.x,a.y-b.y)};
@@ -1739,8 +1818,8 @@ function toggleEdit(){
   const r=$('#reader');clearTimeout(editT);editT=null;
   if(!editing){if(pv.on)viewText();if(tapMode)tapEnd();if(trReset())toast('Η διόρθωση γίνεται στο πρωτότυπο κείμενο');editDoc=doc;
     const multi=doc.pages.length>1;r.innerHTML=doc.pages.map((p,i)=>(multi?`<div class="pg" contenteditable="false">Σελίδα ${i+1}</div>`:'')+`<div class="pge" data-i="${i}" contenteditable="true">${esc(p.text)}</div>`).join('');
-    const f=r.querySelector('.pge');f&&f.focus();editing=true;$('#mEditT').textContent='Τέλος διόρθωσης';toast('Γράψε κατευθείαν στο κείμενο. Αποθηκεύεται μόνο του.')}
-  else{editCommit();editing=false;editDoc=null;$('#mEditT').textContent='Διόρθωση κειμένου';$('#lowConf').classList.add('hidden');render();toast('Αποθηκεύτηκε')}
+    editing=true;pgSync();const f=r.querySelector('.pge');f&&f.focus();$('#mEditT').textContent='Τέλος διόρθωσης';toast('Γράψε κατευθείαν στο κείμενο. Αποθηκεύεται μόνο του.')}
+  else{editCommit();editing=false;editDoc=null;$('#mEditT').textContent='Διόρθωση κειμένου';$('#lowConf').classList.add('hidden');render();pgSoon();toast('Αποθηκεύτηκε')}
 }
 $('#mEdit').onclick=()=>{closeSheet();toggleEdit()};
 // εκφώνηση — ΜΟΝΟ με φωνή εγκατεστημένη στη συσκευή (localService): το κείμενο δεν φεύγει ποτέ προς υπηρεσία στο διαδίκτυο.
@@ -1811,11 +1890,48 @@ function posSave(o){if(!o||o.id==null)return;const m=posAll(),k=String(o.id);m[k
   try{localStorage.setItem('glenread-pos',JSON.stringify(m))}catch(e){}}
 const posGet=id=>posAll()[String(id)]||null;
 function posDel(id){const m=posAll();delete m[String(id)];try{localStorage.setItem('glenread-pos',JSON.stringify(m))}catch(e){}}
-function posNow(){const h=document.body.scrollHeight-innerHeight,o={id:doc.id,y:h>0?Math.min(1,scrollY/h):0,v:'text'};
+function posNow(){if(PG.on)return{id:doc.id,y:pgFrac(),v:'text'};const h=document.body.scrollHeight-innerHeight,o={id:doc.id,y:h>0?Math.min(1,scrollY/h):0,v:'text'};
   if(pv.on){const els=[...document.querySelectorAll('.pvp')];const k=Math.max(0,els.findIndex(el=>el.getBoundingClientRect().bottom>80));const r=els[k]&&els[k].getBoundingClientRect();o.v='page';o.p=k;o.f=r?Math.min(.98,Math.max(0,(80-r.top)/r.height)):0}
   return o}
 function posFlush(){if(posT){clearTimeout(posT);posT=null;try{localStorage.setItem('glenread-last',JSON.stringify(posV))}catch(e){}posSave(posV)}}
 addEventListener('scroll',()=>{if(!doc||$('#read').classList.contains('hidden'))return;posV=posNow();clearTimeout(posT);posT=setTimeout(posFlush,400)},{passive:true});
+// ---------- Βιβλία: γύρισμα σελίδας (όπως Kindle, Google Play Βιβλία, Apple Books) ----------
+// Το κείμενο μπαίνει σε στήλες ίσες με την οθόνη· κάθε στήλη είναι μία σελίδα. Πάτημα δεξιά/αριστερά ή σύρσιμο = επόμενη/προηγούμενη.
+const PG={on:false,n:1,i:0,W:0,ch:[]};
+const pgWant=()=>!!(doc&&doc.book&&!pv.on&&RD.flow!=='scroll'&&!editing&&!$('#read').classList.contains('hidden'));
+function pgSync(y){
+  const R=$('#reader'),want=pgWant();document.body.classList.toggle('bookmode',!!(doc&&doc.book&&!pv.on&&!$('#read').classList.contains('hidden')));
+  if(!want){if(PG.on){const f=pgFrac();PG.on=false;document.body.classList.remove('paged');['padding','columnWidth','columnGap'].forEach(k=>R.style[k]='');
+      if(y==null)setTimeout(()=>scrollTo(0,f*(document.body.scrollHeight-innerHeight)),30)}return}
+  if(y==null&&PG.on)y=pgFrac();
+  document.body.classList.add('paged');PG.on=true;
+  const pad=Math.max(12,+RD.mg||18);R.style.padding='0 '+pad+'px';const W=R.clientWidth;R.style.columnWidth=Math.max(80,W-2*pad)+'px';R.style.columnGap=2*pad+'px';
+  PG.W=W;PG.n=Math.max(1,Math.ceil((R.scrollWidth-4)/W));
+  PG.ch=[...R.querySelectorAll('.pg')].map(el=>({p:pgOfEl(el),t:el.dataset.t||el.textContent}));
+  pgGo(y!=null?Math.round(y*(PG.n-1)):PG.i,false,true);
+}
+let pgT=0;function pgSoon(){cancelAnimationFrame(pgT);pgT=requestAnimationFrame(()=>{if(doc&&!$('#read').classList.contains('hidden'))pgSync()})}
+function pgOfEl(el){const R=$('#reader'),r=el.getBoundingClientRect(),r0=R.getBoundingClientRect();return Math.max(0,Math.floor((r.left-r0.left+R.scrollLeft+2)/(PG.W||1)))}
+const pgFrac=()=>PG.n>1?PG.i/(PG.n-1):0;
+function pgGo(i,smooth,quiet){const R=$('#reader');PG.i=Math.max(0,Math.min(PG.n-1,i));R.scrollTo({left:PG.i*PG.W,behavior:smooth?'smooth':'auto'});pgInfo();
+  if(!quiet||doc){posV=posNow();clearTimeout(posT);posT=setTimeout(posFlush,400)}}
+function pgInfo(){let t='';for(const c of PG.ch)if(c.p<=PG.i)t=c.t;else break;
+  $('#bvTop').textContent=t||(doc&&doc.name)||'';const pc=Math.round((PG.n>1?PG.i/(PG.n-1):1)*100);
+  $('#bvBot').textContent=(EN?'Page ':'Σελίδα ')+(PG.i+1)+(EN?' of ':' από ')+PG.n+' · '+pc+'%'}
+const pgNext=()=>{if(PG.i<PG.n-1)pgGo(PG.i+1,true);else toast(EN?'End of the book':'Τέλος του βιβλίου')};
+const pgPrev=()=>{if(PG.i>0)pgGo(PG.i-1,true)};
+(()=>{const R=$('#reader');let sx=0,sy=0,st=0,swiped=false,snapT=0;
+  R.addEventListener('scroll',()=>{if(!PG.on)return;clearTimeout(snapT);snapT=setTimeout(()=>{const k=Math.round(R.scrollLeft/PG.W);if(Math.abs(R.scrollLeft-k*PG.W)>2||k!==PG.i){PG.i=Math.max(0,Math.min(PG.n-1,k));R.scrollLeft=PG.i*PG.W;pgInfo();posV=posNow();clearTimeout(posT);posT=setTimeout(posFlush,400)}},140)},{passive:true});
+  R.addEventListener('pointerdown',e=>{if(!PG.on||!e.isPrimary)return;sx=e.clientX;sy=e.clientY;st=Date.now();swiped=false});
+  R.addEventListener('pointerup',e=>{if(!PG.on||!e.isPrimary||!st)return;const dx=e.clientX-sx,dy=e.clientY-sy;st=0;
+    if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.3&&!(getSelection().toString())){swiped=true;dx<0?pgNext():pgPrev()}});
+  R.addEventListener('click',e=>{if(!PG.on||swiped||tapMode||editing){swiped=false;return}if(getSelection().toString())return;if(e.target.closest('a,mark,button'))return;
+    const r=R.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;if(x<.3)pgPrev();else if(x>.7)pgNext()});
+  addEventListener('keydown',e=>{if(!PG.on||/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName||'')||!$('#dlg').classList.contains('hidden'))return;
+    if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();pgNext()}else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();pgPrev()}});
+  let rz=0;addEventListener('resize',()=>{if(!PG.on)return;clearTimeout(rz);rz=setTimeout(()=>pgSync(),150)});
+  try{document.fonts&&document.fonts.addEventListener('loadingdone',()=>{if(PG.on)pgSoon()})}catch(e){}
+})();
 function flushAll(){posFlush();flushAnn();shotsFlush();if(editing&&editT){clearTimeout(editT);editT=null;editCommit()}}
 addEventListener('pagehide',flushAll);document.addEventListener('visibilitychange',()=>{if(document.hidden)flushAll()});
 // «Συνέχεια ανάγνωσης» στην αρχική
@@ -1847,14 +1963,29 @@ $('#mtfGo').onclick=()=>{window.open('https://aglentzakis-dot.github.io/metafora
 $('#mtfNo').onclick=()=>{try{localStorage.setItem('glenread-metafora-ok','1')}catch(e){}mtfPaint(0)};
 // Ράφι «Τα βιβλία μου»: εξώφυλλο, τίτλος, συγγραφέας, πόσο έχεις διαβάσει. Όλα μένουν στη συσκευή.
 const coverCol=id=>{let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))>>>0;return `hsl(${h%360} 42% 38%)`};
+// καρτέλες της αρχικής
+let curTab='arxiki';
+function tab(t){if(!document.querySelector('.tabp[data-p="'+t+'"]'))t='arxiki';curTab=t;
+  document.querySelectorAll('.tabp').forEach(p=>p.classList.toggle('hidden',p.dataset.p!==t));
+  document.querySelectorAll('#tabs [data-t]').forEach(b=>{b.classList.toggle('on',b.dataset.t===t);b.setAttribute('aria-current',b.dataset.t===t?'page':'false')});
+  if(t==='eggrafa')try{drawHist()}catch(e){}
+  if(t==='efarmoges')try{EFM()?EFM().page($('#efmPage')):0}catch(e){}
+  scrollTo(0,0)}
+$('#tabs').onclick=e=>{const b=e.target.closest('[data-t]');if(b)tab(b.dataset.t)};
+$('#goBooks').onclick=()=>tab('vivlia');
 function drawShelf(metas){
   const books=metas.filter(m=>m.book),P=posAll(),key=m=>(P[String(m.id)]&&P[String(m.id)].t)||0;
-  $('#shelfBox').classList.toggle('hidden',!books.length);if(!books.length)return;
+  $('#shelfEmpty').classList.toggle('hidden',!!books.length);$('#shelfN').textContent=books.length||'';
+  $('#bbSub').textContent=books.length?(books.length===1?'1 βιβλίο':books.length+' βιβλία')+' · και δωρεάν βιβλία':(EN?'Your shelf and free books':'Το ράφι σου και δωρεάν βιβλία');
+  $('#bbCovers').innerHTML='<span>📚</span>';
+  if(!books.length){$('#shelf').innerHTML='';return}
   books.sort((a,b)=>(key(b)-key(a))||(b.id>a.id?1:-1));
   const pct=m=>Math.round(posPct(m,P[String(m.id)])*100);
   $('#shelfN').textContent=books.length;
   $('#shelf').innerHTML=books.map(m=>`<button class="bk" data-id="${esc(m.id)}"><span class="cv" data-cv="${esc(m.id)}" style="background-color:${coverCol(m.id)}">${esc(m.name)}</span><b>${esc(m.name)}</b>${m.author?`<small>${esc(m.author)}</small>`:''}<span class="rbar"><i style="width:${pct(m)}%"></i></span><small>${pct(m)>0?pct(m)+'%':(EN?'not started':'δεν ξεκίνησε')}</small></button>`).join('');
   $('#shelf').querySelectorAll('[data-cv]').forEach(el=>draftGet('thumb-'+el.dataset.cv).then(u=>{if(typeof u==='string'&&u.startsWith('data:image/')){el.style.backgroundImage=`url("${u}")`;el.classList.add('img')}}).catch(()=>{}));
+  // εξώφυλλα στο μεγάλο κουμπί της αρχικής
+  Promise.all(books.slice(0,3).map(m=>draftGet('thumb-'+m.id).catch(()=>null))).then(us=>{const ok=us.filter(u=>typeof u==='string'&&u.startsWith('data:image/'));if(ok.length){$('#bbCovers').innerHTML='';ok.forEach(u=>{const i=new Image();i.alt='';i.src=u;$('#bbCovers').appendChild(i)})}});
   $('#shelf').onclick=async e=>{const b=e.target.closest('.bk');if(!b)return;flushAll();const id=b.dataset.id,k=isNaN(+id)?id:+id;const f=await getDoc(k).catch(()=>null);if(!f){toast('Αυτό το έγγραφο σβήστηκε');return drawLast()}doc=f;openReader()};
 }
 drawSrc();
@@ -1889,7 +2020,7 @@ let gid=1;const newG=()=>Date.now().toString(36)+(gid++);
 async function pvOpen(o){o=o||{};
   if(editing)toggleEdit();if(tapMode)tapEnd();if(trReset())$('#lowConf').classList.add('hidden');
   if(pv.on)pvClose();const tok=++pv.gen,d=doc,stale=()=>tok!==pv.gen||doc!==d||!pv.on;
-  pv.on=true;document.body.classList.add('pv');$('#pagesView').classList.remove('hidden');$('#inkBar').classList.remove('hidden');closeFind();
+  pv.on=true;document.body.classList.add('pv');pgSync();$('#pagesView').classList.remove('hidden');$('#inkBar').classList.remove('hidden');closeFind();
   viewLabels();try{localStorage.setItem('glenread-view','page')}catch(e){}
   const box=$('#pagesView');box.innerHTML='<p class="muted" style="text-align:center;padding:30px">Φόρτωση σελίδων…</p>';
   const file=await draftGet('file-'+d.id);if(stale())return;pv.file=file;
@@ -1920,7 +2051,7 @@ async function pvOpen(o){o=o||{};
 }
 function pvClose(){
   pv.sel=null;$('#selBar').classList.add('hidden');document.body.classList.remove('selon');
-  pv.on=false;document.body.classList.remove('pv','drawing');$('#pagesView').classList.add('hidden');$('#inkBar').classList.add('hidden');$('#inkPop').classList.add('hidden');
+  pv.on=false;document.body.classList.remove('pv','drawing');setTimeout(pgSoon,0);$('#pagesView').classList.add('hidden');$('#inkBar').classList.add('hidden');$('#inkPop').classList.add('hidden');
   pv.gen++;document.querySelectorAll('.pvp').forEach(el=>{try{el._task&&el._task.cancel()}catch(e){}});
   if(pv.obs){pv.obs.disconnect();pv.obs=null}$('#pagesView').innerHTML='';if(pv.pdf){const p=pv.pdf;setTimeout(()=>pdfFree(p),0)}pv.pdf=null;pv.file=null;viewLabels();
 }
@@ -2335,9 +2466,11 @@ $('#histList').onclick=async e=>{
 $('#bPdf').onclick=()=>$('#fPdf').click();
 $('#bCam').onclick=$('#bAddPage').onclick=()=>openCam();
 $('#bImg').onclick=()=>$('#fImg').click();
-$('#bHist').onclick=()=>{$('#histBox').classList.remove('hidden');drawHist()};
+$('#bHist').onclick=()=>tab('eggrafa');
 $('#bHistClose').onclick=()=>$('#histBox').classList.add('hidden');
 $('#fPdf').onchange=e=>{const f=e.target.files[0];e.target.value='';f&&openAny(f)};
+// «➕ Πρόσθεσε βιβλίο»: ο επιλογέας δείχνει πρώτα βιβλία
+$('#bAddBook').onclick=()=>{const i=document.createElement('input');i.type='file';i.accept='.epub,application/epub+zip,.pdf,application/pdf';i.onchange=()=>{const f=i.files[0];if(f)openAny(f)};i.click()};
 $('#fCam').onchange=$('#fImg').onchange=e=>{try{sessionStorage.removeItem('glenread-cam')}catch(x){}const f=[...e.target.files];e.target.value='';addImages(f)};
 $('#bOcrImgs').onclick=ocrShots;$('#bMakePdf').onclick=makePdf;
 $('#bCancel').onclick=()=>{cancelled=true;prog(null,'Ακύρωση… οι σελίδες που έγιναν κρατιούνται');if(ocrStop)ocrStop()};
@@ -2702,7 +2835,7 @@ $('#mFind').onclick=openFind;$('#qFind').onclick=openFind;$('#findClose').onclic
 $('#mGo').onclick=()=>{closeSheet();const n=pv.on?pv.pages.length:doc.pages.length;if(n<2)return toast('Το έγγραφο έχει μία σελίδα');
   // βιβλίο: λίστα κεφαλαίων
   if(doc.book&&!pv.on){dlgOpen('📑 Κεφάλαια',`<div class="chl">${doc.pages.map((p,i)=>`<button class="sec" data-ch="${i}">${esc(p.title||(EN?'Chapter ':'Κεφάλαιο ')+(i+1))}</button>`).join('')}</div>`,null,true);$('#dlgOk').textContent='Κλείσιμο';
-    $('#dlgB').querySelector('.chl').onclick=e=>{const b=e.target.closest('[data-ch]');if(!b)return;dlgClose();const el=document.querySelectorAll('#reader .pg')[+b.dataset.ch];if(el)el.scrollIntoView({block:'start'})};return}
+    $('#dlgB').querySelector('.chl').onclick=e=>{const b=e.target.closest('[data-ch]');if(!b)return;dlgClose();const el=document.querySelectorAll('#reader .pg')[+b.dataset.ch];if(!el)return;if(PG.on)pgGo(pgOfEl(el),false);else el.scrollIntoView({block:'start'})};return}
   dlgOpen('Μετάβαση σε σελίδα',`<input id="goIn" type="number" inputmode="numeric" min="1" max="${n}" placeholder="1 έως ${n}">`,()=>{const k=Math.max(1,Math.min(n,+$('#goIn').value||1));
     const el=pv.on?$(`.pvp[data-i="${k-1}"]`):document.querySelectorAll('#reader .pg')[k-1];if(el)el.scrollIntoView({block:'start'})});setTimeout(()=>$('#goIn').focus(),50)};
 // πλήρης οθόνη
@@ -2730,6 +2863,9 @@ function curPos(){
     const t=snip(pt.slice(i));
     return{v:'page',p:k,f,label:t?'«'+t+'…»':(EN?'Page ':'Σελίδα ')+(k+1),sub:'Σελίδα '+(k+1)+(els.length>1?' από '+els.length:'')+' · '+when};
   }
+  if(PG.on){const R=$('#reader'),r0=R.getBoundingClientRect();let t='';
+    try{const rg=document.caretRangeFromPoint?document.caretRangeFromPoint(r0.left+(+RD.mg||18)+6,r0.top+12):null;if(rg&&rg.startContainer&&R.contains(rg.startContainer)){const tx=rg.startContainer.textContent||'';let i=rg.startOffset;i=Math.max(0,tx.lastIndexOf(' ',i)+1);t=snip(tx.slice(i))}}catch(e){}
+    return{v:'text',y:pgFrac(),label:t?'«'+t+'…»':(EN?'Page ':'Σελίδα ')+(PG.i+1),sub:(EN?'Page ':'Σελίδα ')+(PG.i+1)+(EN?' of ':' από ')+PG.n+' · '+when}}
   const h=document.body.scrollHeight-innerHeight,y=h>0?scrollY/h:0;
   // το κείμενο που φαίνεται στο πάνω μέρος της οθόνης
   let t='';try{const x=innerWidth/2,yy=Math.min(innerHeight*.22,160);const rg=document.caretRangeFromPoint?document.caretRangeFromPoint(x,yy):null;
@@ -2756,7 +2892,7 @@ $('#bmList').onclick=async e=>{const go=e.target.closest('[data-k]'),del=e.targe
   if(ren){const b=doc.bm[+ren.dataset.ren];closeSheet();dlgOpen('Όνομα σελιδοδείκτη',`<input id="bmName" value="${esc(b.label.replace(/^«|…»$/g,'')).replace(/"/g,'&quot;')}">`,()=>{const v=$('#bmName').value.trim();if(v){b.label=v;saveDoc(doc);toast('Αποθηκεύτηκε')}});setTimeout(()=>$('#bmName').select(),50);return}
   if(!go)return;const b=doc.bm[+go.dataset.k];closeSheet();
   if(b.v==='page'){if(!pv.on)await pvOpen();setTimeout(()=>{const el=$(`.pvp[data-i="${b.p}"]`);if(el){const r=el.getBoundingClientRect();scrollTo(0,scrollY+r.top+r.height*(b.f||0)-70)}},350)}
-  else{if(pv.on)viewText();setTimeout(()=>scrollTo(0,b.y*(document.body.scrollHeight-innerHeight)),60)}};
+  else{if(pv.on)viewText();setTimeout(()=>{if(pgWant())pgSync(b.y);else scrollTo(0,b.y*(document.body.scrollHeight-innerHeight))},60)}};
 // ράφι: κάθε έγγραφο (π.χ. βιβλίο σε PDF) μπαίνει ή βγαίνει από το ράφι
 const shelfUI=()=>{$('#mShelf').classList.toggle('on',!!(doc&&doc.book))};
 $('#mShelf').onclick=()=>{if(!doc)return;doc.book=!doc.book;saveDoc(doc);shelfUI();toast(doc.book?'📚 Μπήκε στο ράφι «Τα βιβλία μου»':'Βγήκε από το ράφι (το έγγραφο μένει στα «Πρόσφατα»)')};

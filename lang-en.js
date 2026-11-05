@@ -694,7 +694,32 @@ var D={
 "Ο σύνδεσμος δεν είναι σωστός — μόνο https://": "The link isn't valid — https:// only",
 "Αυτός ο σύνδεσμος υπάρχει ήδη": "This link already exists",
 "➕ Ο σύνδεσμος προστέθηκε": "➕ Link added",
-"Δεν αποθηκεύτηκε — ο χώρος γέμισε": "Not saved — storage is full"
+"Δεν αποθηκεύτηκε — ο χώρος γέμισε": "Not saved — storage is full",
+"Αρχική": "Home",
+"Βιβλία": "Books",
+"Έγγραφα": "Documents",
+"Ρυθμίσεις": "Settings",
+"Εφαρμογές": "Apps",
+"Κύριες ενότητες": "Main sections",
+"📚 Βιβλία": "📚 Books",
+"📄 Έγγραφα": "📄 Documents",
+"⚙️ Ρυθμίσεις": "⚙️ Settings",
+"✨ Οι εφαρμογές μας": "✨ Our apps",
+"Τα βιβλία μου": "My books",
+"Το ράφι σου και δωρεάν βιβλία": "Your shelf and free books",
+"Νέο έγγραφο": "New document",
+"Από σύνδεσμο": "From a link",
+"🕘 Όλα τα έγγραφα": "🕘 All documents",
+"Το ράφι σου είναι άδειο": "Your shelf is empty",
+"Βρες δωρεάν βιβλία παρακάτω ή πρόσθεσε ένα δικό σου.": "Find free books below or add one of your own.",
+"➕ Πρόσθεσε βιβλίο": "➕ Add a book",
+"🔎 Ρυθμίσεις αναγνώρισης": "🔎 Recognition settings",
+"1 βιβλίο": "1 book",
+"Ρυθμίσεις ανάγνωσης βιβλίου": "Book reading settings",
+"Αα · Ανάγνωση βιβλίου": "Aa · Book reading",
+"📖 Γύρισμα σελίδας": "📖 Page turning",
+"↕ Κύλιση": "↕ Scrolling",
+"Τέλος του βιβλίου": "End of the book"
 };
 var G=function(s){return D.hasOwnProperty(s)?D[s]:s};
 var P=[
@@ -750,7 +775,10 @@ var P=[
 [/^Κατεβάζω… ([\d.]+) MB$/,'Downloading… $1 MB'],
 [/^Κεφάλαιο (\d+)$/,'Chapter $1'],
 [/^Να σβηστεί ο σύνδεσμος «(.+)»;$/,'Delete the link “$1”?'],
-[/^Έφτασες τους (\d+) συνδέσμους$/,'You reached $1 links']
+[/^Έφτασες τους (\d+) συνδέσμους$/,'You reached $1 links'],
+[/^(\d+) βιβλία · και δωρεάν βιβλία$/,'$1 books · and free books'],
+[/^1 βιβλίο · και δωρεάν βιβλία$/,'1 book · and free books'],
+[/^Σελίδα (\d+) από (\d+) · (\d+)%$/,'Page $1 of $2 · $3%']
 ];
 var GR=/[Ͱ-Ͽἀ-῿]/;
 function one(k){if(D.hasOwnProperty(k))return D[k];for(var i=0;i<P.length;i++){var r=P[i][0];if(r.test(k))return k.replace(r,P[i][1])}return null}
