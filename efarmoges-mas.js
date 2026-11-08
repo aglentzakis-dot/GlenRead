@@ -1,5 +1,5 @@
 /*
-  GlenApps · «Οι εφαρμογές μας» — ΚΟΙΝΟ ΚΟΜΜΑΤΙ, έκδοση 2.1 (8/11/2026) — πρότυπο: η σελίδα των Παραγγελιών
+  GlenApps · «Οι εφαρμογές μας» — ΚΟΙΝΟ ΚΟΜΜΑΤΙ, έκδοση 2.2 (9/11/2026) — πρότυπο: η σελίδα των Παραγγελιών
   © 2026 Ανδρέας Μ. Γλεντζάκης (Andreas M. Glentzakis). Με την επιφύλαξη παντός δικαιώματος. All rights reserved.
   Απαγορεύεται η αντιγραφή, τροποποίηση και διάθεση, εν όλω ή εν μέρει, χωρίς προηγούμενη γραπτή άδεια του κατόχου.
 
@@ -29,7 +29,7 @@
   var W = window;
   if (W.EfarmogesMas) return;
 
-  var VERSION = "2.1";
+  var VERSION = "2.2";
   var SRC = "https://aglentzakis-dot.github.io/efarmoges.json";
   /* Αντίγραφο της λίστας τη στιγμή του συγχρονισμού — για το πρώτο άνοιγμα χωρίς ίντερνετ. */
   var BUILTIN = /*EFM_LIST*/[{"id":"dromologio","name":"Δρομολόγιο","icon":"https://aglentzakis-dot.github.io/dromologio/eikonidia/icon-192.png","text":"Πελάτες, δουλειές, υπενθυμίσεις και ταμείο για μάστορες, με διαδρομή που πιάνει τις κοντινές δουλειές.","url":"https://aglentzakis-dot.github.io/dromologio/","showIn":["*"],"active":true,"en":{"name":"Route","text":"Clients, jobs, reminders and cash book for tradespeople, with a route that picks up nearby jobs."},"emoji":"🗺"},{"id":"kontamou","name":"Κοντά μου","icon":"https://aglentzakis-dot.github.io/kontamou/icon-192.png","text":"Μάστορες και συνεργάτες στον χάρτη — σε βρίσκουν οι πελάτες της περιοχής σου.","url":"https://aglentzakis-dot.github.io/kontamou/","showIn":["*"],"active":true,"en":{"name":"Near me","text":"Tradespeople and partners on the map — customers in your area find you."},"emoji":"📍"},{"id":"tameia","name":"Ταμεία","icon":"https://aglentzakis-dot.github.io/tameia/icon-192.png","text":"Προσωπικά και εταιρεία σε ένα μέρος — με πάγια, προϋπολογισμό και αρχείο για τον λογιστή. Κοινόχρηστα: υπό κατασκευή, δωρεάν έως 3 διαμερίσματα.","url":"https://aglentzakis-dot.github.io/tameia/","showIn":["*"],"active":true,"en":{"name":"Cash books","text":"Personal and business money in one place — with fixed costs, budget and an export for your accountant. Shared building expenses: under construction, free for up to 3 apartments."},"emoji":"📒"},{"id":"imerologio","name":"Ημερολόγιο","icon":"https://aglentzakis-dot.github.io/imerologio/icon-192.png","text":"Ραντεβού για κάθε επάγγελμα: οι πελάτες κλείνουν μόνοι τους, υπενθυμίσεις με μήνυμα, στατιστικά και χάρτης πελατών.","url":"https://aglentzakis-dot.github.io/imerologio/","showIn":["*"],"active":true,"en":{"name":"Calendar","text":"Appointments for every profession: clients book themselves, message reminders, statistics and a client map."},"emoji":"📅"},{"id":"glenread","name":"GlenRead","icon":"https://aglentzakis-dot.github.io/GlenRead/icon-192.png","text":"Διάβασε PDF, Word και φωτογραφίες εγγράφων άνετα στο κινητό — με αναγνώριση κειμένου, σημειώσεις και υπογραφή.","url":"https://aglentzakis-dot.github.io/GlenRead/","showIn":["*"],"active":true,"en":{"name":"GlenRead","text":"Read PDFs, Word files and document photos comfortably on your phone — with text recognition, notes and signatures."},"emoji":"📄"},{"id":"ergaleiothiki","name":"Εργαλειοθήκη","icon":"https://aglentzakis-dot.github.io/ergaleiothiki/icon-192.png","text":"Αλφάδι, μετρήσεις και υπολογισμοί υλικών για κάθε μάστορα.","url":"https://aglentzakis-dot.github.io/ergaleiothiki/","showIn":["*"],"active":true,"en":{"name":"Toolbox","text":"Spirit level, measurements and material calculators for every tradesperson."},"emoji":"🧰"},{"id":"glenscanner","name":"GlenScanner","icon":"https://aglentzakis-dot.github.io/GlenScanner/icon-192.png","text":"Σάρωσε έγγραφα με την κάμερα και κάν’ τα καθαρά PDF.","url":"https://aglentzakis-dot.github.io/GlenScanner/","showIn":["*"],"active":true,"en":{"name":"GlenScanner","text":"Scan documents with your camera and turn them into clean PDFs."},"emoji":"📷"},{"id":"paraggelies","name":"Παραγγελίες","icon":"https://aglentzakis-dot.github.io/paraggelies/eikonidia/icon-192.png","text":"Οι πελάτες σου παραγγέλνουν με έναν σύνδεσμο, εσύ τα βλέπεις όλα μαζεμένα.","url":"https://aglentzakis-dot.github.io/paraggelies/","showIn":["*"],"active":true,"en":{"name":"Orders","text":"Your customers order with one link, you see everything in one place."},"emoji":"🧺"},{"id":"fotometra","name":"ΦωτοΜέτρα","icon":"https://fotometra.glenapps.gr/icon-192.png","text":"Σημειώσεις, ίσιες γραμμές και διαστάσεις πάνω στις φωτογραφίες σου.","url":"https://fotometra.glenapps.gr/","showIn":["*"],"active":true,"en":{"name":"PhotoMeasure","text":"Notes, straight lines and dimensions on your photos."},"hideIn":["dromologio"],"emoji":"📐"},{"id":"fishiq","name":"Fish IQ","icon":"https://aglentzakis-dot.github.io/fishing-log/icon-192.png","text":"Ημερολόγιο ψαρέματος με καιρό, στατιστικά και σκορ ημέρας.","url":"https://aglentzakis-dot.github.io/fishing-log/","showIn":["*"],"active":true,"en":{"name":"Fish IQ","text":"Fishing log with weather, statistics and a daily score."},"emoji":"🎣"}]/*/EFM_LIST*/;
@@ -185,7 +185,17 @@
     return '<span class="efm-ic efm-icw' + (big ? "" : " efm-sm") + '" aria-hidden="true"><span>' + fb + "</span>" +
       (a.icon ? '<img src="' + esc(a.icon) + '" alt="" loading="lazy">' : "") + "</span>";
   }
-  function href(a) { return PLAY ? a.play : a.url; }
+  /* Σημάδι προέλευσης για τα στατιστικά του Google Play (Play Console → προέλευση εγκαταστάσεων).
+     Περιέχει ΜΟΝΟ το όνομα της εφαρμογής από την οποία ήρθε ο χρήστης — κανένα στοιχείο χρήστη ή συσκευής. */
+  function withRef(u) {
+    try {
+      var x = new URL(u); if (x.hostname !== "play.google.com") return u;
+      var src = String(cfg.app || "").replace(/[^a-z0-9_-]/gi, "").slice(0, 40); if (!src) return u;
+      x.searchParams.set("referrer", "utm_source=" + src + "&utm_medium=efarmoges-mas&utm_campaign=glenapps");
+      return x.toString();
+    } catch (e) { return u; }
+  }
+  function href(a) { return withRef(PLAY ? a.play : a.url); }
   function card(a) {
     var off = notWanted(a.id);
     return '<div class="efm-card' + (off ? " efm-off" : "") + '" data-efm-id="' + esc(a.id) + '"><a class="efm-go" href="' + esc(href(a)) +
