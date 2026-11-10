@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="plaisio.js"></script>
-<meta name="app-version" content="2.58">
+<meta name="app-version" content="2.59">
 <!-- Ασφάλεια: η σελίδα φορτώνει κώδικα μόνο από εδώ και από συγκεκριμένες, κλειδωμένες εκδόσεις βιβλιοθηκών· στέλνει δεδομένα μόνο στο Google Drive του χρήστη· καμία εκτέλεση κειμένου ως κώδικα (eval) -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://cdn.jsdelivr.net/npm/mammoth@1.8.0/ https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/ https://accounts.google.com/gsi/; worker-src 'self' blob:; connect-src 'self' https: data: blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://tessdata.projectnaptha.com https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com/gsi/; img-src 'self' https://aglentzakis-dot.github.io data: blob: https://*.glenapps.gr; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; font-src 'self' data:; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -155,6 +155,8 @@ body.pv #read>.card{display:none}
 .pvp{position:relative;margin:0 auto 10px;width:calc(var(--z,1)*100%);max-width:calc(var(--z,1)*900px);background:#fff;box-shadow:0 1px 6px #0002}
 .pvp canvas{position:absolute;inset:0;width:100%;height:100%}
 body.drawing .pvp .ink{touch-action:none}
+body.drawing.taptool .pvp .ink{touch-action:pan-x pan-y}
+#selBar .nud{min-height:40px;font-size:20px}
 body:not(.drawing) .pvp .ink{pointer-events:none}
 .pvp canvas.ink{z-index:2}
 /* αόρατο στρώμα κειμένου πάνω στη σελίδα PDF: για μαρκάρισμα λέξεων, αντιγραφή, μετάφραση */
@@ -630,6 +632,10 @@ body.selon #bvAa{display:none}
     <button id="selPlus"><span>➕</span><small>Μεγαλύτερο</small></button>
     <button id="selDel"><span>🗑</span><small>Σβήσιμο</small></button>
     <button id="selDone"><span>✓</span><small>Τέλος</small></button>
+    <button class="nud" data-nx="-1" aria-label="Λίγο αριστερά">⬅</button>
+    <button class="nud" data-ny="-1" aria-label="Λίγο πάνω">⬆</button>
+    <button class="nud" data-ny="1" aria-label="Λίγο κάτω">⬇</button>
+    <button class="nud" data-nx="1" aria-label="Λίγο δεξιά">➡</button>
   </div>
   <button id="gMenu" aria-label="Μενού επιλογών"><img src="G-glenapps.png" alt=""></button>
 </section>
@@ -744,12 +750,12 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="lib/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="antigrafa.js"></script>
-<script src="metafora-rythmisi.js?v=2.58"></script>
-<script src="metafora-lipsi.js?v=2.58"></script>
+<script src="metafora-rythmisi.js?v=2.59"></script>
+<script src="metafora-lipsi.js?v=2.59"></script>
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.58';
+const VERSION='2.59';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -2178,7 +2184,9 @@ function selScale(f){const S=pv.sel;if(!S)return;const b=bboxOf(S.i,S.objs),cx=(
   pushAct({i:S.i,ed2:ch});pvInk(S.i)}
 $('#selMinus').onclick=()=>selScale(1/1.15);$('#selPlus').onclick=()=>selScale(1.15);
 $('#selDel').onclick=()=>{const S=pv.sel;if(!S)return;doc.ann[S.i]=(doc.ann[S.i]||[]).filter(o=>!S.objs.includes(o));pushAct({i:S.i,del:S.objs});selClear();pvInk(S.i)};
-$('#selDone').onclick=()=>selClear();
+$('#selDone').onclick=()=>{selClear();if(pv.back)pvTool(pv.back,true)};
+document.querySelectorAll('#selBar .nud').forEach(b=>b.onclick=()=>{const S=pv.sel;if(!S)return;const dx=(+b.dataset.nx||0)*.004,dy=(+b.dataset.ny||0)*.004;
+  S.objs.forEach(o=>{if(o.t==='tx'){o.x+=dx;o.y+=dy}else o.pts=o.pts.map(q=>[+(q[0]+dx).toFixed(4),+(q[1]+dy).toFixed(4)])});pushAct({i:S.i,mv:S.objs,dx,dy});pvInk(S.i)});
 // μέγεθος κειμένου (σε κλάσματα σελίδας) για να το «πιάνουμε» με το δάχτυλο
 const mctx=document.createElement('canvas').getContext('2d');
 function txBox(s,asp){const W=1000;mctx.font=`600 ${s.s*W}px system-ui,sans-serif`;const lines=(s.text||'').split('\n');const w=Math.max(...lines.map(l=>mctx.measureText(l).width))/W;return{x:s.x,y:s.y,w,h:lines.length*s.s*1.25/asp}}
@@ -2214,18 +2222,22 @@ function pvBind(el){
   el._cancel=()=>{if(erased.length){(doc.ann[i]=doc.ann[i]||[]).push(...erased);erased=[]}
     if(mv){mv.objs.forEach(o=>shift(o,-mv.dx,-mv.dy));mv=null}cur=null;shape=null;pvInk(i)};
   const shift=(o,dx,dy)=>{if(o.t==='tx'){o.x+=dx;o.y+=dy}else o.pts=o.pts.map(q=>[q[0]+dx,q[1]+dy])};
+  // Κείμενο/Υπογραφή: το δάχτυλο που σέρνεται κυλάει τη σελίδα· μόνο ένα σκέτο πάτημα βάζει κείμενο ή υπογραφή
+  let tap=null,pan=null;
   c.addEventListener('pointerdown',e=>{
-    if(pv.tool==='pan'||!e.isPrimary||pv.pinch)return;c.setPointerCapture(e.pointerId);e.preventDefault();$('#inkPop').classList.add('hidden');
+    if(pv.tool==='pan'||!e.isPrimary||pv.pinch)return;
+    if(pv.tool==='tx'||pv.tool==='sig'){tap={x:e.clientX,y:e.clientY,t:Date.now(),p:pt(e)};return}
+    c.setPointerCapture(e.pointerId);e.preventDefault();$('#inkPop').classList.add('hidden');
     const p=pt(e);
     if(pv.tool==='er'){erased=[];erase(p);return}
-    if(pv.tool==='tx'){const s=hitObj(i,p,.01);textDialog(i,s&&s.t==='tx'?s:null,p);return}
-    if(pv.tool==='sig'){placeSig(i,p);return}
-    if(pv.tool==='mv'){const s=hitObj(i,p,.03);if(!s){selClear();toast('Πάτα πάνω σε μια σημείωση για να τη μετακινήσεις ή να αλλάξεις μέγεθος');return}const g=groupOf(i,s);selShow(i,g);mv={objs:g,p0:p,dx:0,dy:0};return}
+    if(pv.tool==='mv'){const s=hitObj(i,p,.03);if(!s){pan={x:e.clientX,y:e.clientY,m:0};return}const g=groupOf(i,s);selShow(i,g);mv={objs:g,p0:p,dx:0,dy:0};return}
     if(pv.tool==='sh'){shape={a:p,b:p};return}
     cur={t:pv.tool,c:pv.tool==='hl'?HL_COLORS[pv.hl]:PEN_COLORS[pv.pen],w:pv.tool==='hl'?WIDTHS.hl[pv.hw]:WIDTHS.pen[pv.pw],pts:[p]};live([cur]);
   });
   c.addEventListener('pointermove',e=>{
+    if(tap&&Math.hypot(e.clientX-tap.x,e.clientY-tap.y)>10)tap=null;
     if(pv.tool==='pan'||!e.isPrimary||pv.pinch||!c.hasPointerCapture(e.pointerId))return;
+    if(pan){const dx=e.clientX-pan.x,dy=e.clientY-pan.y;pan.m+=Math.abs(dx)+Math.abs(dy);pan.x=e.clientX;pan.y=e.clientY;$('#pagesView').scrollLeft-=dx;scrollBy(0,-dy);return}
     const p=pt(e);
     if(pv.tool==='er'){erase(p);return}
     if(mv){const dx=p[0]-mv.p0[0],dy=p[1]-mv.p0[1];mv.objs.forEach(o=>shift(o,dx-mv.dx,dy-mv.dy));mv.dx=dx;mv.dy=dy;live();return}
@@ -2234,7 +2246,11 @@ function pvBind(el){
     if(cur.t==='hl'&&cur.pts.length>1&&Math.abs(p[1]-cur.pts[0][1])<.012)p[1]=cur.pts[0][1]; // ίσια γραμμή μαρκαδόρου
     cur.pts.push(p);live([cur]);
   });
+  c.addEventListener('pointerup',e=>{const t=tap;tap=null;if(!t||pv.pinch||Date.now()-t.t>800)return;
+    if(pv.tool==='tx'){const s=hitObj(i,t.p,.01);textDialog(i,s&&s.t==='tx'?s:null,t.p)}else if(pv.tool==='sig')placeSig(i,t.p)});
+  c.addEventListener('pointercancel',()=>{tap=null});
   const end=()=>{
+    if(pan){const m=pan.m;pan=null;if(m<10){selClear();if(pv.back)pvTool(pv.back,true);else toast('Πάτα πάνω σε μια σημείωση για να τη μετακινήσεις ή να αλλάξεις μέγεθος')}return}
     if(pv.tool==='er'){if(erased.length)pushAct({i,del:erased});erased=[];return}
     if(mv){if(mv.dx||mv.dy)pushAct({i,mv:mv.objs,dx:mv.dx,dy:mv.dy});mv=null;pvInk(i);return}
     if(shape){const tiny=Math.hypot(shape.b[0]-shape.a[0],shape.b[1]-shape.a[1])<.012;const st=shapeStrokes(pv.shape,shape.a,shape.b,asp(),PEN_COLORS[pv.pen],WIDTHS.pen[pv.pw]);shape=null;
@@ -2263,10 +2279,10 @@ function pvBind(el){
 let zhT=null;function zoomHint(z){let h=$('#zoomHint');if(!h){h=document.createElement('div');h.id='zoomHint';document.body.appendChild(h)}h.textContent=Math.round(z*100)+'%';h.classList.remove('hidden');clearTimeout(zhT);zhT=setTimeout(()=>h.classList.add('hidden'),900)}
 // εργαλεία
 const TOOL_TIPS={pan:'Κύλιση: μετακινείσαι στη σελίδα. Δύο δάχτυλα = μεγέθυνση.',pen:'Στυλό: γράψε με ένα δάχτυλο. Δύο δάχτυλα = μεγέθυνση, δεν γράφει.',hl:'Μαρκαδόρος: σύρε πάνω στις γραμμές του κειμένου.',
-  tx:'Κείμενο: πάτα στο σημείο που θέλεις να γράψεις. Πάτα σε υπάρχον κείμενο για αλλαγή.',sh:'Σχήμα: σύρε από τη μία γωνία στην άλλη. Ξαναπάτα «Σχήμα» για άλλο σχήμα.',
-  sig:'Υπογραφή: πάτα στο σημείο που θέλεις να μπει η υπογραφή σου.',mv:'Μετακίνηση: πάτα μια σημείωση για να τη μετακινήσεις, να τη μεγαλώσεις ή να τη μικρύνεις.',er:'Γόμα: πέρνα πάνω από ό,τι θέλεις να σβήσεις.'};
+  tx:'Κείμενο: πάτα μία φορά στο σημείο που θέλεις να γράψεις. Σέρνοντας το δάχτυλο κυλάς τη σελίδα. Πάτα σε υπάρχον κείμενο για αλλαγή.',sh:'Σχήμα: σύρε από τη μία γωνία στην άλλη. Ξαναπάτα «Σχήμα» για άλλο σχήμα.',
+  sig:'Υπογραφή: πάτα μία φορά στο σημείο που θέλεις να μπει η υπογραφή σου. Σέρνοντας το δάχτυλο κυλάς τη σελίδα.',mv:'Μετακίνηση: πάτα μια σημείωση για να τη μετακινήσεις, να τη μεγαλώσεις ή να τη μικρύνεις.',er:'Γόμα: πέρνα πάνω από ό,τι θέλεις να σβήσεις.'};
 function pvTool(t,silent){
-  const again=pv.tool===t&&!silent;if(t!=='mv')selClear();pv.tool=t;document.body.classList.toggle('drawing',t!=='pan');
+  const again=pv.tool===t&&!silent;if(t!=='mv')selClear();pv.tool=t;document.body.classList.toggle('drawing',t!=='pan');document.body.classList.toggle('taptool',t==='tx'||t==='sig');if(t!=='mv')pv.back=null;
   document.querySelectorAll('#inkBar [data-tool]').forEach(b=>b.classList.toggle('on',b.dataset.tool===t));
   $('#inkColor .dot').style.background=t==='hl'?HL_COLORS[pv.hl]:PEN_COLORS[pv.pen];
   $('#shIc').textContent=SHAPES[pv.shape][0];
@@ -2301,12 +2317,16 @@ $('#inkSave').onclick=()=>$('#mAnnPdf').onclick();
 $('#inkUndo').onclick=()=>{selClear();const a=pv.undo.pop();if(a){pvApply(a,false);pv.redo.push(a)}else toast('Δεν υπάρχει κάτι για αναίρεση')};
 $('#inkRedo').onclick=()=>{selClear();const a=pv.redo.pop();if(a){pvApply(a,true);pv.undo.push(a)}};
 // κουτί κειμένου
+const TX_SZ=[.022,.032,.048];
 function textDialog(i,obj,p){
-  dlgOpen(obj?'Αλλαγή κειμένου':'Γράψε κείμενο',`<textarea id="txIn" placeholder="π.χ. υπογραφή εδώ, ημερομηνία, σχόλιο…">${obj?esc(obj.text):''}</textarea>`+(obj?'<div class="row" style="justify-content:flex-start"><button class="sec" id="txDel">🗑 Σβήσε αυτό το κείμενο</button></div>':''),()=>{
+  dlgOpen(obj?'Αλλαγή κειμένου':'Γράψε κείμενο',`<textarea id="txIn" placeholder="π.χ. υπογραφή εδώ, ημερομηνία, σχόλιο…">${obj?esc(obj.text):''}</textarea><div class="lbl" style="margin-top:8px">Μέγεθος γραμμάτων</div><div class="seg" id="txSz">${['Μικρά','Μεσαία','Μεγάλα'].map((n,k)=>`<button type="button" data-t="${k}" class="${k===(obj?TX_SZ.reduce((b,v,j)=>Math.abs(v-obj.s)<Math.abs(TX_SZ[b]-obj.s)?j:b,0):pv.ts)?'on':''}">${n}</button>`).join('')}</div><p class="muted" style="margin:6px 0 0">Μετά θα μπορείς να το σύρεις ακριβώς όπου θέλεις και να το κάνεις μεγαλύτερο ή μικρότερο.</p>`+(obj?'<div class="row" style="justify-content:flex-start"><button class="sec" id="txDel">🗑 Σβήσε αυτό το κείμενο</button></div>':''),()=>{
     const v=$('#txIn').value.replace(/\s+$/,'');
-    if(obj){if(!v){const L=doc.ann[i]||[],k=L.indexOf(obj);if(k>=0){L.splice(k,1);pushAct({i,del:[obj]})}}else{const before={text:obj.text};obj.text=v;pushAct({i,ed:{o:obj,a:before,b:{text:v}}})}}
-    else if(v){const s={t:'tx',x:p[0],y:p[1],s:[.022,.032,.048][pv.ts],c:PEN_COLORS[pv.pen],text:v};(doc.ann[i]=doc.ann[i]||[]).push(s);pushAct({i,add:[s]})}
-    pvInk(i)});
+    const sz=$('#txSz .on'),k=sz?+sz.dataset.t:pv.ts,chS=obj&&Math.abs(TX_SZ[k]-obj.s)>.001&&sz.dataset.picked;let put=null;pv.ts=k;
+    if(obj){if(!v){const L=doc.ann[i]||[],k=L.indexOf(obj);if(k>=0){L.splice(k,1);pushAct({i,del:[obj]})}}else{const before={text:obj.text,s:obj.s};obj.text=v;if(chS)obj.s=TX_SZ[k];pushAct({i,ed:{o:obj,a:before,b:{text:v,s:obj.s}}});put=obj}}
+    else if(v){const s={t:'tx',x:p[0],y:p[1],s:TX_SZ[k],c:PEN_COLORS[pv.pen],text:v};(doc.ann[i]=doc.ann[i]||[]).push(s);pushAct({i,add:[s]});put=s}
+    pvInk(i);
+    if(put){pv.back='tx';pvTool('mv',true);pv.back='tx';selShow(i,[put]);toast('Σύρε το κείμενο ακριβώς όπου θέλεις. Τα ➖ ➕ αλλάζουν το μέγεθος, τα βελάκια το μετακινούν λίγο-λίγο.')}});
+  $('#txSz').onclick=e=>{const b=e.target.closest('button');if(!b)return;$('#txSz').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));b.dataset.picked=1};
   setTimeout(()=>{$('#txIn').focus();const d=$('#txDel');if(d)d.onclick=()=>{$('#txIn').value='';$('#dlgOk').click()}},50);
 }
 // υπογραφή: τη ζωγραφίζεις μία φορά και μετά τη βάζεις όπου θέλεις
@@ -2338,7 +2358,7 @@ function placeSig(i,p,ok,fw){
   if(n&&!ok&&!doc.sigNoAsk){dlgOpen('Κι άλλη υπογραφή;',`<p style="margin:0 0 10px">Το έγγραφο έχει ήδη ${n===1?'1 υπογραφή':n+' υπογραφές'}. Να μπει κι άλλη σε αυτό το σημείο;</p><label style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="sigNoAsk" style="width:22px;height:22px"> Να μη με ξαναρωτάει σε αυτό το έγγραφο</label>`,()=>{if($('#sigNoAsk').checked){doc.sigNoAsk=true;saveDoc(doc)}placeSig(i,p,true)});$('#dlgOk').textContent='Ναι, βάλε κι άλλη';$('#dlgNo').textContent='Όχι';return}
   const asp=pv.pages[i].h/pv.pages[i].w,w=fw?Math.min(.45,Math.max(.12,fw*.9)):.3,h=w*sig.r/asp,x0=p[0]-w/2,y0=p[1]-h/2,g=newG(),c=PEN_COLORS[pv.pen];
   const st=sig.s.map(s=>({t:'pen',c,w:.004,g,sig:1,pts:s.map(q=>[+(x0+q[0]*w).toFixed(4),+(y0+q[1]*h).toFixed(4)])}));
-  (doc.ann[i]=doc.ann[i]||[]).push(...st);pushAct({i,add:st});pvTool('mv',true);selShow(i,st);toast('Μπήκε η υπογραφή. Μεγάλωσέ τη ή μίκρυνέ τη με τα κουμπιά, ή σύρε τη για να τη μετακινήσεις.');
+  (doc.ann[i]=doc.ann[i]||[]).push(...st);pushAct({i,add:st});pvTool('mv',true);pv.back='sig';selShow(i,st);toast('Μπήκε η υπογραφή. Σύρε τη ακριβώς όπου θέλεις. Τα ➖ ➕ αλλάζουν το μέγεθος, τα βελάκια τη μετακινούν λίγο-λίγο.');
 }
 // ---------- Συμπλήρωση αιτήσεων (φόρμες PDF) ----------
 // Τα πεδία του PDF (κείμενο, κουτάκια, επιλογές, υπογραφή) εμφανίζονται πάνω στη σελίδα ως πεδία για γράψιμο.
