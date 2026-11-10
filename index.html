@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="plaisio.js"></script>
-<meta name="app-version" content="2.57">
+<meta name="app-version" content="2.58">
 <!-- Ασφάλεια: η σελίδα φορτώνει κώδικα μόνο από εδώ και από συγκεκριμένες, κλειδωμένες εκδόσεις βιβλιοθηκών· στέλνει δεδομένα μόνο στο Google Drive του χρήστη· καμία εκτέλεση κειμένου ως κώδικα (eval) -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://cdn.jsdelivr.net/npm/mammoth@1.8.0/ https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/ https://accounts.google.com/gsi/; worker-src 'self' blob:; connect-src 'self' https: data: blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://tessdata.projectnaptha.com https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com/gsi/; img-src 'self' https://aglentzakis-dot.github.io data: blob: https://*.glenapps.gr; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; font-src 'self' data:; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -317,6 +317,20 @@ body.reading.ffd #reader{letter-spacing:0;word-spacing:.08em;font-style:normal}
 select{max-width:100%}.tabp label select{width:100%}
 /* --- κίτρινη τελεία σε ό,τι είναι καινούργιο (κοινός κανόνας GlenApps) --- */
 .newdot{position:relative}.newdot::after{content:'';position:absolute;top:8px;right:8px;width:11px;height:11px;border-radius:50%;background:#FDD117;box-shadow:0 0 0 2px var(--card,#fff),0 0 0 3px #E0A100}
+/* --- συμπλήρωση φορμών PDF --- */
+.pvp{container-type:inline-size}
+.frm{position:absolute;inset:0;z-index:3;pointer-events:none}
+.frm>*{position:absolute;pointer-events:auto;box-sizing:border-box;margin:0;border:0;border-radius:2px;background:rgba(66,133,244,.13);outline:1.5px solid rgba(66,133,244,.55);color:#0b1a4a;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:0 .25em;line-height:1.15;min-height:0;box-shadow:none}
+.frm>input:focus,.frm>textarea:focus,.frm>select:focus{background:rgba(255,236,150,.55);outline:2px solid #E0A100}
+.frm>textarea{resize:none;padding-top:.1em}
+.frm>.fck{display:flex;align-items:center;justify-content:center;padding:0;font-weight:800;cursor:pointer}
+.frm>.fsg{display:flex;align-items:center;justify-content:center;font-size:clamp(9px,2.6cqw,15px)!important;font-weight:700;background:rgba(253,209,23,.25);outline:2px dashed #E0A100;cursor:pointer;color:#5a4300}
+.frm>.filled{background:rgba(255,255,255,.35)}
+body.drawing .frm>*{pointer-events:none}
+body[data-th=night] .frm>*,body[data-th=navy] .frm>*,body[data-th=amoled] .frm>*,body[data-th=yellow] .frm>*{color:#0b1a4a}
+#fillBar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 150px);z-index:12;display:flex;align-items:center;gap:8px;padding:8px 10px 8px 14px;border-radius:30px;background:var(--card,#fff);color:var(--ink);box-shadow:0 4px 18px rgba(0,0,0,.3);border:2px solid #FDD117;max-width:94vw}
+#fillBar #fillN{font-size:13px;font-weight:600;white-space:nowrap}#fillBar button{min-height:44px;padding:0 14px}
+body:not(.pv) #fillBar{display:none!important}
 /* --- εκτύπωση: τυπώνεται ΜΟΝΟ το #printArea --- */
 #printArea{display:none}
 @media print{
@@ -569,6 +583,7 @@ body.selon #bvAa{display:none}
     <button class="sec lb" data-q="share"><span>📤</span><small>Κοινοποίηση</small></button>
     <button class="sec lb" data-q="copy"><span>📋</span><small>Αντιγραφή</small></button>
     <button class="sec lb" data-q="print"><span>🖨️</span><small>Εκτύπωση</small></button>
+    <button class="sec lb" data-q="fill"><span>📝</span><small>Συμπλήρωση</small></button>
     <button class="sec lb" data-q="full"><span>⛶</span><small>Οθόνη</small></button>
     <button class="sec lb" data-q="xlsx"><span>📊</span><small>Excel</small></button>
     <button class="sec lb" data-q="docx"><span>📝</span><small>Word</small></button>
@@ -649,6 +664,7 @@ body.selon #bvAa{display:none}
     <details class="cat" data-cat="bm"><summary><span class="ci">🔖</span><span class="ct"><b>Σημειώσεις και υπογραφή</b><small>Σελιδοδείκτες, σημειώσεις, γράψιμο πάνω στη σελίδα, υπογραφή</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mBm"><span class="ic">🔖</span><span class="tx"><b>Βάλε σελιδοδείκτη εδώ</b><small>Για να γυρίσεις αργότερα σε αυτό το σημείο</small></span></button>
     <button class="mi" id="mNote"><span class="ic">📝</span><span class="tx"><b>Σημείωση εδώ</b><small>Γράψε μια σκέψη· αν έχεις επιλέξει κείμενο, κρατιέται κι αυτό</small></span></button>
+    <button class="mi" id="mFill"><span class="ic">📝</span><span class="tx"><b>Συμπλήρωση αίτησης και υπογραφή</b><small>Γράψε τα στοιχεία σου πάνω στο PDF και υπόγραψε</small></span></button>
     <button class="mi" id="mDraw"><span class="ic">🖊️</span><span class="tx"><b>Γράψε πάνω στη σελίδα</b><small>Στυλό, μαρκαδόρος, κείμενο, σχήματα, υπογραφή</small></span></button>
     <button class="mi" id="mSig"><span class="ic">✍️</span><span class="tx"><b>Η υπογραφή μου</b><small id="mSigS">Φτιάξε ή άλλαξε την υπογραφή σου</small></span></button>
     <button class="mi" id="mEdit"><span class="ic">✏️</span><span class="tx"><b id="mEditT">Διόρθωση κειμένου</b><small>Διόρθωσε λάθη της αναγνώρισης</small></span></button>
@@ -681,6 +697,7 @@ body.selon #bvAa{display:none}
   </div>
 </div>
 <div id="printArea" aria-hidden="true"></div>
+<div id="fillBar" class="hidden"><span id="fillN"></span><button id="fillSave">💾 Αποθήκευση PDF</button><button class="sec" id="fillSend">📤</button></div>
 <nav id="tabs" aria-label="Κύριες ενότητες">
   <button data-t="arxiki" class="on"><i>🏠</i><span>Αρχική</span></button>
   <button data-t="vivlia"><i>📚</i><span>Βιβλία</span></button>
@@ -727,12 +744,12 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="lib/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="antigrafa.js"></script>
-<script src="metafora-rythmisi.js?v=2.57"></script>
-<script src="metafora-lipsi.js?v=2.57"></script>
+<script src="metafora-rythmisi.js?v=2.58"></script>
+<script src="metafora-lipsi.js?v=2.58"></script>
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.57';
+const VERSION='2.58';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -2064,7 +2081,9 @@ async function pvOpen(o){o=o||{};
       if(stale()){pdfFree(pdf);return}pv.pdf=pdf;const sizes=[];
       for(let i=1;i<=pdf.numPages;i++){const vp=(await pdf.getPage(i)).getViewport({scale:1});if(stale())return;sizes.push({w:vp.width,h:vp.height})}
       pv.pages=sizes;
-    }else{
+      pv.fields=await formFields(pdf);if(stale())return;
+      fieldsHide(pdf,pv.fields);
+    }else{pv.fields=[];
       const sizes=[];for(const src of pv.file.images){const im=await loadImg(src);if(stale())return;sizes.push({w:im.naturalWidth,h:im.naturalHeight})}
       pv.pages=sizes;
     }
@@ -2073,13 +2092,14 @@ async function pvOpen(o){o=o||{};
   if(pv.obs)pv.obs.disconnect();
   // σχεδιάζει μόνο τις σελίδες κοντά στην οθόνη και ελευθερώνει τις μακρινές, για να μη γεμίζει η μνήμη
   pv.obs=new IntersectionObserver(es=>es.forEach(e=>{const el=e.target;if(e.isIntersecting)pvDrawPage(el);else pvFree(el)}),{rootMargin:'1200px 0px'});
-  box.querySelectorAll('.pvp').forEach(el=>{pv.obs.observe(el);pvBind(el)});
-  pvTool(pv.tool,true);
+  box.querySelectorAll('.pvp').forEach(el=>{pv.obs.observe(el);pvBind(el);formLayer(el)});
+  pvTool(pv.tool,true);fillInfo();
+  if(pv.fields&&pv.fields.length&&!doc.formHint){doc.formHint=1;saveDoc(doc);setTimeout(()=>toast(EN?'📝 This PDF is a form: tap the blue fields and type.':'📝 Αυτό το PDF είναι αίτηση με πεδία: πάτα πάνω στα μπλε πεδία και γράψε.'),600)}
   if(doc.pages.some(p=>p.ocr)&&!doc.pages.some(p=>p.lines)&&!doc.olHint){doc.olHint=1;setTimeout(()=>toast('Σε αυτό το έγγραφο το μαρκάρισμα στη σελίδα δεν γίνεται, γιατί διαβάστηκε με παλιότερη έκδοση. Άνοιξέ το ξανά από το αρχείο για να μαρκάρεται.'),1500)}
 }
 function pvClose(){
   pv.sel=null;$('#selBar').classList.add('hidden');document.body.classList.remove('selon');
-  pv.on=false;document.body.classList.remove('pv','drawing');setTimeout(pgSoon,0);$('#pagesView').classList.add('hidden');$('#inkBar').classList.add('hidden');$('#inkPop').classList.add('hidden');
+  pv.on=false;pv.fields=[];$('#fillBar').classList.add('hidden');document.body.classList.remove('pv','drawing');setTimeout(pgSoon,0);$('#pagesView').classList.add('hidden');$('#inkBar').classList.add('hidden');$('#inkPop').classList.add('hidden');
   pv.gen++;document.querySelectorAll('.pvp').forEach(el=>{try{el._task&&el._task.cancel()}catch(e){}});
   if(pv.obs){pv.obs.disconnect();pv.obs=null}$('#pagesView').innerHTML='';if(pv.pdf){const p=pv.pdf;setTimeout(()=>pdfFree(p),0)}pv.pdf=null;pv.file=null;viewLabels();
 }
@@ -2117,7 +2137,7 @@ async function pvDrawPage(el){
   const asp=pv.pages[i].h/pv.pages[i].w,W=Math.round(Math.min(2600,el.clientWidth*Math.min(2,devicePixelRatio||1),Math.sqrt(5e6/asp))),H=Math.round(W*asp);
   img.width=ink.width=W;img.height=ink.height=H;
   try{
-    if(pdf){const pg=await pdf.getPage(i+1);if(g!==el._g)return;const vp=pg.getViewport({scale:W/pv.pages[i].w});const t=el._task=pg.render({canvasContext:img.getContext('2d'),viewport:vp});await t.promise;if(el._task===t)el._task=null;{const lv=pageNeedsClean(i,null);if(lv&&g===el._g)cleanCanvas(img,lv)}pvTextLayer(el,pg,g)}
+    if(pdf){const pg=await pdf.getPage(i+1);if(g!==el._g)return;const vp=pg.getViewport({scale:W/pv.pages[i].w});const t=el._task=pg.render({canvasContext:img.getContext('2d'),viewport:vp,...fieldsMode(pv.fields)});await t.promise;if(el._task===t)el._task=null;{const lv=pageNeedsClean(i,null);if(lv&&g===el._g)cleanCanvas(img,lv)}pvTextLayer(el,pg,g)}
     else if(file){const im=await loadImg(file.images[i]);if(g!==el._g)return;img.getContext('2d').drawImage(im,0,0,W,H);{const lv=pageNeedsClean(i,file);if(lv)cleanCanvas(img,lv)}pvOcrLayer(el)}
   }catch(e){if(g!==el._g)return}
   if(g===el._g)pvInk(i);
@@ -2311,15 +2331,91 @@ function sigDialog(fromMenu){
     const del=document.createElement('button');del.className='sec';del.textContent='🗑 Σβήσε την αποθηκευμένη';del.onclick=()=>{try{localStorage.removeItem('glenread-sig')}catch(e){}dlgClose();toast('Η υπογραφή σβήστηκε')};$('#sigClr').parentNode.appendChild(del);
     $('#sigClr').onclick=()=>{strokes=[];x.clearRect(0,0,c.width,c.height)};c.addEventListener('pointerdown',()=>{if(!strokes.length)x.clearRect(0,0,c.width,c.height)},{once:true,capture:true})}
 }
-function placeSig(i,p,ok){
+function placeSig(i,p,ok,fw){
   const sig=getSig();if(!sig)return sigDialog();
   // αν υπάρχει ήδη υπογραφή στο έγγραφο, ρωτάμε πριν βάλουμε δεύτερη
   const n=new Set(Object.values(doc.ann||{}).flatMap(L=>L.filter(o=>o.sig).map(o=>o.g))).size;
   if(n&&!ok&&!doc.sigNoAsk){dlgOpen('Κι άλλη υπογραφή;',`<p style="margin:0 0 10px">Το έγγραφο έχει ήδη ${n===1?'1 υπογραφή':n+' υπογραφές'}. Να μπει κι άλλη σε αυτό το σημείο;</p><label style="display:flex;gap:10px;align-items:center"><input type="checkbox" id="sigNoAsk" style="width:22px;height:22px"> Να μη με ξαναρωτάει σε αυτό το έγγραφο</label>`,()=>{if($('#sigNoAsk').checked){doc.sigNoAsk=true;saveDoc(doc)}placeSig(i,p,true)});$('#dlgOk').textContent='Ναι, βάλε κι άλλη';$('#dlgNo').textContent='Όχι';return}
-  const asp=pv.pages[i].h/pv.pages[i].w,w=.3,h=w*sig.r/asp,x0=p[0]-w/2,y0=p[1]-h/2,g=newG(),c=PEN_COLORS[pv.pen];
+  const asp=pv.pages[i].h/pv.pages[i].w,w=fw?Math.min(.45,Math.max(.12,fw*.9)):.3,h=w*sig.r/asp,x0=p[0]-w/2,y0=p[1]-h/2,g=newG(),c=PEN_COLORS[pv.pen];
   const st=sig.s.map(s=>({t:'pen',c,w:.004,g,sig:1,pts:s.map(q=>[+(x0+q[0]*w).toFixed(4),+(y0+q[1]*h).toFixed(4)])}));
   (doc.ann[i]=doc.ann[i]||[]).push(...st);pushAct({i,add:st});pvTool('mv',true);selShow(i,st);toast('Μπήκε η υπογραφή. Μεγάλωσέ τη ή μίκρυνέ τη με τα κουμπιά, ή σύρε τη για να τη μετακινήσεις.');
 }
+// ---------- Συμπλήρωση αιτήσεων (φόρμες PDF) ----------
+// Τα πεδία του PDF (κείμενο, κουτάκια, επιλογές, υπογραφή) εμφανίζονται πάνω στη σελίδα ως πεδία για γράψιμο.
+// Οι τιμές μένουν μέσα στο έγγραφο (στη συσκευή). Στην αποθήκευση γράφονται πάνω στο PDF ως κανονικό κείμενο,
+// σωστά και με ελληνικά, και το συμπληρωμένο πεδίο «παγώνει» ώστε να μην αλλάζει μετά.
+async function formFields(pdf){
+  let F=null;try{F=await pdf.getFieldObjects()}catch(e){}
+  if(!F)return[];const out=[],vps={};
+  for(const name in F)for(const f of F[name]){
+    if(!f||!f.rect||f.page==null||f.page<0||f.hidden)continue;
+    const T={text:'tx',checkbox:'ck',radiobutton:'rd',combobox:'ch',listbox:'ch',signature:'sg'}[f.type];if(!T)continue;
+    if(f.editable===false&&T!=='sg')continue;
+    if(!vps[f.page]){const pg=await pdf.getPage(f.page+1);vps[f.page]=pg.getViewport({scale:1})}
+    const vp=vps[f.page],r=vp.convertToViewportRectangle(f.rect),x0=Math.min(r[0],r[2]),y0=Math.min(r[1],r[3]),x1=Math.max(r[0],r[2]),y1=Math.max(r[1],r[3]);
+    if(x1-x0<3||y1-y0<3)continue;
+    out.push({id:f.id,name,t:T,i:f.page,l:x0/vp.width,tp:y0/vp.height,w:(x1-x0)/vp.width,h:(y1-y0)/vp.height,asp:vp.height/vp.width,
+      ml:!!f.multiline,max:f.charLimit||0,exp:f.exportValues||f.exportValue||'',opts:(f.items||f.options||[]).map(o=>typeof o==='string'?{v:o,l:o}:{v:String(o.exportValue!=null?o.exportValue:o.displayValue),l:String(o.displayValue!=null?o.displayValue:o.exportValue)}),v0:f.value});
+  }
+  return out;
+}
+// τα πεδία που δείχνουμε/γράφουμε εμείς δεν ζωγραφίζονται από το pdf.js (αλλιώς θα έβγαιναν διπλά γράμματα)
+function fieldsHide(pdf,L){try{for(const f of L)pdf.annotationStorage.setValue(f.id,{noView:true,noPrint:true})}catch(e){}}
+const fieldsMode=L=>L&&L.length&&window.pdfjsLib&&pdfjsLib.AnnotationMode?{annotationMode:pdfjsLib.AnnotationMode.ENABLE_STORAGE}:{};
+function formVal(f){const F=doc.form||{};if(Object.prototype.hasOwnProperty.call(F,f.name))return F[f.name];
+  const v=f.v0;if(f.t==='ck')return v!=null&&v!=='Off'&&v!==false&&v!=='';if(f.t==='rd')return v&&v!=='Off'?String(v):'';return v==null||v==='Off'?'':String(v)}
+let formT=0;function formSet(name,v){doc.form=doc.form||{};doc.form[name]=v;clearTimeout(formT);formT=setTimeout(()=>saveDoc(doc),400);fillInfo()}
+function fillInfo(){const L=pv.fields||[];const nm=[...new Set(L.filter(f=>f.t!=='sg').map(f=>f.name))];
+  const done=nm.filter(n=>{const f=L.find(x=>x.name===n);const v=formVal(f);return v!==''&&v!==false&&v!=null}).length;
+  $('#fillN').textContent=nm.length?(EN?`${done} of ${nm.length} fields`:`${done} από ${nm.length} πεδία`):'';
+  $('#fillBar').classList.toggle('hidden',!pv.on||!nm.length)}
+function formLayer(el){
+  const i=+el.dataset.i,L=(pv.fields||[]).filter(f=>f.i===i);let fr=el.querySelector('.frm');
+  if(!L.length){if(fr)fr.remove();return}
+  if(!fr){fr=document.createElement('div');fr.className='frm';el.appendChild(fr)}else fr.innerHTML='';
+  for(const f of L){
+    const pos=`left:${(f.l*100).toFixed(3)}%;top:${(f.tp*100).toFixed(3)}%;width:${(f.w*100).toFixed(3)}%;height:${(f.h*100).toFixed(3)}%;`;
+    const fz=Math.max(.012,Math.min(f.h*f.asp*(f.ml?.26:.66),f.ml?.024:.034));let e;
+    if(f.t==='tx'){e=document.createElement(f.ml?'textarea':'input');if(!f.ml)e.type='text';if(f.max)e.maxLength=f.max;e.value=formVal(f);e.oninput=()=>{formSet(f.name,e.value);e.classList.toggle('filled',!!e.value);(pv.fields||[]).filter(x=>x.name===f.name&&x!==f).forEach(x=>{document.querySelectorAll('.frm [data-fid="'+CSS.escape(x.id)+'"]').forEach(o=>o.value=e.value)})};e.classList.toggle('filled',!!e.value)}
+    else if(f.t==='ck'){e=document.createElement('button');e.type='button';e.className='fck';const on=()=>!!formVal(f);const paint=()=>{e.textContent=on()?'✓':'';e.setAttribute('aria-pressed',on())};paint();e.onclick=()=>{formSet(f.name,!on());paint()}}
+    else if(f.t==='rd'){e=document.createElement('button');e.type='button';e.className='fck';const ex=String(Array.isArray(f.exp)?f.exp[0]:f.exp||f.id);
+      e.dataset.rd=f.name;e.dataset.ex=ex;const paint=()=>{document.querySelectorAll('.frm [data-rd="'+CSS.escape(f.name)+'"]').forEach(b=>{const s=formVal({...f,v0:f.v0})===b.dataset.ex;b.textContent=s?'●':'';b.setAttribute('aria-pressed',s)})};
+      e.onclick=()=>{formSet(f.name,formVal(f)===ex?'':ex);paint()};setTimeout(paint,0)}
+    else if(f.t==='ch'){e=document.createElement('select');e.innerHTML='<option value=""></option>'+f.opts.map(o=>`<option value="${esc(o.v)}">${esc(o.l)}</option>`).join('');e.value=formVal(f);e.onchange=()=>formSet(f.name,e.value)}
+    else if(f.t==='sg'){e=document.createElement('button');e.type='button';e.className='fsg';e.textContent=EN?'✍️ Sign here':'✍️ Υπογραφή εδώ';e.onclick=()=>placeSig(i,[f.l+f.w/2,f.tp+f.h/2],false,f.w)}
+    e.dataset.fid=f.id;e.setAttribute('aria-label',f.name);e.style.cssText=pos+`font-size:${(fz*100).toFixed(3)}cqw`;
+    e.addEventListener('pointerdown',ev=>ev.stopPropagation());fr.appendChild(e);
+  }
+}
+// ζωγραφίζει τις τιμές των πεδίων σε καμβά (εκτύπωση, εικόνες, PDF ως εικόνα)
+function drawForm(x,W,H,i,fields){
+  for(const f of (fields||[]).filter(f=>f.i===i&&f.t!=='sg')){
+    const v=formVal(f);if(v===''||v===false||v==null)continue;
+    const bx=f.l*W,by=f.tp*H,bw=f.w*W,bh=f.h*H;x.save();x.fillStyle='#0b1a4a';x.textBaseline='middle';
+    if(f.t==='ck'||f.t==='rd'){const ex=String(Array.isArray(f.exp)?f.exp[0]:f.exp||f.id);
+      const z=Math.min(bw,bh),cx=bx+bw/2,cy=by+bh/2;x.strokeStyle='#222';x.lineWidth=Math.max(1,z*.06);
+      // μη επιλεγμένη επιλογή της ίδιας ομάδας: μόνο ο κύκλος (το αρχικό πεδίο δεν ζωγραφίζεται πια)
+      if(f.t==='rd'&&v!==ex){x.beginPath();x.arc(cx,cy,z*.45,0,7);x.stroke();x.restore();continue}
+      if(f.t==='ck'){x.strokeRect(cx-z*.45,cy-z*.45,z*.9,z*.9);x.lineWidth=Math.max(1.5,z*.13);x.lineCap='round';x.lineJoin='round';x.beginPath();x.moveTo(cx-z*.28,cy);x.lineTo(cx-z*.06,cy+z*.22);x.lineTo(cx+z*.3,cy-z*.25);x.stroke()}
+      else{x.beginPath();x.arc(cx,cy,z*.45,0,7);x.stroke();x.beginPath();x.arc(cx,cy,z*.24,0,7);x.fill()}}
+    else{let txt=String(f.t==='ch'?((f.opts.find(o=>o.v===v)||{}).l||v):v);
+      let fz=Math.min(bh*(f.ml?.42:.7),W*(f.ml?.018:.03));x.font=`500 ${fz}px system-ui,sans-serif`;let pad=Math.min(bh*.15,fz*.3);
+      if(f.ml){// αναδίπλωση· μικραίνει μέχρι να χωρέσει όλο το κείμενο
+        const wrap=()=>{const out=[];for(const para of txt.split('\n')){let cur='';for(const w of para.split(/(\s+)/)){const t2=cur+w;if(x.measureText(t2).width>bw-2*pad&&cur.trim()){out.push(cur);cur=w.trimStart()}else cur=t2}out.push(cur)}return out};
+        let lines=wrap();while(lines.length*fz*1.15+2*pad>bh&&fz>4){fz*=.9;pad=Math.min(bh*.15,fz*.3);x.font=`500 ${fz}px system-ui,sans-serif`;lines=wrap()}
+        x.textBaseline='top';lines.forEach((l,k)=>x.fillText(l,bx+pad,by+pad+k*fz*1.15))}
+      else{while(x.measureText(txt).width>bw-2*pad&&fz>4){fz*=.92;x.font=`500 ${fz}px system-ui,sans-serif`}x.fillText(txt,bx+pad,by+bh/2)}}
+    x.restore()}
+}
+function fillStart(){
+  closeSheet();newSeen('fill');if(!doc)return;
+  const go=()=>{pvTool('pan',true);
+    if(pv.fields&&pv.fields.length){fillInfo();toast(EN?'📝 Tap a field on the page and type. Then «💾 Save PDF».':'📝 Πάτα πάνω σε κάθε πεδίο της σελίδας και γράψε. Στο τέλος «💾 Αποθήκευση PDF».');const el=document.querySelector('.frm>*');if(el)el.scrollIntoView({block:'center'})}
+    else dlgOpen(EN?'📝 Fill in':'📝 Συμπλήρωση',EN?'<p style="margin:0 0 8px">This PDF has no ready-made fields. You can still write anywhere:</p><p style="margin:0">1. Tap <b>🔤 Text</b> at the bottom and tap where you want to write.<br>2. For the signature tap <b>✍️ Signature</b> and then the spot.<br>3. At the end: menu → «Share, print, file» → <b>Save PDF with notes</b>.</p>':'<p style="margin:0 0 8px">Αυτό το PDF δεν έχει έτοιμα πεδία. Μπορείς όμως να γράψεις όπου θέλεις:</p><p style="margin:0">1. Πάτα <b>🔤 Κείμενο</b> κάτω και μετά πάτα στο σημείο που θέλεις να γράψεις.<br>2. Για υπογραφή πάτα <b>✍️ Υπογραφή</b> και μετά το σημείο.<br>3. Στο τέλος: μενού → «Κοινοποίηση, εκτύπωση, αρχείο» → <b>Αποθήκευση PDF με σημειώσεις</b>.</p>',()=>pvTool('tx'),true)};
+  if(!pv.on)pvOpen().then(()=>setTimeout(go,300));else go();
+}
+$('#mFill').onclick=()=>fillStart();
+$('#fillSave').onclick=()=>annPdf(false);$('#fillSend').onclick=()=>annPdf(true);
 // PDF με τις σημειώσεις: πάνω στο πρωτότυπο, ώστε να κρατιέται το κείμενο του PDF
 const hex2rgb=h=>{const n=parseInt(h.slice(1),16);return[(n>>16&255)/255,(n>>8&255)/255,(n&255)/255]};
 function txPng(s,W){const sc=3,fz=s.s*W*sc,lines=(s.text||'').split('\n');const c=document.createElement('canvas'),x=c.getContext('2d');x.font=`600 ${fz}px system-ui,sans-serif`;
@@ -2327,9 +2423,11 @@ function txPng(s,W){const sc=3,fz=s.s*W*sc,lines=(s.text||'').split('\n');const 
 $('#mAnnPdf').onclick=()=>{closeSheet();annPdf(false)};
 // σελίδα (πρωτότυπο + σημειώσεις) σε καμβά
 async function pageCanvas(file,pdfjs,i,maxW){const c=document.createElement('canvas'),ann=(doc.ann||{})[i]||[];
-  if(pdfjs){const pg=await pdfjs.getPage(i+1);const vp0=pg.getViewport({scale:1});const vp=pg.getViewport({scale:maxW/vp0.width});c.width=vp.width;c.height=vp.height;await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise}
+  let FL=null;if(pdfjs){if(!pageCanvas._f||pageCanvas._f.pdf!==pdfjs){const L=await formFields(pdfjs);fieldsHide(pdfjs,L.filter(f=>{const v=formVal(f);return f.t!=='sg'&&v!==''&&v!==false&&v!=null}));pageCanvas._f={pdf:pdfjs,L}}FL=pageCanvas._f.L}
+  if(pdfjs){const pg=await pdfjs.getPage(i+1);const vp0=pg.getViewport({scale:1});const vp=pg.getViewport({scale:maxW/vp0.width});c.width=vp.width;c.height=vp.height;await pg.render({canvasContext:c.getContext('2d'),viewport:vp,...fieldsMode(FL)}).promise}
   else{const im=await loadImg(file.images[i]);const k=Math.min(1,maxW/im.naturalWidth);c.width=Math.round(im.naturalWidth*k);c.height=Math.round(im.naturalHeight*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height)}
   {const lv=pageNeedsClean(i,file);if(lv)cleanCanvas(c,lv)}
+  if(FL)drawForm(c.getContext('2d'),c.width,c.height,i,FL);
   drawAnn(c.getContext('2d'),c.width,c.height,ann);return c}
 // ---------- Εκτύπωση ----------
 // «Όπως το πρωτότυπο»: κάθε σελίδα ως εικόνα (με τις σημειώσεις/υπογραφή σου) · «Μόνο το κείμενο»: καθαρό κείμενο σε όλο το πλάτος.
@@ -2368,7 +2466,7 @@ async function printOrig(file){
 }
 $('#mPrint').onclick=()=>{newSeen('print');printAsk()};
 // «καινούργιο»: κίτρινη τελεία μέχρι να το ανοίξεις μία φορά
-const NEW_ITEMS={print:['#mPrint','#sheet details.cat[data-cat="file"] summary','#qGrid [data-k="print"]']};
+const NEW_ITEMS={print:['#mPrint','#sheet details.cat[data-cat="file"] summary','#qGrid [data-k="print"]'],fill:['#mFill','#sheet details.cat[data-cat="bm"] summary','#qGrid [data-k="fill"]']};
 function newPaint(){let seen=[];try{seen=JSON.parse(localStorage.getItem('glenread-seen')||'[]')}catch(e){}
   for(const k in NEW_ITEMS)NEW_ITEMS[k].forEach(q=>document.querySelectorAll(q).forEach(el=>el.classList.toggle('newdot',!seen.includes(k))))}
 function newSeen(k){let seen=[];try{seen=JSON.parse(localStorage.getItem('glenread-seen')||'[]')}catch(e){}if(!seen.includes(k)){seen.push(k);try{localStorage.setItem('glenread-seen',JSON.stringify(seen))}catch(e){}}newPaint()}
@@ -2384,6 +2482,21 @@ async function annPdf(send){
     if(file.pdf&&window.PDFLib){
       const P=PDFLib,pd=await P.PDFDocument.load(file.pdf.slice(0),{ignoreEncryption:true});if(pd.isEncrypted)throw new Error('enc');
       const pages=pd.getPages();
+      // συμπληρωμένα πεδία φόρμας → κείμενο πάνω στη σελίδα (με ελληνικά) και αφαίρεση του πεδίου
+      let FL=pv.on&&pv.fields?pv.fields:null;
+      if(!FL){await pdfReady().catch(()=>{});if(window.pdfjsLib){const t=pdfLoad(file.pdf.slice(0),{key:doc.id,name:doc.name});const pj=await t.promise;FL=await formFields(pj);pdfFree(pj)}}
+      if(FL&&FL.length&&doc.form&&Object.keys(doc.form).length){
+        const form=pd.getForm(),gone=new Set();
+        for(const f of FL){if(f.t==='sg')continue;const v=formVal(f);if(v===''||v===false||v==null)continue;
+          const page=pages[f.i];if(!page)continue;if((page.getRotation().angle||0)%360)throw new Error('rot');
+          const box=page.getCropBox?page.getCropBox():{x:0,y:0,...page.getSize()};const W=box.width,H=box.height,sc=4;
+          const cv=document.createElement('canvas');cv.width=Math.max(4,Math.round(f.w*W*sc));cv.height=Math.max(4,Math.round(f.h*H*sc));
+          drawForm(cv.getContext('2d'),cv.width/f.w,cv.height/f.h,f.i,[{...f,l:0,tp:0}]);
+          const png=await pd.embedPng(cv.toDataURL('image/png'));cv.width=cv.height=0;
+          page.drawImage(png,{x:box.x+f.l*W,y:box.y+H-(f.tp+f.h)*H,width:f.w*W,height:f.h*H});gone.add(f.name)}
+        // αν κάποιο πεδίο δεν φεύγει, θα σκέπαζε το κείμενο → πάμε στον ασφαλή δρόμο (σελίδες ως εικόνα)
+        for(const n of gone){form.removeField(form.getField(n))}
+      }
       for(let i=0;i<pages.length;i++){
         const page=pages[i],L=ann[i];if(!L||!L.length)continue;
         const rot=(page.getRotation().angle||0)%360;if(rot)throw new Error('rot');
@@ -2395,7 +2508,8 @@ async function annPdf(send){
           page.drawSvgPath(d,{x:box.x,y:box.y+H,borderColor:P.rgb(r,g,b),borderWidth:s.w*W,borderOpacity:s.t==='hl'?.35:1,borderLineCap:P.LineCapStyle.Round});
         }
       }
-      bytes=await pd.save();
+      // χωρίς ξαναζωγράφισμα των υπόλοιπων πεδίων (τα τυπικά γράμματα του PDF δεν έχουν ελληνικά)
+      bytes=await pd.save({updateFieldAppearances:false});
     }else throw new Error('img');
     out2(new Blob([bytes],{type:'application/pdf'}),doc.name+(Object.values(ann).some(L=>L&&L.length)?' (σημειώσεις)':'')+'.pdf');
   }catch(e){
@@ -2660,7 +2774,7 @@ qbApply();
 const QB_ACT={find:()=>openFind(),view:()=>toggleView(),tr:()=>openTranslate(),speak:()=>$('#mSpeak').onclick(),fsm:()=>$('#fsMinus').onclick(),fsp:()=>$('#fsPlus').onclick(),
   theme:()=>themePop(),
 
-  bm:()=>$('#mBm').onclick(),draw:()=>$('#mDraw').onclick(),share:()=>$('#mShare').onclick(),copy:()=>$('#mCopy').onclick(),print:()=>{newSeen('print');printAsk()},xlsx:()=>exportDoc('xlsx'),docx:()=>exportDoc('docx'),save:()=>$('#mAnnPdf').onclick(),full:()=>$('#mFull').onclick(),menu:()=>openSheet()};
+  bm:()=>$('#mBm').onclick(),draw:()=>$('#mDraw').onclick(),share:()=>$('#mShare').onclick(),copy:()=>$('#mCopy').onclick(),print:()=>{newSeen('print');printAsk()},fill:()=>fillStart(),xlsx:()=>exportDoc('xlsx'),docx:()=>exportDoc('docx'),save:()=>$('#mAnnPdf').onclick(),full:()=>$('#mFull').onclick(),menu:()=>openSheet()};
 document.querySelectorAll('#qbar [data-q]').forEach(b=>{if(QB_ACT[b.dataset.q])b.onclick=QB_ACT[b.dataset.q]});
 // «Θέμα»: ανοίγει από κάτω οι επιλογές (ίδιες με του μενού) — πατάς και βλέπεις αμέσως το αποτέλεσμα
 function themePop(){

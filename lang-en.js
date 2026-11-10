@@ -747,7 +747,11 @@ var D={
 "Σελίδα και αναζήτηση": "Page and search",
 "Κείμενο ή πρωτότυπο, αναζήτηση, μετάβαση, πλήρης οθόνη": "Text or original, search, go to, full screen",
 "Ρυθμίσεις και βοήθεια": "Settings and help",
-"Οθόνη, μπάρες, γλώσσα, οδηγός χρήσης": "Screen, bars, language, user guide"
+"Οθόνη, μπάρες, γλώσσα, οδηγός χρήσης": "Screen, bars, language, user guide",
+"Συμπλήρωση αίτησης και υπογραφή": "Fill in a form and sign",
+"Γράψε τα στοιχεία σου πάνω στο PDF και υπόγραψε": "Write your details on the PDF and sign",
+"Συμπλήρωση": "Fill in",
+"💾 Αποθήκευση PDF": "💾 Save PDF"
 };
 var G=function(s){return D.hasOwnProperty(s)?D[s]:s};
 var P=[
@@ -808,7 +812,8 @@ var P=[
 [/^1 βιβλίο · και δωρεάν βιβλία$/,'1 book · and free books'],
 [/^Σελίδα (\d+) από (\d+) · (\d+)%$/,'Page $1 of $2 · $3%'],
 [/^Σελίδα (\d+) από (\d+)…$/,'Page $1 of $2…'],
-[/^Το έγγραφο έχει (\d+) σελίδες\. Να τυπωθούν όλες;$/,'The document has $1 pages. Print them all?']
+[/^Το έγγραφο έχει (\d+) σελίδες\. Να τυπωθούν όλες;$/,'The document has $1 pages. Print them all?'],
+[/^(\d+) από (\d+) πεδία$/,'$1 of $2 fields']
 ];
 var GR=/[Ͱ-Ͽἀ-῿]/;
 function one(k){if(D.hasOwnProperty(k))return D[k];for(var i=0;i<P.length;i++){var r=P[i][0];if(r.test(k))return k.replace(r,P[i][1])}return null}
