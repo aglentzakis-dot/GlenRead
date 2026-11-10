@@ -719,7 +719,15 @@ var D={
 "Αα · Ανάγνωση βιβλίου": "Aa · Book reading",
 "📖 Γύρισμα σελίδας": "📖 Page turning",
 "↕ Κύλιση": "↕ Scrolling",
-"Τέλος του βιβλίου": "End of the book"
+"Τέλος του βιβλίου": "End of the book",
+"🔒 PDF με κωδικό": "🔒 Password-protected PDF",
+"Δοκίμασε ξανά.": "Try again.",
+"Κωδικός του PDF": "PDF password",
+"προστατεύεται με κωδικό. Γράψε τον για να ανοίξει. Ο κωδικός δεν αποθηκεύεται.": "is protected with a password. Enter it to open. The password is not saved.",
+"Το αρχείο προστατεύεται με κωδικό. Γράψε τον για να ανοίξει. Ο κωδικός δεν αποθηκεύεται.": "The file is protected with a password. Enter it to open. The password is not saved.",
+"Δεν άνοιξε — χρειάζεται ο κωδικός του PDF": "Not opened — the PDF password is needed",
+"Ο κωδικός του PDF δεν δέχτηκε — δοκίμασε ξανά.": "The PDF password wasn't accepted — try again.",
+"Χωρίς τον κωδικό φαίνεται μόνο το κείμενο": "Without the password only the text is shown"
 };
 var G=function(s){return D.hasOwnProperty(s)?D[s]:s};
 var P=[

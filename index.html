@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="plaisio.js"></script>
-<meta name="app-version" content="2.54">
+<meta name="app-version" content="2.55">
 <!-- Ασφάλεια: η σελίδα φορτώνει κώδικα μόνο από εδώ και από συγκεκριμένες, κλειδωμένες εκδόσεις βιβλιοθηκών· στέλνει δεδομένα μόνο στο Google Drive του χρήστη· καμία εκτέλεση κειμένου ως κώδικα (eval) -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://cdn.jsdelivr.net/npm/mammoth@1.8.0/ https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/ https://accounts.google.com/gsi/; worker-src 'self' blob:; connect-src 'self' https: data: blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://tessdata.projectnaptha.com https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com/gsi/; img-src 'self' https://aglentzakis-dot.github.io data: blob: https://*.glenapps.gr; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; font-src 'self' data:; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -711,19 +711,30 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="lib/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="antigrafa.js"></script>
-<script src="metafora-rythmisi.js?v=2.54"></script>
-<script src="metafora-lipsi.js?v=2.54"></script>
+<script src="metafora-rythmisi.js?v=2.55"></script>
+<script src="metafora-lipsi.js?v=2.55"></script>
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.54';
+const VERSION='2.55';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
 // pdf.js φορτώνεται ως άρθρωμα (λίγο αργότερα από αυτό το σενάριο): όποιος το χρειάζεται, περιμένει
 const pdfReady=()=>window.pdfjsLib?Promise.resolve(window.pdfjsLib):new Promise((ok,no)=>{const t=setTimeout(()=>no(new Error('nolib')),20000);addEventListener('pdfjs-ready',()=>{clearTimeout(t);ok(window.pdfjsLib)},{once:true})});
 // ΚΑΘΕ άνοιγμα PDF περνά από εδώ: χωρίς εκτέλεση κώδικα από το αρχείο (isEvalSupported:false), χωρίς σενάρια PDF
-function pdfLoad(data){return pdfjsLib.getDocument({data,isEvalSupported:false,enableXfa:false,disableFontFace:false,standardFontDataUrl:new URL('pdfjs/standard_fonts/',location.href).href})}
+// PDF με κωδικό: ο κωδικός ζητείται από τον χρήστη και κρατιέται ΜΟΝΟ στη μνήμη όσο είναι ανοιχτή η εφαρμογή
+// (ποτέ στον δίσκο ή στα αντίγραφα). Με opt.silent (π.χ. μικρογραφίες) δεν ρωτάμε ποτέ.
+const pdfPw=new Map();
+function pdfLoad(data,opt){opt=opt||{};const t=pdfjsLib.getDocument({data,isEvalSupported:false,enableXfa:false,disableFontFace:false,standardFontDataUrl:new URL('pdfjs/standard_fonts/',location.href).href});
+  let used=null;
+  t.onPassword=(upd,reason)=>{const k=opt.key!=null?String(opt.key):null;
+    if(k&&pdfPw.has(k)&&reason!==2&&!used){used=pdfPw.get(k);upd(used);return}
+    if(opt.silent){t.__cancel=true;t.destroy();return}
+    askPdfPw(reason===2,opt.name).then(pw=>{if(pw==null){t.__cancel=true;t.destroy();return}used=pw;upd(pw)})};
+  t.promise.then(()=>{if(used&&opt.key!=null)pdfPw.set(String(opt.key),used)},()=>{});
+  return t}
+function askPdfPw(wrong,name){return pwDlg('🔒 PDF με κωδικό',wrong?'<b style="color:var(--bad)">Λάθος κωδικός.</b> Δοκίμασε ξανά.':'Το αρχείο'+(name?' <b class="usr">'+esc(name)+'</b>':'')+' προστατεύεται με κωδικό. Γράψε τον για να ανοίξει. Ο κωδικός δεν αποθηκεύεται.',[['pdfPw','Κωδικός του PDF']],'Άνοιγμα','off').then(v=>v?v.pdfPw:null)}
 window.pdfLoad=pdfLoad;
 
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2600)};
@@ -782,9 +793,9 @@ async function pwPaint(){
   $('#pwWarn').classList.toggle('hidden',on||!(used||pwNeed));
 }
 // διάλογος κωδικού· fields: [[id,ετικέτα]] → Promise({id:τιμή}|null)
-function pwDlg(title,intro,fields,okTxt){
+function pwDlg(title,intro,fields,okTxt,ac){
   return new Promise(res=>{
-    dlgOpen(title,(intro?'<p style="margin:0 0 8px">'+intro+'</p>':'')+fields.map(([id,l])=>`<label style="display:block">${l}<input class="pwin" type="password" id="${id}" autocomplete="new-password" autocapitalize="off" spellcheck="false"></label>`).join('')+'<label style="display:flex;gap:10px;align-items:center;justify-content:flex-start;width:auto"><input type="checkbox" id="pwShow" style="width:22px;height:22px;min-height:0;flex:none;margin:0;padding:0"><span>Εμφάνιση κωδικού</span></label><p class="muted" id="pwErr" style="margin:6px 0 0;color:var(--bad)"></p>',
+    dlgOpen(title,(intro?'<p style="margin:0 0 8px">'+intro+'</p>':'')+fields.map(([id,l])=>`<label style="display:block">${l}<input class="pwin" type="password" id="${id}" autocomplete="${ac||'new-password'}" autocapitalize="off" spellcheck="false"></label>`).join('')+'<label style="display:flex;gap:10px;align-items:center;justify-content:flex-start;width:auto"><input type="checkbox" id="pwShow" style="width:22px;height:22px;min-height:0;flex:none;margin:0;padding:0"><span>Εμφάνιση κωδικού</span></label><p class="muted" id="pwErr" style="margin:6px 0 0;color:var(--bad)"></p>',
       ()=>{const v={};fields.forEach(([id])=>v[id]=$('#'+id).value);setTimeout(()=>res(v),0)});
     dlgCancel=()=>res(null);$('#dlgOk').textContent=okTxt||'Εντάξει';
     $('#pwShow').onchange=e=>fields.forEach(([id])=>$('#'+id).type=e.target.checked?'text':'password');
@@ -1133,8 +1144,8 @@ async function openPdf(file){
   try{
     await pdfReady().catch(()=>{});if(!window.pdfjsLib)throw new Error('nolib');
     const buf=await file.arrayBuffer();const orig=buf.slice(0);
-    task=pdfLoad(buf);pdf=await task.promise;
-    part={id:Date.now(),date:new Date().toISOString(),name:file.name.replace(/\.pdf$/i,''),pages,partial:pdf.numPages};
+    const pid=Date.now();task=pdfLoad(buf,{key:pid,name:file.name});pdf=await task.promise.catch(e=>{throw task.__cancel?new Error('pwcancel'):e});
+    part={id:pid,date:new Date().toISOString(),name:file.name.replace(/\.pdf$/i,''),pages,partial:pdf.numPages};
     for(let p=1;p<=pdf.numPages;p++){
       if(cancelled||gone()){if(!gone()){ocrLbl='';ocrRunning(false)}if(pages.length)saveDoc(part);pdfFree(pdf);return gone()?null:goHome()}
       if(pages.length)saveDoc(part,true);
@@ -1168,8 +1179,9 @@ async function openPdf(file){
     if(gone())return;ocrLbl='';ocrRunning(false);ocrRecycle();
     if(e.message==='cancel')return goHome();
     failHome();
+    if(e.message==='pwcancel')return toast('Δεν άνοιξε — χρειάζεται ο κωδικός του PDF');
     if(e.message==='timeout')return toast(pages.length?'Μια σκαναρισμένη σελίδα άργησε πολύ — κρατήθηκαν οι '+pages.length+' πρώτες στα «Πρόσφατα».':'Η αναγνώριση άργησε πολύ. Δοκίμασε ξανά ή με λιγότερες σελίδες.');
-    toast(e.message==='nolib'?'Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.':/password/i.test(e.name+e.message)?'Το PDF έχει κωδικό — δεν μπορεί να ανοίξει.':'Δεν άνοιξε το αρχείο. Ίσως είναι κατεστραμμένο.');
+    toast(e.message==='nolib'?'Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.':/password/i.test(e.name+e.message)?'Ο κωδικός του PDF δεν δέχτηκε — δοκίμασε ξανά.':'Δεν άνοιξε το αρχείο. Ίσως είναι κατεστραμμένο.');
   }
 }
 
@@ -1952,7 +1964,7 @@ const thumbQ=[];let thumbBusy=false;
 async function thumbFor(id){const k='thumb-'+id;const t=await draftGet(k);if(typeof t==='string')return t;
   const f=await draftGet('file-'+id).catch(()=>null);if(!f)return null;let c=null,pdf=null;
   try{if(f.images&&f.images[0]){const im=await loadImg(f.images[0]);c=document.createElement('canvas');c.width=180;c.height=Math.round(im.naturalHeight*180/im.naturalWidth);c.getContext('2d').drawImage(im,0,0,c.width,c.height)}
-    else if(f.pdf&&await pdfReady().catch(()=>null)){pdf=await pdfLoad(f.pdf.slice(0)).promise;const pg=await pdf.getPage(1),v0=pg.getViewport({scale:1}),vp=pg.getViewport({scale:180/v0.width});c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);await pg.render({canvasContext:x,viewport:vp}).promise}
+    else if(f.pdf&&await pdfReady().catch(()=>null)){pdf=await pdfLoad(f.pdf.slice(0),{key:id,silent:true}).promise;const pg=await pdf.getPage(1),v0=pg.getViewport({scale:1}),vp=pg.getViewport({scale:180/v0.width});c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);await pg.render({canvasContext:x,viewport:vp}).promise}
     if(!c)return null;const u=c.toDataURL('image/jpeg',.7);c.width=c.height=0;await draftSet(k,u);return u}catch(e){return null}finally{if(pdf)pdfFree(pdf)}}
 function thumbFill(){if(thumbBusy)return;const el=thumbQ.shift();if(!el)return;thumbBusy=true;
   thumbFor(el.dataset.th).then(u=>{if(u){el.style.backgroundImage=`url("${u}")`;el.textContent=''}}).finally(()=>{thumbBusy=false;setTimeout(thumbFill,30)})}
@@ -2032,7 +2044,7 @@ async function pvOpen(o){o=o||{};
   try{
     if(pv.file.pdf){
       await pdfReady().catch(()=>{});if(!window.pdfjsLib)throw new Error('nolib');
-      const pdf=await pdfLoad(pv.file.pdf.slice(0)).promise;
+      const pt=pdfLoad(pv.file.pdf.slice(0),{key:doc.id,name:doc.name});const pdf=await pt.promise.catch(e=>{if(pt.__cancel){viewText();throw new Error('pwcancel')}throw e});
       if(stale()){pdfFree(pdf);return}pv.pdf=pdf;const sizes=[];
       for(let i=1;i<=pdf.numPages;i++){const vp=(await pdf.getPage(i)).getViewport({scale:1});if(stale())return;sizes.push({w:vp.width,h:vp.height})}
       pv.pages=sizes;
@@ -2040,7 +2052,7 @@ async function pvOpen(o){o=o||{};
       const sizes=[];for(const src of pv.file.images){const im=await loadImg(src);if(stale())return;sizes.push({w:im.naturalWidth,h:im.naturalHeight})}
       pv.pages=sizes;
     }
-  }catch(e){if(stale())return;box.innerHTML='<div class="card" style="margin:16px">Οι σελίδες δεν φόρτωσαν. Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.</div>';return}
+  }catch(e){if(stale())return;if(e.message==='pwcancel')return toast('Χωρίς τον κωδικό φαίνεται μόνο το κείμενο');box.innerHTML='<div class="card" style="margin:16px">Οι σελίδες δεν φόρτωσαν. Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.</div>';return}
   box.innerHTML=pv.pages.map((p,i)=>`<div class="pvp" data-i="${i}" style="aspect-ratio:${p.w}/${p.h}"><canvas class="img"></canvas><div class="textLayer"></div><canvas class="ink"></canvas><span class="pvn">${i+1}/${pv.pages.length}</span></div>`).join('');
   if(pv.obs)pv.obs.disconnect();
   // σχεδιάζει μόνο τις σελίδες κοντά στην οθόνη και ελευθερώνει τις μακρινές, για να μη γεμίζει η μνήμη
@@ -2333,7 +2345,7 @@ async function annPdf(send){
     // εναλλακτικά: εικόνα σελίδας + σημειώσεις
     try{
       if(!window.jspdf)return toast('Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.');
-      const {jsPDF}=window.jspdf;let out=null;const pdfjs=file.pdf&&await pdfReady().catch(()=>null)?await pdfLoad(file.pdf.slice(0)).promise:null;
+      const {jsPDF}=window.jspdf;let out=null;const pdfjs=file.pdf&&await pdfReady().catch(()=>null)?await pdfLoad(file.pdf.slice(0),{key:doc.id,name:doc.name}).promise:null;
       const n=pdfjs?pdfjs.numPages:file.images.length;
       for(let i=0;i<n;i++){
         const c=await pageCanvas(file,pdfjs,i,pdfjs?1600:4000);
@@ -2350,7 +2362,7 @@ async function annPdf(send){
 async function sendImages(which){
   const file=pv.file||await draftGet('file-'+doc.id);if(!file)return toast('Το πρωτότυπο δεν κρατήθηκε');
   let pdfjs=null;try{
-    pdfjs=file.pdf&&await pdfReady().catch(()=>null)?await pdfLoad(file.pdf.slice(0)).promise:null;
+    pdfjs=file.pdf&&await pdfReady().catch(()=>null)?await pdfLoad(file.pdf.slice(0),{key:doc.id,name:doc.name}).promise:null;
     const n=pdfjs?pdfjs.numPages:file.images.length,idx=which==='all'?[...Array(n).keys()]:[Math.min(n-1,Math.max(0,which|0))];
     toast(idx.length>1?(EN?'Preparing '+idx.length+' photos…':'Ετοιμάζω '+idx.length+' φωτογραφίες…'):(EN?'Preparing the photo…':'Ετοιμάζω τη φωτογραφία…'));
     const files=[],base=safeName(doc.name);
