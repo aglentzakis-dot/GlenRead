@@ -9,7 +9,7 @@ function gaNet(net,fromCache,ev){var p=Promise.resolve(net);try{ev&&ev.waitUntil
   return new Promise(function(ok){var done=false,t;function fin(r){if(!done){done=true;clearTimeout(t);ok(r)}}
     t=setTimeout(function(){fc().then(function(c){if(c){gaSlow=Date.now()+30000;fin(c)}})},GA_MS);
     p.then(function(r){if(r&&r.status>=500)fc().then(function(c){fin(c||r)});else fin(r)},function(){fc().then(function(c){fin(c||Response.error())})});});}
-const CACHE='glenread-2.55';
+const CACHE='glenread-2.56';
 const CORE=['./','index.html','plaisio.js','manifest.json','icon-192.png','icon-512.png','icon-512-maskable.png','apple-touch-icon.png','privacy.html','G-glenapps.png','antigrafa.js','metafora-rythmisi.js','metafora-lipsi.js','efarmoges-mas.js','lang-en.js','exagogi.js','parousiasi.js','pdfjs/pdf.mjs','pdfjs/pdf.worker.mjs','lib/jspdf.umd.min.js','lib/jszip.min.js','fonts/OpenDyslexic-Regular.woff2','fonts/OpenDyslexic-Bold.woff2'];
 // το κοινό αρχείο της σελίδας GlenApps: αν λείπει για λίγο, η εγκατάσταση δεν πρέπει να αποτύχει
 const SHARED=['/efarmoges-mas.js'];

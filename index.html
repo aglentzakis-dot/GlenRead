@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="plaisio.js"></script>
-<meta name="app-version" content="2.55">
+<meta name="app-version" content="2.56">
 <!-- Ασφάλεια: η σελίδα φορτώνει κώδικα μόνο από εδώ και από συγκεκριμένες, κλειδωμένες εκδόσεις βιβλιοθηκών· στέλνει δεδομένα μόνο στο Google Drive του χρήστη· καμία εκτέλεση κειμένου ως κώδικα (eval) -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://cdn.jsdelivr.net/npm/mammoth@1.8.0/ https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/ https://accounts.google.com/gsi/; worker-src 'self' blob:; connect-src 'self' https: data: blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://tessdata.projectnaptha.com https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com/gsi/; img-src 'self' https://aglentzakis-dot.github.io data: blob: https://*.glenapps.gr; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; font-src 'self' data:; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -315,6 +315,21 @@ body.reading.ffd #reader{letter-spacing:0;word-spacing:.08em;font-style:normal}
 .src .si{flex:1;min-width:0;overflow-wrap:anywhere}.src .si b{display:block;font-size:15px;overflow-wrap:anywhere}.src>button{flex:none}.src .si small{display:block;font-size:12.5px;opacity:.75;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .src button{min-height:42px;padding:0 10px}.src .fav{min-width:42px;padding:0;font-size:20px;background:transparent;box-shadow:none;border:0;color:#E0A100}
 select{max-width:100%}.tabp label select{width:100%}
+/* --- κίτρινη τελεία σε ό,τι είναι καινούργιο (κοινός κανόνας GlenApps) --- */
+.newdot{position:relative}.newdot::after{content:'';position:absolute;top:8px;right:8px;width:11px;height:11px;border-radius:50%;background:#FDD117;box-shadow:0 0 0 2px var(--card,#fff),0 0 0 3px #E0A100}
+/* --- εκτύπωση: τυπώνεται ΜΟΝΟ το #printArea --- */
+#printArea{display:none}
+@media print{
+  @page{margin:10mm}
+  html,body{background:#fff!important;color:#000!important;padding:0!important;margin:0!important;min-height:0!important}
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block!important}
+  #printArea img{display:block;width:auto;height:auto;max-width:100%;max-height:97vh;margin:0 auto;break-after:page;page-break-after:always;break-inside:avoid}
+  #printArea img:last-child{break-after:auto;page-break-after:auto}
+  #printArea .ph{font:700 14pt/1.3 Georgia,serif;margin:0 0 6pt}
+  #printArea .pp{font:12pt/1.55 Georgia,"Noto Serif",serif;white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 12pt}
+  #printArea .brk{break-before:page;page-break-before:always}
+}
 /* --- κάτω μπάρα καρτελών (όπως οι εφαρμογές ανάγνωσης) --- */
 #tabs{display:none}
 body.onhome #tabs{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--card,#fff);border-top:1px solid rgba(128,128,128,.25);padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));justify-content:space-around;box-shadow:0 -2px 10px rgba(0,0,0,.06)}
@@ -553,6 +568,7 @@ body.selon #bvAa{display:none}
     <button class="sec lb" data-q="bm"><span>🔖</span><small>Σελιδοδείκτης</small></button>
     <button class="sec lb" data-q="share"><span>📤</span><small>Κοινοποίηση</small></button>
     <button class="sec lb" data-q="copy"><span>📋</span><small>Αντιγραφή</small></button>
+    <button class="sec lb" data-q="print"><span>🖨️</span><small>Εκτύπωση</small></button>
     <button class="sec lb" data-q="full"><span>⛶</span><small>Οθόνη</small></button>
     <button class="sec lb" data-q="xlsx"><span>📊</span><small>Excel</small></button>
     <button class="sec lb" data-q="docx"><span>📝</span><small>Word</small></button>
@@ -610,7 +626,7 @@ body.selon #bvAa{display:none}
     <div class="qhead"><b>Τα κουμπιά μου</b><button class="sec" id="qEdit">✏️ Προσαρμογή</button></div>
     <p class="muted hidden" id="qEditHelp" style="margin:0 6px 8px;font-size:12.5px">⭐ = να φαίνεται εδώ, στα «Κουμπιά μου» · 📌 = να φαίνεται στην πάνω μπάρα (όσα υπάρχουν ήδη στην κάτω μπάρα, όπως «Γράψε» και «PDF», δεν εμφανίζονται εδώ, για να μην είναι διπλά). Αποθηκεύεται αμέσως. Τη σειρά στις μπάρες την αλλάζεις κρατώντας πατημένο ένα κουμπί και σέρνοντάς το.</p>
     <div id="qGrid"></div>
-    <details class="cat" data-cat="view"><summary><span class="ci">👁</span><span class="ct"><b>Προβολή</b><small>Κείμενο ή σελίδα, αναζήτηση, μετάβαση</small></span><span class="cv">›</span></summary>
+    <details class="cat" data-cat="view"><summary><span class="ci">👁</span><span class="ct"><b>Σελίδα και αναζήτηση</b><small>Κείμενο ή πρωτότυπο, αναζήτηση, μετάβαση, πλήρης οθόνη</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mView"><span class="ic">📄</span><span class="tx"><b id="mViewT">Πρωτότυπο σελίδας</b><small id="mViewS">Δες το PDF όπως είναι και γράψε πάνω του</small></span></button>
     <button class="mi" id="mFind"><span class="ic">🔍</span><span class="tx"><b>Αναζήτηση στο κείμενο</b><small>Βρες λέξεις, ακόμη και χωρίς τόνους</small></span></button>
     <button class="mi" id="mGo"><span class="ic">🔢</span><span class="tx"><b>Μετάβαση σε σελίδα</b><small>Πήγαινε κατευθείαν σε μια σελίδα</small></span></button>
@@ -630,20 +646,19 @@ body.selon #bvAa{display:none}
     <div class="opt"><span>Ταχύτητα</span><div class="seg" data-k="rate"><button data-v="0.75">0,75×</button><button data-v="1">1×</button><button data-v="1.3">1,3×</button><button data-v="1.5">1,5×</button></div></div>
     <button class="mi" id="mTr"><span class="ic">🌐</span><span class="tx"><b>Μετάφραση</b><small>Του κειμένου που επιλέγεις ή όλου του εγγράφου</small></span></button>
     </details>
-    <details class="cat" data-cat="bm"><summary><span class="ci">🔖</span><span class="ct"><b>Σελιδοδείκτες και σημειώσεις</b><small>Σημάδια και δικές σου σημειώσεις σε κάθε βιβλίο</small></span><span class="cv">›</span></summary>
+    <details class="cat" data-cat="bm"><summary><span class="ci">🔖</span><span class="ct"><b>Σημειώσεις και υπογραφή</b><small>Σελιδοδείκτες, σημειώσεις, γράψιμο πάνω στη σελίδα, υπογραφή</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mBm"><span class="ic">🔖</span><span class="tx"><b>Βάλε σελιδοδείκτη εδώ</b><small>Για να γυρίσεις αργότερα σε αυτό το σημείο</small></span></button>
     <button class="mi" id="mNote"><span class="ic">📝</span><span class="tx"><b>Σημείωση εδώ</b><small>Γράψε μια σκέψη· αν έχεις επιλέξει κείμενο, κρατιέται κι αυτό</small></span></button>
-    <div id="bmList"></div>
-    </details>
-    <details class="cat" data-cat="note"><summary><span class="ci">🖊️</span><span class="ct"><b>Σημειώσεις και υπογραφή</b><small>Γράψε, υπογραφή, διόρθωση κειμένου</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mDraw"><span class="ic">🖊️</span><span class="tx"><b>Γράψε πάνω στη σελίδα</b><small>Στυλό, μαρκαδόρος, κείμενο, σχήματα, υπογραφή</small></span></button>
     <button class="mi" id="mSig"><span class="ic">✍️</span><span class="tx"><b>Η υπογραφή μου</b><small id="mSigS">Φτιάξε ή άλλαξε την υπογραφή σου</small></span></button>
     <button class="mi" id="mEdit"><span class="ic">✏️</span><span class="tx"><b id="mEditT">Διόρθωση κειμένου</b><small>Διόρθωσε λάθη της αναγνώρισης</small></span></button>
     <button class="mi" id="mClear"><span class="ic">🗑️</span><span class="tx"><b>Σβήσε όλες τις σημειώσεις</b><small>Καθαρίζει ό,τι έγραψες πάνω στις σελίδες</small></span></button>
+    <div id="bmList"></div>
     </details>
-    <details class="cat" data-cat="file"><summary><span class="ci">📁</span><span class="ct"><b>Αρχείο</b><small>Αποθήκευση, αποστολή, αντιγραφή, όνομα</small></span><span class="cv">›</span></summary>
-    <button class="mi" id="mAnnPdf"><span class="ic">📑</span><span class="tx"><b>Αποθήκευση PDF με τις σημειώσεις</b><small>Για να το στείλεις ή να το κρατήσεις</small></span></button>
+    <details class="cat" data-cat="file"><summary><span class="ci">📤</span><span class="ct"><b>Κοινοποίηση, εκτύπωση, αρχείο</b><small>Στείλε, τύπωσε, Word/Excel, αντιγραφή, όνομα</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mShare"><span class="ic">📤</span><span class="tx"><b>Κοινοποίηση ή αποθήκευση</b><small>Σε όποια εφαρμογή θέλεις ή σε φάκελο που διαλέγεις — ως PDF, φωτογραφία, κείμενο, Word ή Excel</small></span></button>
+    <button class="mi" id="mPrint"><span class="ic">🖨️</span><span class="tx"><b>Εκτύπωση</b><small>Όπως το πρωτότυπο ή μόνο το κείμενο, σε εκτυπωτή ή PDF</small></span></button>
+    <button class="mi" id="mAnnPdf"><span class="ic">📑</span><span class="tx"><b>Αποθήκευση PDF με τις σημειώσεις</b><small>Για να το στείλεις ή να το κρατήσεις</small></span></button>
     <button class="mi" id="mCopy"><span class="ic">📋</span><span class="tx"><b>Αντιγραφή κειμένου</b><small>Όλου, ή μόνο όσου έχεις επιλέξει</small></span></button>
     <button class="mi" id="mDocx"><span class="ic">📝</span><span class="tx"><b>Εξαγωγή σε Word</b><small>Οι λίστες και οι πίνακες βγαίνουν ως πίνακες</small></span></button>
     <button class="mi" id="mXlsx"><span class="ic">📊</span><span class="tx"><b>Εξαγωγή σε Excel</b><small>Κατάλογοι και λίστες σε στήλες, με έτοιμα φίλτρα</small></span></button>
@@ -651,20 +666,21 @@ body.selon #bvAa{display:none}
     <button class="mi" id="mShelf"><span class="ic">📚</span><span class="tx"><b>Στο ράφι «Τα βιβλία μου»</b><small>Με εξώφυλλο και πόσο έχεις διαβάσει</small></span><span class="sw"></span></button>
     <button class="mi" id="mRename"><span class="ic">🏷️</span><span class="tx"><b>Μετονομασία</b><small id="mRenameS"></small></span></button>
     </details>
-    <details class="cat" data-cat="set"><summary><span class="ci">⚙️</span><span class="ct"><b>Ρυθμίσεις</b><small>Οθόνη, μπάρες και σειρά κουμπιών, θέση του G</small></span><span class="cv">›</span></summary>
+    <details class="cat" data-cat="set"><summary><span class="ci">⚙️</span><span class="ct"><b>Ρυθμίσεις και βοήθεια</b><small>Οθόνη, μπάρες, γλώσσα, οδηγός χρήσης</small></span><span class="cv">›</span></summary>
     <button class="mi" id="mAwake"><span class="ic">☀️</span><span class="tx"><b>Να μη σβήνει η οθόνη</b><small>Όσο διαβάζεις</small></span><span class="sw"></span></button>
     <button class="mi" id="mPin"><span class="ic">📌</span><span class="tx"><b>Σταθερή μπάρα πάνω</b><small>Τα κουμπιά που θέλεις, πάντα ορατά</small></span><span class="sw"></span></button>
     <button class="mi" id="mOrdTop"><span class="ic">↔️</span><span class="tx"><b>Σειρά κουμπιών πάνω μπάρας</b><small>Ποιο κουμπί έρχεται πρώτο</small></span></button>
     <button class="mi" id="mOrdInk"><span class="ic">↕️</span><span class="tx"><b>Σειρά εργαλείων κάτω μπάρας</b><small>Βάλε μπροστά όσα χρησιμοποιείς πιο συχνά</small></span></button>
     <button class="mi" id="mUi"><span class="ic">🌐</span><span class="tx"><b>Γλώσσα εφαρμογής</b><small id="mUiS">Ελληνικά · English</small></span></button>
+    <button class="mi" id="mHelp"><span class="ic">❓</span><span class="tx"><b>Οδηγός χρήσης</b><small>Τι κάνει κάθε κουμπί</small></span></button>
+    <button class="mi" id="mApps"><span class="ic">✨</span><span class="tx"><b>Οι εφαρμογές μας</b><small>Κι άλλες δωρεάν εφαρμογές GlenApps</small></span></button>
     <button class="mi" id="mGpos"><span class="ic">↘️</span><span class="tx"><b>Επαναφορά θέσης του G</b><small>Το κουμπί μενού γυρίζει κάτω δεξιά</small></span></button>
     </details>
-    <button class="mi" id="mExport"><span class="ic">📊</span><span class="tx"><b>Εξαγωγή σε Excel ή Word</b><small>Λίστες και κατάλογοι σε στήλες, με φίλτρα</small></span></button>
-    <button class="mi" id="mApps"><span class="ic">✨</span><span class="tx"><b>Οι εφαρμογές μας</b><small>Κι άλλες δωρεάν εφαρμογές GlenApps</small></span></button>
-    <button class="mi" id="mHelp"><span class="ic">❓</span><span class="tx"><b>Οδηγός χρήσης</b><small>Τι κάνει κάθε κουμπί</small></span></button>
+    <button class="mi hidden" id="mExport"><span class="ic">📊</span><span class="tx"><b>Εξαγωγή σε Excel ή Word</b><small>Λίστες και κατάλογοι σε στήλες, με φίλτρα</small></span></button>
     <button class="mi" id="mHome"><span class="ic">🏠</span><span class="tx"><b>Πίσω στην αρχική</b><small>Τα πάντα έχουν αποθηκευτεί</small></span></button>
   </div>
 </div>
+<div id="printArea" aria-hidden="true"></div>
 <nav id="tabs" aria-label="Κύριες ενότητες">
   <button data-t="arxiki" class="on"><i>🏠</i><span>Αρχική</span></button>
   <button data-t="vivlia"><i>📚</i><span>Βιβλία</span></button>
@@ -711,12 +727,12 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="lib/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="antigrafa.js"></script>
-<script src="metafora-rythmisi.js?v=2.55"></script>
-<script src="metafora-lipsi.js?v=2.55"></script>
+<script src="metafora-rythmisi.js?v=2.56"></script>
+<script src="metafora-lipsi.js?v=2.56"></script>
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.55';
+const VERSION='2.56';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -2315,6 +2331,47 @@ async function pageCanvas(file,pdfjs,i,maxW){const c=document.createElement('can
   else{const im=await loadImg(file.images[i]);const k=Math.min(1,maxW/im.naturalWidth);c.width=Math.round(im.naturalWidth*k);c.height=Math.round(im.naturalHeight*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height)}
   {const lv=pageNeedsClean(i,file);if(lv)cleanCanvas(c,lv)}
   drawAnn(c.getContext('2d'),c.width,c.height,ann);return c}
+// ---------- Εκτύπωση ----------
+// «Όπως το πρωτότυπο»: κάθε σελίδα ως εικόνα (με τις σημειώσεις/υπογραφή σου) · «Μόνο το κείμενο»: καθαρό κείμενο σε όλο το πλάτος.
+// Τυπώνεται μέσω του διαλόγου εκτύπωσης του κινητού/υπολογιστή (εκτυπωτής ή «Αποθήκευση ως PDF»). Τίποτα δεν φεύγει αλλού.
+let prUrls=[];
+function prClean(){prUrls.forEach(u=>URL.revokeObjectURL(u));prUrls=[];$('#printArea').innerHTML=''}
+addEventListener('afterprint',()=>setTimeout(prClean,500));
+async function printAsk(){
+  closeSheet();if(!doc)return;
+  const file=await draftGet('file-'+doc.id).catch(()=>null),hasOrig=!!(file&&(file.pdf||(file.images&&file.images.length)));
+  if(typeof window.print!=='function')return toast('Αυτό το πρόγραμμα περιήγησης δεν τυπώνει — στείλε το ως PDF από την «Κοινοποίηση»');
+  dlgOpen('🖨️ Εκτύπωση',`<p style="margin:0 0 10px">Τι να τυπωθεί; Στο επόμενο βήμα διαλέγεις εκτυπωτή — ή «Αποθήκευση ως PDF».</p><div class="shws">${hasOrig?'<button id="prOrig">📄 Όπως το πρωτότυπο<small style="display:block;font-weight:400;opacity:.8">Οι σελίδες ακριβώς όπως είναι, με τις σημειώσεις σου</small></button>':''}<button class="${hasOrig?'sec':''}" id="prText">Aa Μόνο το κείμενο<small style="display:block;font-weight:400;opacity:.8">Καθαρό κείμενο, χωρίς εικόνες</small></button></div>`,null,true);
+  $('#dlgOk').textContent='Άκυρο';
+  if(hasOrig)$('#prOrig').onclick=()=>{dlgClose();printOrig(file)};
+  $('#prText').onclick=()=>{dlgClose();printText()};
+}
+function printText(){prClean();const A=$('#printArea');
+  A.innerHTML=`<div class="ph">${esc(doc.name)}</div>`+doc.pages.map((p,i)=>`${doc.book&&p.title?`<div class="ph${i?' brk':''}">${esc(p.title)}</div>`:''}<div class="pp">${esc(p.text||'')}</div>`).join('');
+  setTimeout(()=>window.print(),60)}
+async function printOrig(file){
+  prClean();let pdfjs=null;const A=$('#printArea');
+  try{
+    if(file.pdf){await pdfReady().catch(()=>{});if(!window.pdfjsLib)return toast('Χρειάζεται σύνδεση στο ίντερνετ την πρώτη φορά.');
+      const t=pdfLoad(file.pdf.slice(0),{key:doc.id,name:doc.name});pdfjs=await t.promise.catch(e=>{if(t.__cancel)throw new Error('pwcancel');throw e})}
+    const n=pdfjs?pdfjs.numPages:file.images.length;
+    if(n>80&&!confirm('Το έγγραφο έχει '+n+' σελίδες. Να τυπωθούν όλες;'))return;
+    let stop=false;dlgOpen('🖨️ Ετοιμάζω την εκτύπωση','<p style="margin:0" id="prProg">Σελίδα 1 από '+n+'…</p>',()=>{stop=true},true);$('#dlgOk').textContent='Άκυρο';dlgCancel=()=>{stop=true};
+    for(let i=0;i<n;i++){if(stop){prClean();return}
+      const pp=$('#prProg');if(pp)pp.textContent='Σελίδα '+(i+1)+' από '+n+'…';
+      const c=await pageCanvas(file,pdfjs,i,1240);const b=await new Promise(r=>c.toBlob(r,'image/jpeg',.9));c.width=c.height=0;
+      const u=URL.createObjectURL(b);prUrls.push(u);const im=new Image();im.alt='';im.src=u;A.appendChild(im);await im.decode().catch(()=>{})}
+    if(stop){prClean();return}
+    dlgCancel=null;dlgClose();setTimeout(()=>window.print(),60);
+  }catch(e){prClean();try{dlgClose()}catch(_){}if(e.message==='pwcancel')return toast('Δεν τυπώθηκε — χρειάζεται ο κωδικός του PDF');console.warn(e);toast('Η εκτύπωση δεν ετοιμάστηκε — δοκίμασε «Μόνο το κείμενο»')}
+  finally{if(pdfjs)pdfFree(pdfjs)}
+}
+$('#mPrint').onclick=()=>{newSeen('print');printAsk()};
+// «καινούργιο»: κίτρινη τελεία μέχρι να το ανοίξεις μία φορά
+const NEW_ITEMS={print:['#mPrint','#sheet details.cat[data-cat="file"] summary','#qGrid [data-k="print"]']};
+function newPaint(){let seen=[];try{seen=JSON.parse(localStorage.getItem('glenread-seen')||'[]')}catch(e){}
+  for(const k in NEW_ITEMS)NEW_ITEMS[k].forEach(q=>document.querySelectorAll(q).forEach(el=>el.classList.toggle('newdot',!seen.includes(k))))}
+function newSeen(k){let seen=[];try{seen=JSON.parse(localStorage.getItem('glenread-seen')||'[]')}catch(e){}if(!seen.includes(k)){seen.push(k);try{localStorage.setItem('glenread-seen',JSON.stringify(seen))}catch(e){}}newPaint()}
 async function annPdf(send){
   const file=pv.file||await draftGet('file-'+doc.id);
   if(!file)return toast('Το πρωτότυπο δεν κρατήθηκε — άνοιξε ξανά το PDF για να γράψεις πάνω του');
@@ -2603,7 +2660,7 @@ qbApply();
 const QB_ACT={find:()=>openFind(),view:()=>toggleView(),tr:()=>openTranslate(),speak:()=>$('#mSpeak').onclick(),fsm:()=>$('#fsMinus').onclick(),fsp:()=>$('#fsPlus').onclick(),
   theme:()=>themePop(),
 
-  bm:()=>$('#mBm').onclick(),draw:()=>$('#mDraw').onclick(),share:()=>$('#mShare').onclick(),copy:()=>$('#mCopy').onclick(),xlsx:()=>exportDoc('xlsx'),docx:()=>exportDoc('docx'),save:()=>$('#mAnnPdf').onclick(),full:()=>$('#mFull').onclick(),menu:()=>openSheet()};
+  bm:()=>$('#mBm').onclick(),draw:()=>$('#mDraw').onclick(),share:()=>$('#mShare').onclick(),copy:()=>$('#mCopy').onclick(),print:()=>{newSeen('print');printAsk()},xlsx:()=>exportDoc('xlsx'),docx:()=>exportDoc('docx'),save:()=>$('#mAnnPdf').onclick(),full:()=>$('#mFull').onclick(),menu:()=>openSheet()};
 document.querySelectorAll('#qbar [data-q]').forEach(b=>{if(QB_ACT[b.dataset.q])b.onclick=QB_ACT[b.dataset.q]});
 // «Θέμα»: ανοίγει από κάτω οι επιλογές (ίδιες με του μενού) — πατάς και βλέπεις αμέσως το αποτέλεσμα
 function themePop(){
@@ -2621,8 +2678,9 @@ function themePop(){
   $('#thDone').onclick=close;
 }
 // πλέγμα «Γρήγορα κουμπιά» στην κορυφή του μενού: πάτημα = ενέργεια, 📌 = μπαίνει/βγαίνει από την πάνω μπάρα (αποθηκεύεται αμέσως)
-const FAV_DEF=['find','view','tr','speak','fsm','fsp','theme','bm','share','copy'];
-let FAV=FAV_DEF.slice();try{const v=JSON.parse(localStorage.getItem('glenread-fav')||'null');if(Array.isArray(v))FAV=v}catch(e){}
+const FAV_DEF=['find','speak','bm','share','print'];
+const FAV_OLD='find,view,tr,speak,fsm,fsp,theme,bm,share,copy'; // παλιά προεπιλογή (10 κουμπιά) → περνά στη νέα
+let FAV=FAV_DEF.slice();try{const v=JSON.parse(localStorage.getItem('glenread-fav')||'null');if(Array.isArray(v)&&v.join()!==FAV_OLD)FAV=v}catch(e){}
 FAV=FAV.filter(k=>!NOPIN.includes(k)&&QB_ALL.some(x=>x[0]===k));
 let qEditing=false;
 function drawQGrid(){
@@ -2800,7 +2858,7 @@ document.addEventListener('click',e=>{if(Date.now()-sheetAt<500&&e.target.closes
 function openSheet(){
   if(editing){toggleEdit()}
   document.querySelectorAll('#sheet details.cat').forEach(d=>d.open=false);$('#sheet .pn').scrollTop=0;
-  $('#mRenameS').textContent=doc?doc.name:'';sigPreview();qEditing=false;drawQGrid();drawBm();rdApply();viewLabels();speakUI();shelfUI();
+  $('#mRenameS').textContent=doc?doc.name:'';sigPreview();qEditing=false;drawQGrid();drawBm();rdApply();viewLabels();speakUI();shelfUI();newPaint();
   $('#mPin').classList.toggle('on',pinned);
   sheetAt=Date.now();$('#sheet').classList.remove('hidden');$('#inkPop').classList.add('hidden');
   if(history.state&&history.state.v!=='sheet')history.pushState({v:'sheet'},'');

@@ -727,7 +727,27 @@ var D={
 "Το αρχείο προστατεύεται με κωδικό. Γράψε τον για να ανοίξει. Ο κωδικός δεν αποθηκεύεται.": "The file is protected with a password. Enter it to open. The password is not saved.",
 "Δεν άνοιξε — χρειάζεται ο κωδικός του PDF": "Not opened — the PDF password is needed",
 "Ο κωδικός του PDF δεν δέχτηκε — δοκίμασε ξανά.": "The PDF password wasn't accepted — try again.",
-"Χωρίς τον κωδικό φαίνεται μόνο το κείμενο": "Without the password only the text is shown"
+"Χωρίς τον κωδικό φαίνεται μόνο το κείμενο": "Without the password only the text is shown",
+"Εκτύπωση": "Print",
+"🖨️ Εκτύπωση": "🖨️ Print",
+"Όπως το πρωτότυπο ή μόνο το κείμενο, σε εκτυπωτή ή PDF": "As the original or text only, to a printer or PDF",
+"Τι να τυπωθεί; Στο επόμενο βήμα διαλέγεις εκτυπωτή — ή «Αποθήκευση ως PDF».": "What should be printed? In the next step you choose a printer — or “Save as PDF”.",
+"📄 Όπως το πρωτότυπο": "📄 As the original",
+"Οι σελίδες ακριβώς όπως είναι, με τις σημειώσεις σου": "The pages exactly as they are, with your notes",
+"Aa Μόνο το κείμενο": "Aa Text only",
+"Καθαρό κείμενο, χωρίς εικόνες": "Clean text, no images",
+"🖨️ Ετοιμάζω την εκτύπωση": "🖨️ Preparing to print",
+"Δεν τυπώθηκε — χρειάζεται ο κωδικός του PDF": "Not printed — the PDF password is needed",
+"Η εκτύπωση δεν ετοιμάστηκε — δοκίμασε «Μόνο το κείμενο»": "Printing couldn't be prepared — try “Text only”",
+"Αυτό το πρόγραμμα περιήγησης δεν τυπώνει — στείλε το ως PDF από την «Κοινοποίηση»": "This browser can't print — send it as PDF from “Share”",
+"Σημειώσεις και υπογραφή": "Notes and signature",
+"Σελιδοδείκτες, σημειώσεις, γράψιμο πάνω στη σελίδα, υπογραφή": "Bookmarks, notes, writing on the page, signature",
+"Κοινοποίηση, εκτύπωση, αρχείο": "Share, print, file",
+"Στείλε, τύπωσε, Word/Excel, αντιγραφή, όνομα": "Send, print, Word/Excel, copy, name",
+"Σελίδα και αναζήτηση": "Page and search",
+"Κείμενο ή πρωτότυπο, αναζήτηση, μετάβαση, πλήρης οθόνη": "Text or original, search, go to, full screen",
+"Ρυθμίσεις και βοήθεια": "Settings and help",
+"Οθόνη, μπάρες, γλώσσα, οδηγός χρήσης": "Screen, bars, language, user guide"
 };
 var G=function(s){return D.hasOwnProperty(s)?D[s]:s};
 var P=[
@@ -786,7 +806,9 @@ var P=[
 [/^Έφτασες τους (\d+) συνδέσμους$/,'You reached $1 links'],
 [/^(\d+) βιβλία · και δωρεάν βιβλία$/,'$1 books · and free books'],
 [/^1 βιβλίο · και δωρεάν βιβλία$/,'1 book · and free books'],
-[/^Σελίδα (\d+) από (\d+) · (\d+)%$/,'Page $1 of $2 · $3%']
+[/^Σελίδα (\d+) από (\d+) · (\d+)%$/,'Page $1 of $2 · $3%'],
+[/^Σελίδα (\d+) από (\d+)…$/,'Page $1 of $2…'],
+[/^Το έγγραφο έχει (\d+) σελίδες\. Να τυπωθούν όλες;$/,'The document has $1 pages. Print them all?']
 ];
 var GR=/[Ͱ-Ͽἀ-῿]/;
 function one(k){if(D.hasOwnProperty(k))return D[k];for(var i=0;i<P.length;i++){var r=P[i][0];if(r.test(k))return k.replace(r,P[i][1])}return null}
