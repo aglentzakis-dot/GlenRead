@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="plaisio.js"></script>
-<meta name="app-version" content="2.61">
+<meta name="app-version" content="2.62">
 <!-- Ασφάλεια: η σελίδα φορτώνει κώδικα μόνο από εδώ και από συγκεκριμένες, κλειδωμένες εκδόσεις βιβλιοθηκών· στέλνει δεδομένα μόνο στο Google Drive του χρήστη· καμία εκτέλεση κειμένου ως κώδικα (eval) -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://cdn.jsdelivr.net/npm/mammoth@1.8.0/ https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/ https://accounts.google.com/gsi/; worker-src 'self' blob:; connect-src 'self' https: data: blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://tessdata.projectnaptha.com https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com/gsi/; img-src 'self' https://aglentzakis-dot.github.io data: blob: https://*.glenapps.gr https://covers.openlibrary.org https://archive.org https://*.archive.org https://books.google.com https://books.googleusercontent.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; font-src 'self' data:; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -421,7 +421,9 @@ body.selon #bvAa{display:none}
 @keyframes scl{from{top:12%}to{top:88%}}
 #bcBox p{position:relative;color:#fff;text-align:center;margin:18px 16px;font-size:16px;text-shadow:0 1px 3px #000}
 #bcBox .sbt{position:absolute;bottom:max(24px,env(safe-area-inset-bottom));left:16px;right:16px;display:flex;gap:10px}
-#bcBox .sbt button{flex:1;min-height:52px;font-size:16px}
+#bcBox .sbt button{flex:1;min-height:52px;font-size:15px;padding:0 6px}#bcBox .sbt button.sec{background:#fff;color:#1d1d1b;border-color:#fff}
+#bcBox .bcz{position:absolute;bottom:calc(max(24px,env(safe-area-inset-bottom)) + 64px);left:16px;right:16px;display:flex;align-items:center;gap:10px;color:#fff;font-size:20px}#bcBox .bcz input{flex:1}#bcBox .bcz button{min-width:48px;min-height:44px;font-size:20px;background:#0008;border:1px solid #fff6;color:#fff;border-radius:10px}#bcBox .bcz button.on{background:#FDD117}
+.fbRow button{min-width:44px}
 </style>
 </head>
 <body>
@@ -489,8 +491,8 @@ body.selon #bvAa{display:none}
     <h2 class="tabh">📚 Βιβλία</h2>
   <div class="card" id="findBox">
     <div class="row" style="flex-wrap:nowrap"><strong style="flex:1">🔎 Βρες βιβλίο</strong></div>
-    <div class="fbRow"><input id="fbQ" type="search" enterkeyhint="search" autocomplete="off" maxlength="120" placeholder="Τίτλος, συγγραφέας ή ISBN" aria-label="Τίτλος, συγγραφέας ή ISBN"><button id="fbGo" aria-label="Αναζήτηση στο διαδίκτυο">🔎</button><button id="fbScan" class="sec" aria-label="Σκάναρε το barcode του βιβλίου">📷</button></div>
-    <p class="muted" style="margin:6px 0 0;font-size:12.5px">Καθώς γράφεις ψάχνει <b>στο κινητό σου</b>. Με το 🔎 ψάχνει και <b>στο διαδίκτυο</b>: στέλνεται μόνο ό,τι έγραψες, τίποτε άλλο. Με το 📷 σκανάρεις το barcode στο πίσω μέρος του βιβλίου.</p>
+    <div class="fbRow"><input id="fbQ" type="search" enterkeyhint="search" autocomplete="off" maxlength="120" placeholder="Τίτλος, συγγραφέας ή ISBN" aria-label="Τίτλος, συγγραφέας ή ISBN"><button id="fbGo" aria-label="Αναζήτηση στο διαδίκτυο">🔎</button><button id="fbScan" class="sec" aria-label="Σκάναρε το barcode του βιβλίου">📷</button><button id="fbPh" class="sec" aria-label="Βρες το βιβλίο από φωτογραφία">🖼</button></div>
+    <p class="muted" style="margin:6px 0 0;font-size:12.5px">Καθώς γράφεις ψάχνει <b>στο κινητό σου</b>. Με το 🔎 ψάχνει και <b>στο διαδίκτυο</b> (Open Library και Google Βιβλία): στέλνεται μόνο ό,τι έγραψες, τίποτε άλλο. Οι φωτογραφίες δεν φεύγουν ποτέ από το κινητό. Με το 📷 σκανάρεις το barcode ή το QR, με το 🖼 το βρίσκει από φωτογραφία (barcode, εξώφυλλο ή QR).</p>
     <div id="fbLocal"></div>
     <div id="fbNet"></div>
   </div>
@@ -804,12 +806,12 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="lib/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="antigrafa.js"></script>
-<script src="metafora-rythmisi.js?v=2.61"></script>
-<script src="metafora-lipsi.js?v=2.61"></script>
+<script src="metafora-rythmisi.js?v=2.62"></script>
+<script src="metafora-lipsi.js?v=2.62"></script>
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.61';
+const VERSION='2.62';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -2196,76 +2198,135 @@ function fbLocal(){const q=$('#fbQ').value.trim(),box=$('#fbLocal');if(q.length<
     +K.map(b=>katRow(b,'')).join(''):'<p class="muted" style="margin:8px 0 0">📱 Δεν το έχεις στο κινητό σου. Πάτα 🔎 για αναζήτηση στο διαδίκτυο.</p>';
 }
 $('#fbQ').addEventListener('input',()=>{fbLocal();if(!$('#fbQ').value.trim()){fbRes=[];$('#fbNet').innerHTML=''}});
-$('#fbQ').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();fbSearch('ol')}});
+$('#fbQ').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();fbSearch()}});
 $('#fbQ').addEventListener('focus',()=>newSeen('vivlio'),{once:true});
 $('#fbLocal').onclick=async e=>{const s=e.target.closest('[data-sh]');if(s){flushAll();const id=s.dataset.sh,k=isNaN(+id)?id:+id;const f=await getDoc(k).catch(()=>null);if(!f)return toast('Αυτό το έγγραφο σβήστηκε');doc=f;return openReader()}
   const r=e.target.closest('.kit');if(r){const b=KAT.find(k=>k.id===r.dataset.k);if(b)katDlg(b)}};
-$('#fbGo').onclick=()=>fbSearch('ol');
+$('#fbGo').onclick=()=>fbSearch();
 // ---- αναζήτηση στο διαδίκτυο ----
 async function getJSON(u){const ac=new AbortController(),to=setTimeout(()=>ac.abort(),15000);
   try{const r=await fetch(u,{credentials:'omit',referrerPolicy:'no-referrer',cache:'no-store',signal:ac.signal});if(!r.ok)throw new Error(r.status===429?'busy':'http');
     const t=await r.text();if(t.length>3e6)throw new Error('big');return JSON.parse(t)}finally{clearTimeout(to)}}
-async function fbSearch(src){
+// Δύο πηγές μαζί (Open Library + Google Βιβλία), ενωμένα αποτελέσματα· στέλνεται ΜΟΝΟ το κείμενο/ISBN της αναζήτησης.
+function olMap(d,isb){const L=Array.isArray(d.isbn)?d.isbn.slice(0,200).map(isbnNorm).filter(Boolean):[],is=(isb&&L.includes(isb)?isb:L[0])||'';
+  return katClean({t:d.title,a:(d.author_name||[]).slice(0,3).join(', '),y:d.first_publish_year,pub:Array.isArray(d.publisher)?d.publisher[0]:'',pg:d.number_of_pages_median,isbn:is,ol:d.key,
+    covU:d.cover_i?'https://covers.openlibrary.org/b/id/'+(+d.cover_i)+'-M.jpg':'',
+    free:d.ebook_access==='public'&&Array.isArray(d.ia)&&/^[\w.-]+$/.test(d.ia[0]||'')?'https://archive.org/details/'+d.ia[0]:''})}
+function gbMap(it){const v=it.volumeInfo||{},ac=it.accessInfo||{},ids=Array.isArray(v.industryIdentifiers)?v.industryIdentifiers:[];
+  const i13=(ids.find(x=>x.type==='ISBN_13')||ids.find(x=>x.type==='ISBN_10')||{}).identifier;let cu=v.imageLinks&&(v.imageLinks.thumbnail||v.imageLinks.smallThumbnail);if(cu)cu=String(cu).replace(/^http:/,'https:').replace(/&edge=curl/,'');
+  return katClean({t:[v.title,v.subtitle].filter(Boolean).join(' — '),a:(v.authors||[]).slice(0,3).join(', '),y:String(v.publishedDate||'').slice(0,4),pub:v.publisher,pg:v.pageCount,isbn:i13,covU:cu,
+    free:ac.accessViewStatus==='FULL_PUBLIC_DOMAIN'&&(ac.epub&&ac.epub.isAvailable||ac.pdf&&ac.pdf.isAvailable)?String(v.infoLink||'').replace(/^http:/,'https:'):''})}
+async function fbSearch(){
   const q=$('#fbQ').value.trim().slice(0,120);if(q.length<2)return toast('Γράψε τίτλο, συγγραφέα ή ISBN');
   if(isbnLooks(q)&&!isbnNorm(q))return toast('Το ISBN δεν είναι σωστό — έλεγξε τα ψηφία');
   if(!navigator.onLine)return toast('Χρειάζεται σύνδεση στο διαδίκτυο');
-  const isb=isbnNorm(q),my=++fbSeq;$('#fbNet').innerHTML=`<p class="muted" style="margin:10px 0">🌐 Ψάχνω στο ${src==='gb'?'Google Βιβλία':'Open Library'}…</p>`;
-  try{let R=[];
-    if(src==='gb'){const j=await getJSON('https://www.googleapis.com/books/v1/volumes?maxResults=20&printType=books&q='+encodeURIComponent(isb?'isbn:'+isb:q));
-      R=(Array.isArray(j.items)?j.items:[]).map(it=>{const v=it.volumeInfo||{},ac=it.accessInfo||{},ids=Array.isArray(v.industryIdentifiers)?v.industryIdentifiers:[];
-        const i13=(ids.find(x=>x.type==='ISBN_13')||ids.find(x=>x.type==='ISBN_10')||{}).identifier;let cu=v.imageLinks&&(v.imageLinks.thumbnail||v.imageLinks.smallThumbnail);if(cu)cu=String(cu).replace(/^http:/,'https:').replace(/&edge=curl/,'');
-        return katClean({t:[v.title,v.subtitle].filter(Boolean).join(' — '),a:(v.authors||[]).slice(0,3).join(', '),y:String(v.publishedDate||'').slice(0,4),pub:v.publisher,pg:v.pageCount,isbn:i13,covU:cu,
-          free:ac.accessViewStatus==='FULL_PUBLIC_DOMAIN'&&(ac.epub&&ac.epub.isAvailable||ac.pdf&&ac.pdf.isAvailable)?String(v.infoLink||'').replace(/^http:/,'https:'):''})}).filter(Boolean)}
-    else{const F='key,title,author_name,first_publish_year,isbn,cover_i,publisher,number_of_pages_median,ebook_access,ia';
-      const j=await getJSON('https://openlibrary.org/search.json?limit=20&fields='+F+'&q='+encodeURIComponent(isb?'isbn:'+isb:q));
-      R=(Array.isArray(j.docs)?j.docs:[]).map(d=>{const L=Array.isArray(d.isbn)?d.isbn.slice(0,200).map(isbnNorm).filter(Boolean):[],is=(isb&&L.includes(isb)?isb:L[0])||'';
-        return katClean({t:d.title,a:(d.author_name||[]).slice(0,3).join(', '),y:d.first_publish_year,pub:Array.isArray(d.publisher)?d.publisher[0]:'',pg:d.number_of_pages_median,isbn:is,ol:d.key,
-          covU:d.cover_i?'https://covers.openlibrary.org/b/id/'+(+d.cover_i)+'-M.jpg':'',
-          free:d.ebook_access==='public'&&Array.isArray(d.ia)&&/^[\w.-]+$/.test(d.ia[0]||'')?'https://archive.org/details/'+d.ia[0]:''})}).filter(Boolean)}
-    if(my!==fbSeq)return;fbRes=R;fbNetDraw(src,isb)}
-  catch(e){if(my!==fbSeq)return;$('#fbNet').innerHTML=`<p class="muted" style="margin:10px 0">${e.message==='busy'?'Η υπηρεσία είναι φορτωμένη — δοκίμασε σε λίγο.':e.name==='AbortError'?'Άργησε πολύ — δοκίμασε ξανά.':'Η αναζήτηση δεν έγινε — έλεγξε τη σύνδεση.'}</p>`+fbMore(src)}
-}
-let fbSrc='ol',fbIsb=null;
-const fbMore=src=>src==='gb'?'':`<button class="sec" id="fbGb" style="width:100%;margin-top:8px">Ψάξε και στο Google Βιβλία</button><p class="muted" style="font-size:12px;margin:4px 0 0">Καλύτερο για ελληνικά βιβλία. Στέλνεται στη Google μόνο το κείμενο της αναζήτησης.</p>`;
-function fbNetDraw(src,isb){if(src){fbSrc=src;fbIsb=isb}if(!$('#fbQ').value.trim())return;
-  const nm=fbSrc==='gb'?'Google Βιβλία':'Open Library';
-  $('#fbNet').innerHTML=`<div class="srch">🌐 Στο διαδίκτυο · ${nm}</div>`+(fbRes.length?fbRes.map((b,i)=>{const h=katFind(b);
-    return katRow(Object.assign({},b,{sh:'',r:0}),`<button data-ff="${i}" class="${h&&h.fav?'on':''}" aria-label="Βάλ' το στα αγαπημένα">${h&&h.fav?'⭐':'☆'}</button><button data-fa="${i}" aria-label="${h?'Το έχεις ήδη στη λίστα σου':'Πρόσθεσέ το στη λίστα σου'}">${h?'✓':'➕'}</button>`)
-      .replace('<small></small>',`<small>${h?'<span class="kbadge have">✓ στη λίστα σου</span>':''}${b.free?'<span class="kbadge">📖 δωρεάν ηλεκτρονικό</span>':''}${b.isbn?'<span class="usr">ISBN '+esc(b.isbn)+'</span>':''}</small>`)}).join('')
-    :`<p class="muted" style="margin:8px 0">Δεν βρέθηκε τίποτα${fbIsb?' με αυτό το ISBN':''} στο ${nm}.</p>`)
-    +fbMore(fbSrc)+`<button class="sec" id="fbMan" style="width:100%;margin-top:8px">✍️ Πρόσθεσέ το με το χέρι</button>`;
-  const g=$('#fbGb');if(g)g.onclick=()=>fbSearch('gb');
+  const isb=isbnNorm(q),my=++fbSeq;$('#fbNet').innerHTML='<p class="muted" style="margin:10px 0">🌐 Ψάχνω στο Open Library και στο Google Βιβλία…</p>';
+  const F='key,title,author_name,first_publish_year,isbn,cover_i,publisher,number_of_pages_median,ebook_access,ia';
+  const jobs=[getJSON('https://openlibrary.org/search.json?limit=20&fields='+F+'&q='+encodeURIComponent(isb?'isbn:'+isb:q)).then(j=>(Array.isArray(j.docs)?j.docs:[]).map(d=>olMap(d,isb))),
+    getJSON('https://www.googleapis.com/books/v1/volumes?maxResults=20&printType=books&q='+encodeURIComponent(isb?'isbn:'+isb:q)).then(j=>(Array.isArray(j.items)?j.items:[]).map(gbMap))];
+  const rs=await Promise.allSettled(jobs);if(my!==fbSeq)return;
+  const ol=rs[0].status==='fulfilled'?rs[0].value.filter(Boolean):[],gb=rs[1].status==='fulfilled'?rs[1].value.filter(Boolean):[];
+  // ένωση: για ISBN πρώτα ό,τι ταιριάζει ακριβώς· τα διπλά (ίδιο ISBN ή ίδιος τίτλος+συγγραφέας) μία φορά, με ό,τι λείπει συμπληρωμένο
+  const out=[];for(const b of (isb?[...gb,...ol]:[...ol,...gb])){const d=out.find(x=>(b.isbn&&x.isbn===b.isbn)||katKey(x)===katKey(b));
+    if(d){for(const k of ['a','y','pub','pg','covU','free','ol','isbn'])if(!d[k]&&b[k])d[k]=b[k]}else out.push(b)}
+  fbRes=isb?out.filter(b=>b.isbn===isb).concat(out.filter(b=>b.isbn!==isb)):out;
+  fbErr=rs.every(r=>r.status==='rejected')?(rs.some(r=>r.reason&&r.reason.message==='busy')?'busy':(rs.some(r=>r.reason&&r.reason.name==='AbortError')?'slow':'net')):'';
+  fbIsb=isb;fbNetDraw()}
+let fbIsb=null,fbErr='';
+// όταν δεν βρίσκεται: η ελληνική βάση βιβλίων (Βιβλιονέτ) και αναζήτηση στο διαδίκτυο, στο πρόγραμμα περιήγησης
+const fbExt=q=>`<div class="row" style="gap:6px;margin-top:8px;flex-wrap:nowrap"><button class="sec" data-ext="bn" style="flex:1">🇬🇷 Βιβλιονέτ</button><button class="sec" data-ext="web" style="flex:1">🌐 Ψάξε στο διαδίκτυο</button></div><p class="muted" style="font-size:12px;margin:4px 0 0">Ανοίγουν στο πρόγραμμα περιήγησης. Η Βιβλιονέτ έχει σχεδόν όλα τα ελληνικά βιβλία.</p>`;
+function fbNetDraw(){const q=$('#fbQ').value.trim();if(!q)return;
+  const hits=fbRes.filter(b=>!fbIsb||b.isbn===fbIsb).length;
+  $('#fbNet').innerHTML='<div class="srch">🌐 Στο διαδίκτυο</div>'+(fbErr?`<p class="muted" style="margin:8px 0">${fbErr==='busy'?'Οι υπηρεσίες είναι φορτωμένες — δοκίμασε σε λίγο.':fbErr==='slow'?'Άργησε πολύ — δοκίμασε ξανά.':'Η αναζήτηση δεν έγινε — έλεγξε τη σύνδεση.'}</p>`:'')
+    +(fbRes.length?fbRes.map((b,i)=>{const h=katFind(b);
+      return katRow(Object.assign({},b,{sh:'',r:0}),`<button data-ff="${i}" class="${h&&h.fav?'on':''}" aria-label="Βάλ' το στα αγαπημένα">${h&&h.fav?'⭐':'☆'}</button><button data-fa="${i}" aria-label="${h?'Το έχεις ήδη στη λίστα σου':'Πρόσθεσέ το στη λίστα σου'}">${h?'✓':'➕'}</button>`)
+        .replace('<small></small>',`<small>${h?'<span class="kbadge have">✓ στη λίστα σου</span>':''}${b.free?'<span class="kbadge">📖 δωρεάν ηλεκτρονικό</span>':''}${b.isbn?'<span class="usr">ISBN '+esc(b.isbn)+'</span>':''}</small>`)}).join(''):'')
+    +(!fbErr&&!hits?`<p style="margin:8px 0"><b>Δεν βρέθηκε${fbIsb?' αυτό το ISBN':''} στο Open Library και στο Google Βιβλία.</b> <span class="muted">Τα περισσότερα ελληνικά βιβλία υπάρχουν στη Βιβλιονέτ:</span></p>`:'')
+    +fbExt(q)+`<button class="sec" id="fbMan" style="width:100%;margin-top:8px">✍️ Πρόσθεσέ το με το χέρι</button>`;
   $('#fbMan').onclick=()=>{const q=$('#fbQ').value.trim(),i=isbnNorm(q);katDlg({t:i?'':q,a:'',isbn:i||'',y:'',pub:'',pg:'',sh:'want',fav:false,r:0,n:''},true)};
 }
 $('#fbNet').onclick=async e=>{const f=e.target.closest('[data-ff]'),a=e.target.closest('[data-fa]');
+  const x=e.target.closest('[data-ext]');if(x){const q=$('#fbQ').value.trim().slice(0,120),i=isbnNorm(q)||q;
+    const u=x.dataset.ext==='bn'?'https://www.biblionet.gr/'+encodeURIComponent('συνθετη-αναζητηση')+'?q='+encodeURIComponent(i):'https://duckduckgo.com/?q='+encodeURIComponent((isbnNorm(q)?'ISBN '+i:q+' βιβλίο'));
+    window.open(u,'_blank','noopener,noreferrer');return}
   if(f){const b=fbRes[+f.dataset.ff];if(!b)return;const h=katFind(b);if(h){h.fav=!h.fav;await katSave();fbNetDraw();return toast(h.fav?'⭐ Μπήκε στα αγαπημένα':'Βγήκε από τα αγαπημένα')}
     const c=await katAdd(b,{fav:true});if(c)toast('⭐ Μπήκε στα αγαπημένα');return}
   if(a){const b=fbRes[+a.dataset.fa];if(!b)return;const h=katFind(b);if(h)return katDlg(h);katDlg(Object.assign({},b,{sh:'want',fav:false,r:0,n:''}),true);return}
   const r=e.target.closest('.kit');if(r){const i=r.querySelector('[data-fa]');if(i)i.click()}};
-// ---- σάρωση barcode με την κάμερα (μένει όλα στη συσκευή) ----
+// ---- σάρωση barcode/QR με την κάμερα ή από φωτογραφία (όλα μέσα στη συσκευή) ----
 let scan=null;
+const BC_FMT=['ean_13','upc_a','ean_8','qr_code'];
+async function bcDet(){if(!('BarcodeDetector' in window))return null;try{const sup=await BarcodeDetector.getSupportedFormats();const fm=BC_FMT.filter(x=>sup.includes(x));return fm.length?new BarcodeDetector({formats:fm}):null}catch(e){return null}}
+function fbSet(q,msg){const el=$('#fbQ');el.removeAttribute('inputmode');el.value=q;fbLocal();if(msg)toast(msg);fbSearch()}
+// τι βρέθηκε σε barcode/QR: ISBN → αναζήτηση· σύνδεσμος → ερώτηση πριν ανοίξει· κείμενο → αναζήτηση με αυτό
+function bcUse(raw){const t=String(raw||'').trim().slice(0,500),i=isbnNorm(t)||isbnNorm((t.match(/97[89][\d\- ]{10,14}/)||[])[0]);
+  if(i){fbSet(i,'Βρέθηκε το ISBN '+i);return true}
+  if(/^https?:\/\//i.test(t)){const c=urlCheck(t);
+    dlgOpen('🔗 Ο κωδικός QR έχει σύνδεσμο',`<p style="margin:0 0 6px">Ο κωδικός οδηγεί εδώ:</p><p class="usr" style="word-break:break-all;margin:0 0 8px"><b>${esc(t)}</b></p><p class="muted" style="margin:0">${c.err?esc(c.err):'Άνοιξέ τον μόνο αν εμπιστεύεσαι το βιβλίο/τον εκδότη. Ανοίγει στο πρόγραμμα περιήγησης.'}</p>`,c.err?null:()=>window.open(c.u.href,'_blank','noopener,noreferrer'),!!c.err);
+    if(!c.err)$('#dlgOk').textContent='Άνοιγμα';return true}
+  if(t.length>=2){fbSet(t.slice(0,120),'Διαβάστηκε ο κωδικός QR');return true}return false}
 async function scanStart(){
   newSeen('vivlio');
-  if(!('BarcodeDetector' in window)||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-    dlgOpen('📷 Σάρωση barcode','<p style="margin:0">Αυτό το πρόγραμμα περιήγησης δεν μπορεί να διαβάσει barcode. Γράψε το <b>ISBN</b>: είναι τα ψηφία που υπάρχουν πάνω ή κάτω από το barcode, στο πίσω μέρος του βιβλίου (αρχίζουν συνήθως από 978).</p>',()=>{setTimeout(()=>{const q=$('#fbQ');q.setAttribute('inputmode','numeric');q.focus()},50)},true);return}
-  let det;try{const sup=await BarcodeDetector.getSupportedFormats();const fm=['ean_13','upc_a','ean_8'].filter(x=>sup.includes(x));if(!fm.length)throw 0;det=new BarcodeDetector({formats:fm})}catch(e){return toast('Η συσκευή δεν διαβάζει barcode βιβλίων — γράψε το ISBN')}
-  const box=document.createElement('div');box.id='bcBox';box.innerHTML='<video playsinline muted></video><div class="sfr"><i></i></div><p>Στόχευσε το barcode στο πίσω μέρος του βιβλίου</p><div class="sbt"><button class="sec" id="scTy">✍️ Γράψε το ISBN</button><button id="scX">✕ Κλείσιμο</button></div>';
+  const det=await bcDet();
+  if(!det||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){photoPick();return}
+  const box=document.createElement('div');box.id='bcBox';box.innerHTML='<video playsinline muted></video><div class="sfr"><i></i></div><p>Κράτα το κινητό <b>μια παλάμη μακριά</b> και στόχευσε το barcode. Πάτα πάνω στην εικόνα για εστίαση.</p><div class="bcz hidden"><span>🔍</span><input type="range" id="bcZ" aria-label="Ζουμ" step="0.1"><button id="bcT" class="hidden" aria-label="Φακός">🔦</button></div><div class="sbt"><button class="sec" id="scPh">📸 Φωτογραφία</button><button class="sec" id="scTy">✍️ ISBN</button><button id="scX">✕</button></div>';
   document.body.appendChild(box);
-  let st;try{st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false})}
-  catch(e){box.remove();return toast(e.name==='NotAllowedError'?'Δεν δόθηκε άδεια για την κάμερα — γράψε το ISBN':'Η κάμερα δεν άνοιξε — γράψε το ISBN')}
+  let st;try{st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false})}
+  catch(e){box.remove();if(e.name==='NotAllowedError')toast('Δεν δόθηκε άδεια για την κάμερα — βγάλε φωτογραφία ή γράψε το ISBN');photoPick();return}
   const v=box.querySelector('video');v.srcObject=st;try{await v.play()}catch(e){}
   scan={st,box,on:true};const stop=()=>scanStop();
-  box.querySelector('#scX').onclick=stop;box.querySelector('#scTy').onclick=()=>{stop();const q=$('#fbQ');q.setAttribute('inputmode','numeric');q.value='';q.focus()};
-  let seen='',n=0;
+  // εστίαση: συνεχής αυτόματη εστίαση, λίγο ζουμ (για να μην πλησιάζεις πολύ — από κοντά καμία κάμερα δεν εστιάζει), φακός
+  const tr=st.getVideoTracks()[0];let caps={};try{caps=tr.getCapabilities?tr.getCapabilities():{}}catch(e){}
+  const ac=c=>tr.applyConstraints({advanced:[c]}).catch(()=>{});
+  if(Array.isArray(caps.focusMode)&&caps.focusMode.includes('continuous'))ac({focusMode:'continuous'});
+  if(caps.zoom&&caps.zoom.max>caps.zoom.min){const z=box.querySelector('#bcZ');z.min=caps.zoom.min;z.max=Math.min(caps.zoom.max,8);z.value=Math.min(2,z.max);ac({zoom:+z.value});z.oninput=()=>ac({zoom:+z.value});box.querySelector('.bcz').classList.remove('hidden')}
+  if(caps.torch){const t=box.querySelector('#bcT');t.classList.remove('hidden');box.querySelector('.bcz').classList.remove('hidden');let on=false;t.onclick=()=>{on=!on;ac({torch:on});t.classList.toggle('on',on)}}
+  v.onclick=e=>{const r=v.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+    if(Array.isArray(caps.focusMode)&&caps.focusMode.includes('single-shot'))ac({focusMode:'single-shot',pointsOfInterest:[{x,y}]}).then(()=>setTimeout(()=>caps.focusMode.includes('continuous')&&ac({focusMode:'continuous'}),1500));
+    else if(Array.isArray(caps.focusMode)&&caps.focusMode.includes('continuous'))ac({focusMode:'continuous',pointsOfInterest:[{x,y}]})};
+  box.querySelector('#scX').onclick=stop;
+  box.querySelector('#scTy').onclick=()=>{stop();const q=$('#fbQ');q.setAttribute('inputmode','numeric');q.value='';q.focus()};
+  box.querySelector('#scPh').onclick=()=>{stop();photoPick(true)};
+  // κάθε φορά διαβάζει όλη την εικόνα και, εναλλάξ, μεγεθυμένο το κέντρο (για μικρά barcode)
+  const cv=document.createElement('canvas'),cx=cv.getContext('2d',{willReadFrequently:true});let seen='',k=0;
   const loop=async()=>{if(!scan||!scan.on)return;
-    try{if(v.readyState>=2){const r=await det.detect(v);for(const c of r){const i=isbnNorm(c.rawValue);if(i){if(i===seen&&++n>=1){scanStop();try{navigator.vibrate&&navigator.vibrate(80)}catch(e){}
-          const q=$('#fbQ');q.removeAttribute('inputmode');q.value=i;fbLocal();toast('📷 Βρέθηκε το ISBN '+i);fbSearch('ol');return}seen=i;n=0}}}}catch(e){}
-    setTimeout(loop,180)};
+    try{if(v.readyState>=2&&v.videoWidth){let src=v;
+      if(k++%2){const W=v.videoWidth,H=v.videoHeight,w=W*.6,h=H*.45;cv.width=w;cv.height=h;cx.drawImage(v,(W-w)/2,(H-h)/2,w,h,0,0,w,h);src=cv}
+      const r=await det.detect(src);
+      for(const c of r){const raw=String(c.rawValue||'');const isb=isbnNorm(raw);
+        if(isb||c.format==='qr_code'){const key=isb||raw;if(key===seen){scanStop();try{navigator.vibrate&&navigator.vibrate(80)}catch(e){}bcUse(raw);return}seen=key;break}}}}catch(e){}
+    setTimeout(loop,150)};
   loop();
 }
 function scanStop(){if(!scan)return;scan.on=false;try{scan.st.getTracks().forEach(t=>t.stop())}catch(e){}try{scan.box.remove()}catch(e){}scan=null}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)scanStop()});
-$('#fbScan').onclick=scanStart;
+// ---- αναγνώριση βιβλίου από φωτογραφία: barcode/QR, αλλιώς ανάγνωση του κειμένου (ISBN ή τίτλος από το εξώφυλλο) ----
+function photoPick(cam){const i=document.createElement('input');i.type='file';i.accept='image/*';if(cam)i.setAttribute('capture','environment');
+  i.onchange=()=>{const f=i.files&&i.files[0];if(f)photoBook(f)};i.click()}
+async function photoBook(f){
+  newSeen('vivlio');if(!/^image\//.test(f.type||'image/'))return toast('Διάλεξε μια φωτογραφία');
+  let bm;try{bm=await createImageBitmap(f)}catch(e){return toast('Η φωτογραφία δεν διαβάστηκε')}
+  const msg=$('#fbNet');msg.innerHTML='<p class="muted" style="margin:10px 0">📷 Κοιτάζω τη φωτογραφία…</p>';
+  try{
+    const det=await bcDet();
+    if(det){const tries=[bm];const M=Math.max(bm.width,bm.height);
+      if(M>1800){const sc=1800/M,c=document.createElement('canvas');c.width=bm.width*sc;c.height=bm.height*sc;c.getContext('2d').drawImage(bm,0,0,c.width,c.height);tries.push(c)}
+      for(const t of tries){let r=[];try{r=await det.detect(t)}catch(e){}
+        const pick=r.find(c=>isbnNorm(c.rawValue))||r.find(c=>c.format==='qr_code');if(pick){msg.innerHTML='';bcUse(pick.rawValue);return}}}
+    // κανένα barcode: διαβάζω το κείμενο της φωτογραφίας
+    msg.innerHTML='<p class="muted" style="margin:10px 0">📷 Διαβάζω το κείμενο της φωτογραφίας… (την πρώτη φορά αργεί λίγο)</p>';
+    const M=Math.max(bm.width,bm.height),sc=Math.min(1,1800/M),c=document.createElement('canvas');c.width=Math.round(bm.width*sc);c.height=Math.round(bm.height*sc);c.getContext('2d').drawImage(bm,0,0,c.width,c.height);
+    cancelled=false;const w=await getWorker();const res=await ocrOnce(w,c,0);c.width=c.height=0;
+    const txt=String(res.text||'');const im=txt.replace(/[Oo]/g,'0').match(/(?:ISBN[\s:\-]*)?(97[89][\d\-\s]{10,16}|\d[\d\-\s]{8,12}[\dXx])/g)||[];
+    for(const m of im){const i=isbnNorm(m);if(i){msg.innerHTML='';fbSet(i,'Διαβάστηκε το ISBN '+i);return}}
+    // αλλιώς: οι γραμμές με τα μεγαλύτερα γράμματα (τίτλος, συγγραφέας του εξωφύλλου)
+    const L=(res.lines||[]).filter(l=>(l[0].match(/\p{L}/gu)||[]).length>=3).sort((a,b)=>(b[4]-b[2])-(a[4]-a[2])).slice(0,2).map(l=>l[0].replace(/[^\p{L}\p{N}\s'’.\-]/gu,' ').replace(/\s+/g,' ').trim()).filter(Boolean);
+    if(L.length){msg.innerHTML='';fbSet(L.join(' ').slice(0,100),'Διάβασα: «'+L.join(' ').slice(0,60)+'» — διόρθωσέ το αν χρειάζεται');return}
+    msg.innerHTML='<p class="muted" style="margin:10px 0">Δεν βρήκα barcode ούτε κείμενο. Φωτογράφισε <b>ίσια</b> το πίσω μέρος (το barcode με τα ψηφία) ή το εξώφυλλο με τον τίτλο, με καλό φως.</p>';
+  }catch(e){console.warn(e);msg.innerHTML='<p class="muted" style="margin:10px 0">Η φωτογραφία δεν διαβάστηκε — δοκίμασε ξανά ή γράψε το ISBN.</p>'}
+  finally{try{bm.close()}catch(e){}}
+}
+$('#fbScan').onclick=scanStart;$('#fbPh').onclick=()=>photoPick(false);
 katLoad();setTimeout(()=>{try{newPaint()}catch(e){}},0);
 async function drawLast(){
   const box=$('#lastBox');let metas=[];try{metas=await docsMeta()}catch(e){}
