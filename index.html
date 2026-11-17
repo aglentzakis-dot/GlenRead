@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="plaisio.js"></script>
-<meta name="app-version" content="2.62">
+<meta name="app-version" content="2.63">
 <!-- Ασφάλεια: η σελίδα φορτώνει κώδικα μόνο από εδώ και από συγκεκριμένες, κλειδωμένες εκδόσεις βιβλιοθηκών· στέλνει δεδομένα μόνο στο Google Drive του χρήστη· καμία εκτέλεση κειμένου ως κώδικα (eval) -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://cdn.jsdelivr.net/npm/mammoth@1.8.0/ https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/ https://accounts.google.com/gsi/; worker-src 'self' blob:; connect-src 'self' https: data: blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://tessdata.projectnaptha.com https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com/gsi/; img-src 'self' https://aglentzakis-dot.github.io data: blob: https://*.glenapps.gr https://covers.openlibrary.org https://archive.org https://*.archive.org https://books.google.com https://books.googleusercontent.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; font-src 'self' data:; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -414,6 +414,8 @@ body.selon #bvAa{display:none}
 #katDlg .kcov{width:96px;height:138px;border-radius:7px;background:var(--bg) center/cover no-repeat;border:1px solid var(--line);float:left;margin:0 10px 6px 0;display:flex;align-items:center;justify-content:center;font-size:40px;overflow:hidden}
 #katDlg .kcov img{width:100%;height:100%;object-fit:cover}
 #katDlg .stars button{font-size:24px;padding:2px 4px;background:none;border:none;min-height:40px;color:#EF9F02}
+.webg{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:2px solid #EF9F02;border-radius:12px;background:#FDD11722;margin:6px 0}.webg b{font-size:16px}.webg small{opacity:.75;font-size:12px}
+.webs{display:flex;flex-direction:column;align-items:flex-start;width:100%;text-align:left;margin-top:5px;padding:7px 10px;min-height:0;gap:1px}.webs small{opacity:.75;font-size:12px;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 #bcBox{position:fixed;inset:0;z-index:60;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center}
 #bcBox video{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
 #bcBox .sfr{position:relative;width:78%;max-width:420px;height:150px;border:3px solid #FDD117;border-radius:14px;box-shadow:0 0 0 2000px #0008}
@@ -806,12 +808,12 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="lib/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="antigrafa.js"></script>
-<script src="metafora-rythmisi.js?v=2.62"></script>
-<script src="metafora-lipsi.js?v=2.62"></script>
+<script src="metafora-rythmisi.js?v=2.63"></script>
+<script src="metafora-lipsi.js?v=2.63"></script>
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.62';
+const VERSION='2.63';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -2231,9 +2233,43 @@ async function fbSearch(){
     if(d){for(const k of ['a','y','pub','pg','covU','free','ol','isbn'])if(!d[k]&&b[k])d[k]=b[k]}else out.push(b)}
   fbRes=isb?out.filter(b=>b.isbn===isb).concat(out.filter(b=>b.isbn!==isb)):out;
   fbErr=rs.every(r=>r.status==='rejected')?(rs.some(r=>r.reason&&r.reason.message==='busy')?'busy':(rs.some(r=>r.reason&&r.reason.name==='AbortError')?'slow':'net')):'';
-  fbIsb=isb;fbNetDraw()}
-let fbIsb=null,fbErr='';
+  fbIsb=isb;fbWeb=null;
+  // δεν βρέθηκε στις δύο βάσεις: αναζήτηση σε όλο το διαδίκτυο (με τη συγκατάθεσή σου, μία φορά)
+  const miss=isb?!fbRes.some(b=>b.isbn===isb):!fbRes.length;
+  if(miss&&!fbErr)fbWeb=webOk()?{st:'go'}:{st:'ask'};
+  fbNetDraw();if(fbWeb&&fbWeb.st==='go')webFind(q,my)}
+let fbIsb=null,fbErr='',fbWeb=null,webLast=0;
+// «Βιβλιοθηκάριος» GlenApps (Cloudflare): ψάχνει με το Brave Search, δεν κρατά τίποτα. Τα αποτελέσματα μένουν μόνο στη μνήμη·
+// στη λίστα μπαίνει μόνο ό,τι επιβεβαιώσεις εσύ.
+const VIV='https://vivliothikarios.glenapps.gr/vivlio';
+const webOk=()=>{try{return localStorage.getItem('glenread-web-ok')==='1'}catch(e){return false}};
+async function webFind(q,my){
+  if(Date.now()-webLast<2500){await new Promise(r=>setTimeout(r,2500))}webLast=Date.now();
+  fbWeb={st:'load'};fbNetDraw();
+  try{const j=await getJSON(VIV+'?q='+encodeURIComponent(q));if(my!==fbSeq)return;
+    const g=j&&j.guess&&typeof j.guess.t==='string'?{t:kStr(j.guess.t,200),a:kStr(j.guess.a,120)}:null;
+    const shops=(Array.isArray(j&&j.shops)?j.shops:[]).slice(0,8).map(x=>({t:kStr(x&&x.title,140),h:kStr(x&&x.host,80),u:String(x&&x.url||'')})).filter(x=>x.h&&!urlCheck(x.u).err);
+    fbWeb=g||shops.length?{st:'ok',g,shops,isbn:isbnNorm(j.isbn)||''}:{st:'none'}}
+  catch(e){if(my!==fbSeq)return;fbWeb={st:e.message==='busy'?'busy':'err'}}
+  fbNetDraw()}
+function webAsk(){
+  dlgOpen('🌐 Αναζήτηση σε όλο το διαδίκτυο',`<p style="margin:0 0 8px">Όταν ένα βιβλίο δεν βρίσκεται στο Open Library και στο Google Βιβλία, το GlenRead μπορεί να ψάξει <b>σε όλο το διαδίκτυο</b> μέσω της υπηρεσίας Brave Search.</p>
+    <p style="margin:0 0 8px">🔒 Στέλνεται <b>μόνο το ISBN ή ο τίτλος</b>, μέσα από τον διακομιστή της GlenApps, που <b>δεν κρατά τίποτα</b> — ούτε την αναζήτηση ούτε τη διεύθυνσή σου.</p>
+    <p style="margin:0 0 8px"><b>Όροι χρήσης:</b> τα αποτελέσματα δείχνονται μόνο για να βρεις το βιβλίο σου. Δεν επιτρέπεται να αντιγράφονται μαζικά, να αποθηκεύονται σε βάσεις δεδομένων, να μεταπωλούνται ή να χρησιμοποιούνται για εκπαίδευση τεχνητής νοημοσύνης. Ο τίτλος και ο συγγραφέας μπαίνουν στη λίστα σου μόνο όταν τα επιβεβαιώσεις εσύ. Τα αποτελέσματα είναι πιθανά και μπορεί να έχουν λάθη.</p>
+    <label style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="webAg" style="width:auto;margin-top:3px"> <span>Συμφωνώ με τους όρους</span></label>`,
+    ()=>{if(!$('#webAg').checked){setTimeout(()=>toast('Χρειάζεται να συμφωνήσεις με τους όρους'),0);return}
+      try{localStorage.setItem('glenread-web-ok','1')}catch(e){}setTimeout(()=>webFind($('#fbQ').value.trim().slice(0,120),fbSeq),0)});
+  $('#dlgOk').textContent='Ψάξε'}
 // όταν δεν βρίσκεται: η ελληνική βάση βιβλίων (Βιβλιονέτ) και αναζήτηση στο διαδίκτυο, στο πρόγραμμα περιήγησης
+function webHtml(){const w=fbWeb;if(!w)return '';
+  let h='<div class="srch">🔎 Σε όλο το διαδίκτυο</div>';
+  if(w.st==='ask')return h+'<button id="webAsk" style="width:100%">🔎 Ψάξε σε όλο το διαδίκτυο</button>';
+  if(w.st==='load'||w.st==='go')return h+'<p class="muted" style="margin:8px 0">Ψάχνω σε όλο το διαδίκτυο…</p>';
+  if(w.st==='none')return h+'<p class="muted" style="margin:8px 0">Δεν βρέθηκε ούτε σε όλο το διαδίκτυο.</p>';
+  if(w.st==='busy'||w.st==='err')return h+'<p class="muted" style="margin:8px 0">'+(w.st==='busy'?'Η αναζήτηση σε όλο το διαδίκτυο είναι φορτωμένη — δοκίμασε αργότερα.':'Η αναζήτηση σε όλο το διαδίκτυο δεν είναι διαθέσιμη αυτή τη στιγμή.')+'</p>';
+  h+=w.g?`<div class="webg"><small>Πιθανό βιβλίο</small><b class="usr">${esc(w.g.t)}</b>${w.g.a?`<span class="usr">${esc(w.g.a)}</span>`:''}<button id="webYes" style="margin-top:8px">✓ Σωστό — πρόσθεσέ το</button><small style="margin-top:6px">Έλεγξε τα στοιχεία πριν το αποθηκεύσεις· μπορείς να τα διορθώσεις.</small></div>`:'';
+  if(w.shops.length)h+='<p class="muted" style="margin:8px 0 2px;font-size:12.5px">Βρέθηκε σε:</p>'+w.shops.map((x,i)=>`<button class="sec webs" data-wsh="${i}"><b class="usr">${esc(x.h)}</b><small class="usr">${esc(x.t)}</small></button>`).join('');
+  return h+'<button class="sec" id="webOff" style="width:100%;margin-top:6px;font-size:12.5px;min-height:34px">Να μην ψάχνει σε όλο το διαδίκτυο</button>'}
 const fbExt=q=>`<div class="row" style="gap:6px;margin-top:8px;flex-wrap:nowrap"><button class="sec" data-ext="bn" style="flex:1">🇬🇷 Βιβλιονέτ</button><button class="sec" data-ext="web" style="flex:1">🌐 Ψάξε στο διαδίκτυο</button></div><p class="muted" style="font-size:12px;margin:4px 0 0">Ανοίγουν στο πρόγραμμα περιήγησης. Η Βιβλιονέτ έχει σχεδόν όλα τα ελληνικά βιβλία.</p>`;
 function fbNetDraw(){const q=$('#fbQ').value.trim();if(!q)return;
   const hits=fbRes.filter(b=>!fbIsb||b.isbn===fbIsb).length;
@@ -2242,10 +2278,14 @@ function fbNetDraw(){const q=$('#fbQ').value.trim();if(!q)return;
       return katRow(Object.assign({},b,{sh:'',r:0}),`<button data-ff="${i}" class="${h&&h.fav?'on':''}" aria-label="Βάλ' το στα αγαπημένα">${h&&h.fav?'⭐':'☆'}</button><button data-fa="${i}" aria-label="${h?'Το έχεις ήδη στη λίστα σου':'Πρόσθεσέ το στη λίστα σου'}">${h?'✓':'➕'}</button>`)
         .replace('<small></small>',`<small>${h?'<span class="kbadge have">✓ στη λίστα σου</span>':''}${b.free?'<span class="kbadge">📖 δωρεάν ηλεκτρονικό</span>':''}${b.isbn?'<span class="usr">ISBN '+esc(b.isbn)+'</span>':''}</small>`)}).join(''):'')
     +(!fbErr&&!hits?`<p style="margin:8px 0"><b>Δεν βρέθηκε${fbIsb?' αυτό το ISBN':''} στο Open Library και στο Google Βιβλία.</b> <span class="muted">Τα περισσότερα ελληνικά βιβλία υπάρχουν στη Βιβλιονέτ:</span></p>`:'')
-    +fbExt(q)+`<button class="sec" id="fbMan" style="width:100%;margin-top:8px">✍️ Πρόσθεσέ το με το χέρι</button>`;
+    +webHtml()+fbExt(q)+`<button class="sec" id="fbMan" style="width:100%;margin-top:8px">✍️ Πρόσθεσέ το με το χέρι</button>`;
+  const wa=$('#webAsk');if(wa)wa.onclick=webAsk;
+  const wy=$('#webYes');if(wy)wy.onclick=()=>{const g=fbWeb&&fbWeb.g;if(!g)return;const i=fbWeb.isbn||isbnNorm($('#fbQ').value)||'';const have=katFind({t:g.t,a:g.a,isbn:i});if(have)return katDlg(have);katDlg({t:g.t,a:g.a,isbn:i,y:'',pub:'',pg:'',sh:'want',fav:false,r:0,n:''},true)};
+  const wo=$('#webOff');if(wo)wo.onclick=()=>{try{localStorage.removeItem('glenread-web-ok')}catch(e){}fbWeb=null;fbNetDraw();toast('Η αναζήτηση σε όλο το διαδίκτυο σταμάτησε')};
   $('#fbMan').onclick=()=>{const q=$('#fbQ').value.trim(),i=isbnNorm(q);katDlg({t:i?'':q,a:'',isbn:i||'',y:'',pub:'',pg:'',sh:'want',fav:false,r:0,n:''},true)};
 }
 $('#fbNet').onclick=async e=>{const f=e.target.closest('[data-ff]'),a=e.target.closest('[data-fa]');
+  const ws=e.target.closest('[data-wsh]');if(ws){const x=fbWeb&&fbWeb.shops&&fbWeb.shops[+ws.dataset.wsh];if(!x)return;const c=urlCheck(x.u);if(c.err)return toast(c.err);window.open(c.u.href,'_blank','noopener,noreferrer');return}
   const x=e.target.closest('[data-ext]');if(x){const q=$('#fbQ').value.trim().slice(0,120),i=isbnNorm(q)||q;
     const u=x.dataset.ext==='bn'?'https://www.biblionet.gr/'+encodeURIComponent('συνθετη-αναζητηση')+'?q='+encodeURIComponent(i):'https://duckduckgo.com/?q='+encodeURIComponent((isbnNorm(q)?'ISBN '+i:q+' βιβλίο'));
     window.open(u,'_blank','noopener,noreferrer');return}
