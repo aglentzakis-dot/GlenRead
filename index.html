@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <script src="plaisio.js"></script>
-<meta name="app-version" content="2.60">
+<meta name="app-version" content="2.61">
 <!-- Ασφάλεια: η σελίδα φορτώνει κώδικα μόνο από εδώ και από συγκεκριμένες, κλειδωμένες εκδόσεις βιβλιοθηκών· στέλνει δεδομένα μόνο στο Google Drive του χρήστη· καμία εκτέλεση κειμένου ως κώδικα (eval) -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://cdn.jsdelivr.net/npm/mammoth@1.8.0/ https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/ https://accounts.google.com/gsi/; worker-src 'self' blob:; connect-src 'self' https: data: blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://tessdata.projectnaptha.com https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com/gsi/; img-src 'self' https://aglentzakis-dot.github.io data: blob: https://*.glenapps.gr; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; font-src 'self' data:; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://cdn.jsdelivr.net/npm/mammoth@1.8.0/ https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/ https://accounts.google.com/gsi/; worker-src 'self' blob:; connect-src 'self' https: data: blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://tessdata.projectnaptha.com https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com/gsi/; img-src 'self' https://aglentzakis-dot.github.io data: blob: https://*.glenapps.gr https://covers.openlibrary.org https://archive.org https://*.archive.org https://books.google.com https://books.googleusercontent.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; font-src 'self' data:; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>GlenRead</title>
 <meta name="theme-color" content="#FDD117">
@@ -399,6 +399,29 @@ body.selon #bvAa{display:none}
 .shw{display:flex!important;align-items:center;gap:12px;text-align:left;justify-content:flex-start;padding:10px 12px;min-height:56px;width:100%}
 .shw>span:first-child{font-size:26px;flex:none;width:34px;text-align:center}
 .shw b{display:block;font-size:16px}.shw small{display:block;opacity:.75;font-weight:400;font-size:13px;line-height:1.3}
+.fbRow{display:flex;gap:6px;margin-top:8px}.fbRow input{flex:1;min-width:0}.fbRow button{min-width:48px;padding:0 10px;font-size:19px}
+.katF{margin:8px 0 4px}.katF button{padding:4px 1px;font-size:12.5px;min-width:0}
+.kit{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);width:100%;background:none;border-radius:0;color:var(--ink);text-align:left;font-weight:400;min-height:0}
+.kit .kc{flex:0 0 46px;height:66px;border-radius:5px;background:var(--bg) center/cover no-repeat;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden}
+.kit .kc img{width:100%;height:100%;object-fit:cover}
+.kit .kt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.kit .kt b{font-size:15px;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.kit .kt small{opacity:.75;font-size:12.5px}.kit .kb{display:flex;gap:4px;flex:0 0 auto}
+.kit .kb button{min-width:42px;min-height:42px;padding:0;font-size:20px;background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:10px}
+.kit .kb button.on{background:#FDD117;border-color:#EF9F02}
+.kbadge{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 7px;border-radius:9px;background:#FDD11766;margin-right:4px}
+.kbadge.have{background:#2e7d3233}
+#katDlg label{display:block;margin:6px 0 0;font-size:13px}#katDlg input,#katDlg textarea{width:100%;box-sizing:border-box}
+#katDlg .kcov{width:96px;height:138px;border-radius:7px;background:var(--bg) center/cover no-repeat;border:1px solid var(--line);float:left;margin:0 10px 6px 0;display:flex;align-items:center;justify-content:center;font-size:40px;overflow:hidden}
+#katDlg .kcov img{width:100%;height:100%;object-fit:cover}
+#katDlg .stars button{font-size:24px;padding:2px 4px;background:none;border:none;min-height:40px;color:#EF9F02}
+#bcBox{position:fixed;inset:0;z-index:60;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#bcBox video{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+#bcBox .sfr{position:relative;width:78%;max-width:420px;height:150px;border:3px solid #FDD117;border-radius:14px;box-shadow:0 0 0 2000px #0008}
+#bcBox .sfr i{position:absolute;left:6%;right:6%;top:50%;height:2px;background:#e53935;animation:scl 1.6s ease-in-out infinite alternate}
+@keyframes scl{from{top:12%}to{top:88%}}
+#bcBox p{position:relative;color:#fff;text-align:center;margin:18px 16px;font-size:16px;text-shadow:0 1px 3px #000}
+#bcBox .sbt{position:absolute;bottom:max(24px,env(safe-area-inset-bottom));left:16px;right:16px;display:flex;gap:10px}
+#bcBox .sbt button{flex:1;min-height:52px;font-size:16px}
 </style>
 </head>
 <body>
@@ -464,6 +487,20 @@ body.selon #bvAa{display:none}
 
   <div class="tabp hidden" data-p="vivlia">
     <h2 class="tabh">📚 Βιβλία</h2>
+  <div class="card" id="findBox">
+    <div class="row" style="flex-wrap:nowrap"><strong style="flex:1">🔎 Βρες βιβλίο</strong></div>
+    <div class="fbRow"><input id="fbQ" type="search" enterkeyhint="search" autocomplete="off" maxlength="120" placeholder="Τίτλος, συγγραφέας ή ISBN" aria-label="Τίτλος, συγγραφέας ή ISBN"><button id="fbGo" aria-label="Αναζήτηση στο διαδίκτυο">🔎</button><button id="fbScan" class="sec" aria-label="Σκάναρε το barcode του βιβλίου">📷</button></div>
+    <p class="muted" style="margin:6px 0 0;font-size:12.5px">Καθώς γράφεις ψάχνει <b>στο κινητό σου</b>. Με το 🔎 ψάχνει και <b>στο διαδίκτυο</b>: στέλνεται μόνο ό,τι έγραψες, τίποτε άλλο. Με το 📷 σκανάρεις το barcode στο πίσω μέρος του βιβλίου.</p>
+    <div id="fbLocal"></div>
+    <div id="fbNet"></div>
+  </div>
+  <div class="card" id="katBox">
+    <div class="row" style="flex-wrap:nowrap"><strong style="flex:1">⭐ Η λίστα μου</strong><span class="muted" id="katN"></span></div>
+    <div class="seg katF" id="katF"><button data-f="" class="on">Όλα</button><button data-f="fav">⭐</button><button data-f="want">Θέλω</button><button data-f="reading">Διαβάζω</button><button data-f="read">Διάβασα</button></div>
+    <div id="katList"></div>
+    <p id="katEmpty" class="muted" style="text-align:center;margin:12px 4px">Εδώ κρατάς τα βιβλία που σε ενδιαφέρουν: αγαπημένα, όσα θέλεις να διαβάσεις, όσα διαβάζεις και όσα διάβασες. Βρες ένα βιβλίο παραπάνω και πάτα ☆ ή ➕.</p>
+    <button class="sec" id="katManual" style="width:100%;margin-top:8px">✍️ Πρόσθεσε βιβλίο με το χέρι</button>
+  </div>
   <div class="card" id="shelfBox">
     <div class="row" style="flex-wrap:nowrap"><strong style="flex:1">📚 Τα βιβλία μου</strong><span class="muted" id="shelfN"></span></div>
     <div class="shelf" id="shelf"></div>
@@ -767,12 +804,12 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="lib/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="antigrafa.js"></script>
-<script src="metafora-rythmisi.js?v=2.60"></script>
-<script src="metafora-lipsi.js?v=2.60"></script>
+<script src="metafora-rythmisi.js?v=2.61"></script>
+<script src="metafora-lipsi.js?v=2.61"></script>
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.60';
+const VERSION='2.61';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -936,13 +973,13 @@ function srcDlg(x){
 }
 $('#srcAdd').onclick=()=>srcDlg(null);
 function bkPayload(docs){const P=posAll(),ids=new Set(docs.map(d=>String(d.id))),pos={};for(const k in P)if(ids.has(k))pos[k]=P[k];
-  return JSON.stringify({app:BK.app,version:VERSION,date:new Date().toISOString(),docs,pos,covers:bkCovers,piges:srcGet()})}
+  return JSON.stringify({app:BK.app,version:VERSION,date:new Date().toISOString(),docs,pos,covers:bkCovers,piges:srcGet(),katalogos:KAT})}
 async function changed(){try{docsCache=await allDocs();docsReady=true;await coversRefresh(docsCache)}catch(e){}try{window.GlenDrive&&GlenDrive.changed()}catch(e){}clearTimeout(bkTimer);bkTimer=setTimeout(()=>autoBackup(false),3000)}
 // Γράφει το αντίγραφο της ημέρας στον φάκελο. Κανόνες: ποτέ 0 έγγραφα, ποτέ ακρυπτογράφητο,
 // και αν το νέο έχει λιγότερα έγγραφα από το υπάρχον, κρατά πρώτα το παλιό ως «-prin-ΩΩΛΛΔΔ» (τα 10 νεότερα).
 async function autoBackup(ask){
   try{const dir=await appDir(ask);if(!dir)return false;
-    const docs=await allDocs();if(!docs.length)return 'empty';
+    const docs=await allDocs();if(!docs.length&&!KAT.length)return 'empty';
     await coversRefresh(docs);const data=await lockData(bkPayload(docs));
     if(!data)return 'nopass';
     const name=`${BK.prefix}-${today()}.json`;
@@ -977,7 +1014,7 @@ $('#bkNow').onclick=async()=>{
   const r=await autoBackup(true);
   if(r===true)return toast('🔒 Το κλειδωμένο αντίγραφο γράφτηκε στο GlenApps › GlenRead');
   if(bkMsg(r))return toast(bkMsg(r));
-  const docs=await allDocs();if(!docs.length)return toast(bkMsg('empty'));
+  const docs=await allDocs();if(!docs.length&&!KAT.length)return toast(bkMsg('empty'));
   await coversRefresh(docs);const data=await lockData(bkPayload(docs));if(!data)return toast(bkMsg('nopass'));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download=`${BK.prefix}-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),60000);toast('🔒 Το κλειδωμένο αντίγραφο κατέβηκε στις Λήψεις');
 };
@@ -1005,9 +1042,12 @@ async function restore(txt){
   }
   try{const o=JSON.parse(txt);if(![BK.app,'gdoc'].includes(o.app)||!Array.isArray(o.docs))throw 0;
     const ok=o.docs.filter(d=>d&&typeof d==='object'&&(typeof d.id==='number'||typeof d.id==='string')&&Array.isArray(d.pages)).map(d=>Object.assign({},d,{name:String(d.name||'Έγγραφο'),pages:d.pages.filter(x=>x&&typeof x==='object').map(x=>Object.assign({},x,{text:String(x.text||'')}))}));
-    if(!ok.length)throw 0;
+    // η λίστα βιβλίων: προστίθενται όσα λείπουν (με έλεγχο), χωρίς να αλλάξει κάτι από όσα έχεις
+    const kIn=(Array.isArray(o.katalogos)?o.katalogos:[]).slice(0,KAT_MAX).map(katClean).filter(Boolean),kIds=new Set(KAT.map(k=>k.id)),kNu=kIn.filter(k=>!kIds.has(k.id)&&!katFind(k));
+    if(!ok.length&&!kIn.length)throw 0;
+    const kMerge=async()=>{if(!kNu.length)return 0;KAT=KAT.concat(kNu).slice(0,KAT_MAX);await katSave();return kNu.length};
     const have=new Set((await allDocs()).map(d=>d.id));const nu=ok.filter(d=>!have.has(d.id));
-    if(!nu.length)return toast('Όλα τα έγγραφα του αντιγράφου ('+ok.length+') υπάρχουν ήδη');
+    if(!nu.length){const k=await kMerge();return toast((ok.length?'Όλα τα έγγραφα του αντιγράφου ('+ok.length+') υπάρχουν ήδη':'Το αντίγραφο δεν έχει έγγραφα')+(k?' · μπήκαν '+k+' βιβλία στη λίστα σου':''))}
     if(!confirm(`Το αντίγραφο της ${new Date(o.date).toLocaleString(LOC)} έχει ${ok.length} έγγραφα. Επαναφορά ${nu.length} που λείπουν; Τα έγγραφα που έχεις τώρα δεν αλλάζουν.`+(ok.length>nu.length?` (${ok.length-nu.length} υπάρχουν ήδη και μένουν όπως είναι.)`:'')))return;
     try{await store('readwrite',s=>{nu.forEach(d=>s.put(d))})}catch(e){console.warn(e);return toast('⚠️ Η επαναφορά δεν χώρεσε — ο χώρος του κινητού γέμισε')}
     // δικοί σου σύνδεσμοι βιβλίων και αγαπημένα: προστίθενται όσα λείπουν (με έλεγχο)
@@ -1017,7 +1057,7 @@ async function restore(txt){
     // θέσεις ανάγνωσης και εξώφυλλα μόνο για όσα επανήλθαν (δεν αλλάζουμε όσα ήδη υπάρχουν)
     try{const P=o.pos&&typeof o.pos==='object'?o.pos:{};nu.forEach(d=>{const l=P[String(d.id)];if(l&&typeof l==='object'&&!posGet(d.id)){const c={id:d.id};['y','p','f'].forEach(k=>{if(typeof l[k]==='number'&&isFinite(l[k]))c[k]=Math.max(0,l[k])});if(l.v==='page'||l.v==='text')c.v=l.v;posSave(c)}})}catch(e){}
     try{const C=o.covers&&typeof o.covers==='object'?o.covers:{};for(const d of nu){const u=C[String(d.id)];if(typeof u==='string'&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(u)&&u.length<400000)await draftSet('thumb-'+d.id,u)}}catch(e){}
-    toast('Η επαναφορά έγινε: '+nu.length+' έγγραφα');changed();drawLast();
+    const kk=await kMerge();toast('Η επαναφορά έγινε: '+nu.length+' έγγραφα'+(kk?' · '+kk+' βιβλία στη λίστα σου':''));changed();drawLast();
   }catch(e){toast('Αυτό δεν είναι αντίγραφο του GlenRead')}
 }
 bkUI();
@@ -2042,7 +2082,7 @@ function tab(t){if(!document.querySelector('.tabp[data-p="'+t+'"]'))t='arxiki';c
 $('#tabs').onclick=e=>{const b=e.target.closest('[data-t]');if(b)tab(b.dataset.t)};
 $('#goBooks').onclick=()=>tab('vivlia');
 function drawShelf(metas){
-  const books=metas.filter(m=>m.book),P=posAll(),key=m=>(P[String(m.id)]&&P[String(m.id)].t)||0;
+  const books=metas.filter(m=>m.book);shelfMetas=books;try{fbLocal()}catch(e){}const P=posAll(),key=m=>(P[String(m.id)]&&P[String(m.id)].t)||0;
   $('#shelfEmpty').classList.toggle('hidden',!!books.length);$('#shelfN').textContent=books.length||'';
   $('#bbSub').textContent=books.length?(books.length===1?'1 βιβλίο':books.length+' βιβλία')+' · και δωρεάν βιβλία':(EN?'Your shelf and free books':'Το ράφι σου και δωρεάν βιβλία');
   $('#bbCovers').innerHTML='<span>📚</span>';
@@ -2057,6 +2097,176 @@ function drawShelf(metas){
   $('#shelf').onclick=async e=>{const b=e.target.closest('.bk');if(!b)return;flushAll();const id=b.dataset.id,k=isNaN(+id)?id:+id;const f=await getDoc(k).catch(()=>null);if(!f){toast('Αυτό το έγγραφο σβήστηκε');return drawLast()}doc=f;openReader()};
 }
 drawSrc();
+// ---------- Βρες βιβλίο & Η λίστα μου ----------
+// Αναζήτηση με τίτλο/συγγραφέα/ISBN ή με το barcode (κάμερα). Πρώτα ψάχνει στο κινητό (λίστα + ράφι).
+// Στο διαδίκτυο ΜΟΝΟ όταν πατήσεις 🔎: Open Library (μη κερδοσκοπικό, Internet Archive)· το Google Βιβλία
+// μόνο αν το πατήσεις εσύ. Στέλνεται μόνο το κείμενο της αναζήτησης — χωρίς cookies, χωρίς αναφορά σελίδας.
+// Η λίστα μένει στη συσκευή (IndexedDB) και μπαίνει στα κλειδωμένα αντίγραφα. Η κάμερα δεν γράφει/στέλνει τίποτα.
+let KAT=[],katF='',shelfMetas=[],fbRes=[],fbSeq=0;
+const KAT_MAX=5000,SHELF_L={want:'Θέλω να διαβάσω',reading:'Διαβάζω',read:'Διάβασα'};
+const COV_HOSTS=/^https:\/\/(covers\.openlibrary\.org|[a-z0-9-]+\.archive\.org|archive\.org|books\.google\.com|books\.googleusercontent\.com)\//;
+const FREE_HOSTS=/^https:\/\/(openlibrary\.org|archive\.org|books\.google\.[a-z.]+|play\.google\.com)\//;
+function isbnNorm(s){const d=String(s||'').toUpperCase().replace(/[^0-9X]/g,'');
+  if(d.length===13&&/^97[89]\d{10}$/.test(d)){let t=0;for(let i=0;i<12;i++)t+=(+d[i])*(i%2?3:1);return (10-t%10)%10===+d[12]?d:null}
+  if(d.length===10&&/^\d{9}[\dX]$/.test(d)){let t=0;for(let i=0;i<10;i++)t+=(d[i]==='X'?10:+d[i])*(10-i);if(t%11)return null;
+    const b='978'+d.slice(0,9);let u=0;for(let i=0;i<12;i++)u+=(+b[i])*(i%2?3:1);return b+((10-u%10)%10)}
+  return null}
+const isbnLooks=s=>/^[\s\d\-xX]{10,17}$/.test(String(s||'').trim());
+const kStr=(v,n)=>String(v==null?'':v).replace(/[\u0000-\u001f]/g,' ').trim().slice(0,n);
+function katClean(o){if(!o||typeof o!=='object')return null;const t=kStr(o.t,300);if(!t)return null;
+  const c={id:/^k[\w-]{4,40}$/.test(o.id)?o.id:'k'+Date.now().toString(36)+Math.random().toString(36).slice(2,8),t,a:kStr(o.a,200),isbn:isbnNorm(o.isbn)||'',
+    y:/^\d{3,4}$/.test(String(o.y||''))?String(o.y):'',pub:kStr(o.pub,120),pg:Math.max(0,Math.min(99999,parseInt(o.pg)||0))||'',
+    sh:SHELF_L[o.sh]?o.sh:'',fav:!!o.fav,r:Math.max(0,Math.min(5,parseInt(o.r)||0)),n:kStr(o.n,2000).replace(/ {2,}/g,' '),
+    d:typeof o.d==='number'&&isFinite(o.d)?o.d:Date.now()};
+  if(typeof o.n==='string')c.n=o.n.replace(/[\u0000-\u0008\u000b-\u001f]/g,'').trim().slice(0,2000);
+  if(typeof o.cov==='string'&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(o.cov)&&o.cov.length<300000)c.cov=o.cov;
+  else if(typeof o.covU==='string'&&COV_HOSTS.test(o.covU)&&o.covU.length<500)c.covU=o.covU;
+  if(typeof o.free==='string'&&FREE_HOSTS.test(o.free)&&o.free.length<500&&!urlCheck(o.free).err)c.free=o.free;
+  if(typeof o.ol==='string'&&/^\/works\/OL\d+W$/.test(o.ol))c.ol=o.ol;
+  return c}
+async function katLoad(){try{const v=await draftGet('katalogos');KAT=Array.isArray(v)?v.map(katClean).filter(Boolean):[]}catch(e){KAT=[]}katDraw()}
+async function katSave(){await draftSet('katalogos',KAT);katDraw();fbLocal();changed()}
+const katKey=b=>b.isbn||b.ol||(b.t+'|'+b.a).toLowerCase().replace(/\s+/g,' ');
+const katFind=b=>KAT.find(k=>(b.isbn&&k.isbn===b.isbn)||(b.ol&&k.ol===b.ol)||katKey(k)===katKey(b));
+const katCov=(b,cls)=>b.cov?`<span class="${cls}"><img alt="" src="${esc(b.cov)}"></span>`:b.covU?`<span class="${cls}"><img alt="" loading="lazy" referrerpolicy="no-referrer" src="${esc(b.covU)}" onerror="this.remove()"></span>`:`<span class="${cls}">📕</span>`;
+const katSub=b=>[b.a,b.y].filter(Boolean).map(esc).join(' · ');
+function katRow(b,btns){return `<div class="kit" data-k="${esc(b.id)}">${katCov(b,'kc')}<span class="kt"><b class="usr">${esc(b.t)}</b>${katSub(b)?`<small class="usr">${katSub(b)}</small>`:''}<small>${b.sh?`<span class="kbadge">${esc(SHELF_L[b.sh])}</span>`:''}${b.r?'★'.repeat(b.r):''}</small></span><span class="kb">${btns}</span></div>`}
+function katDraw(){
+  const L=KAT.filter(b=>!katF||(katF==='fav'?b.fav:b.sh===katF)).sort((a,b)=>b.d-a.d);
+  $('#katN').textContent=KAT.length||'';$('#katEmpty').classList.toggle('hidden',!!KAT.length);
+  $('#katList').innerHTML=L.length?L.map(b=>katRow(b,`<button data-fv="${esc(b.id)}" class="${b.fav?'on':''}" aria-label="${b.fav?'Βγάλ\' το από τα αγαπημένα':'Βάλ\' το στα αγαπημένα'}">${b.fav?'⭐':'☆'}</button>`)).join(''):(KAT.length?'<p class="muted" style="text-align:center">Κανένα βιβλίο σε αυτή την κατηγορία</p>':'');
+}
+$('#katF').onclick=e=>{const b=e.target.closest('button');if(!b)return;katF=b.dataset.f;$('#katF').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));katDraw()};
+$('#katList').onclick=e=>{const fv=e.target.closest('[data-fv]');if(fv){const b=KAT.find(k=>k.id===fv.dataset.fv);if(b){b.fav=!b.fav;katSave();toast(b.fav?'⭐ Μπήκε στα αγαπημένα':'Βγήκε από τα αγαπημένα')}return}
+  const r=e.target.closest('.kit');if(r){const b=KAT.find(k=>k.id===r.dataset.k);if(b)katDlg(b)}};
+$('#katManual').onclick=()=>katDlg({t:'',a:'',isbn:'',y:'',pub:'',pg:'',sh:'want',fav:false,r:0,n:''},true);
+// μικραίνει μια εικόνα εξωφύλλου (από αρχείο ή από το διαδίκτυο) σε μικρή φωτογραφία που μένει στη συσκευή
+async function covSmall(blob){if(!blob||!/^image\//.test(blob.type)||blob.size>8e6)return null;
+  try{const im=await createImageBitmap(blob);const w=Math.min(200,im.width),h=Math.round(im.height*w/im.width);if(!w||!h||h>600)return null;
+    const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);try{im.close()}catch(e){}
+    const u=c.toDataURL('image/jpeg',.8);c.width=c.height=0;return u.length<300000?u:null}catch(e){return null}}
+async function covFetch(u){if(!u||!COV_HOSTS.test(u))return null;const ac=new AbortController(),to=setTimeout(()=>ac.abort(),12000);
+  try{const r=await fetch(u,{credentials:'omit',referrerPolicy:'no-referrer',signal:ac.signal});if(!r.ok)return null;return await covSmall(await r.blob())}catch(e){return null}finally{clearTimeout(to)}}
+async function katAdd(b,opt){
+  const have=katFind(b);if(have){if(opt&&opt.fav&&!have.fav){have.fav=true;await katSave();return toast('⭐ Το είχες ήδη — μπήκε και στα αγαπημένα')}return toast('✓ Υπάρχει ήδη στη λίστα σου')}
+  if(KAT.length>=KAT_MAX)return toast('Η λίστα έφτασε τα '+KAT_MAX+' βιβλία');
+  const c=katClean(Object.assign({},b,opt||{},{id:null,d:Date.now()}));if(!c)return;
+  if(!c.cov&&c.covU){const u=await covFetch(c.covU);if(u){c.cov=u;delete c.covU}}
+  KAT.push(c);await katSave();fbNetDraw();return c}
+function katDlg(b,isNew){
+  const st=b.sh||'';const cov=b.cov||'';let newCov=null;
+  dlgOpen(isNew?'✍️ Νέο βιβλίο':'📕 Βιβλίο',`<div id="katDlg">${katCov(b,'kcov')}
+    <label>Τίτλος<input id="kdT" maxlength="300" value="${esc(b.t)}" class="usr"></label>
+    <label>Συγγραφέας<input id="kdA" maxlength="200" value="${esc(b.a)}" class="usr"></label>
+    <div style="clear:both"></div>
+    <div class="row" style="gap:6px;flex-wrap:nowrap"><label style="flex:2">ISBN<input id="kdI" inputmode="numeric" maxlength="17" value="${esc(b.isbn)}"></label><label style="flex:1">Έτος<input id="kdY" inputmode="numeric" maxlength="4" value="${esc(b.y)}"></label><label style="flex:1">Σελίδες<input id="kdP" inputmode="numeric" maxlength="5" value="${esc(b.pg)}"></label></div>
+    <label>Εκδότης<input id="kdB" maxlength="120" value="${esc(b.pub)}" class="usr"></label>
+    <div class="lbl" style="margin-top:10px">Ράφι</div>
+    <div class="seg" id="kdS"><button type="button" data-s="">—</button>${Object.keys(SHELF_L).map(k=>`<button type="button" data-s="${k}">${esc(SHELF_L[k])}</button>`).join('')}</div>
+    <div class="row" style="margin-top:6px;align-items:center;gap:6px"><label style="display:flex;align-items:center;gap:6px;margin:0;flex:1"><input type="checkbox" id="kdF" style="width:auto"${b.fav?' checked':''}> ⭐ Αγαπημένο</label>
+      <span class="stars" id="kdR" aria-label="Βαθμολογία">${[1,2,3,4,5].map(i=>`<button type="button" data-r="${i}" aria-label="${i} αστέρια">${i<=b.r?'★':'☆'}</button>`).join('')}</span></div>
+    <label>Σημείωση (π.χ. το δάνεισα, πού το έχω, τι μου άρεσε)<textarea id="kdN" rows="3" maxlength="2000" class="usr">${esc(b.n)}</textarea></label>
+    <div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap"><button type="button" class="sec" id="kdC">📷 Φωτογραφία εξωφύλλου</button>${b.free?`<button type="button" class="sec" id="kdW">📖 Δωρεάν ηλεκτρονικό</button>`:''}${isNew?'':`<button type="button" class="sec" id="kdX">🗑 Διαγραφή</button>`}</div>
+    <input type="file" id="kdCf" accept="image/*" capture="environment" class="hidden"></div>`,
+  ()=>{const o={t:$('#kdT').value,a:$('#kdA').value,isbn:$('#kdI').value,y:$('#kdY').value,pg:$('#kdP').value,pub:$('#kdB').value,n:$('#kdN').value,
+      sh:($('#kdS .on')||{dataset:{s:''}}).dataset.s,fav:$('#kdF').checked,r:+($('#kdR').dataset.v||b.r||0)};
+    if(!kStr(o.t,300)){setTimeout(()=>toast('Γράψε τουλάχιστον τον τίτλο'),0);return}
+    if(o.isbn.trim()&&!isbnNorm(o.isbn))setTimeout(()=>toast('Το ISBN δεν φαίνεται σωστό — κρατήθηκε χωρίς αυτό'),0);
+    if(newCov)o.cov=newCov;
+    if(isNew){katAdd(Object.assign({},b,o)).then(c=>{if(c)toast('➕ Μπήκε στη λίστα σου')});return}
+    const c=katClean(Object.assign({},b,o));if(!c)return;if(newCov)delete c.covU;
+    const i=KAT.findIndex(k=>k.id===b.id);if(i>=0){KAT[i]=c;katSave();toast('Αποθηκεύτηκε')}});
+  $('#dlgOk').textContent=isNew?'➕ Πρόσθεσε':'Αποθήκευση';
+  const seg=$('#kdS');seg.querySelector(`[data-s="${st}"]`).classList.add('on');
+  seg.onclick=e=>{const x=e.target.closest('button');if(x)seg.querySelectorAll('button').forEach(y=>y.classList.toggle('on',y===x))};
+  $('#kdR').onclick=e=>{const x=e.target.closest('[data-r]');if(!x)return;let v=+x.dataset.r;if(v===+($('#kdR').dataset.v||b.r))v=0;$('#kdR').dataset.v=v;$('#kdR').querySelectorAll('button').forEach(y=>y.textContent=+y.dataset.r<=v?'★':'☆')};
+  $('#kdC').onclick=()=>$('#kdCf').click();
+  $('#kdCf').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const u=await covSmall(f);if(!u)return toast('Η φωτογραφία δεν διαβάστηκε');newCov=u;$('#katDlg .kcov').innerHTML=`<img alt="" src="${u}">`};
+  const w=$('#kdW');if(w)w.onclick=()=>{const c=urlCheck(b.free);if(c.err)return toast(c.err);window.open(c.u.href,'_blank','noopener,noreferrer')};
+  const x=$('#kdX');if(x)x.onclick=()=>{if(!confirm('Να βγει το «'+b.t+'» από τη λίστα σου;'))return;KAT=KAT.filter(k=>k.id!==b.id);dlgClose();katSave();toast('Βγήκε από τη λίστα')};
+}
+// ---- αναζήτηση στο κινητό (λίστα + ράφι), καθώς γράφεις ----
+const fold=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/ς/g,'σ');
+function fbLocal(){const q=$('#fbQ').value.trim(),box=$('#fbLocal');if(q.length<2){box.innerHTML='';return}
+  const isb=isbnNorm(q),f=fold(q).split(/\s+/).filter(Boolean),hit=s=>{const h=fold(s);return f.every(w=>h.includes(w))};
+  const K=KAT.filter(b=>(isb&&b.isbn===isb)||hit(b.t+' '+b.a+' '+b.isbn)).slice(0,20);
+  const S=shelfMetas.filter(m=>hit(m.name+' '+(m.author||''))).slice(0,20);
+  box.innerHTML=(K.length||S.length)?'<div class="srch">📱 Στο κινητό σου</div>'
+    +S.map(m=>`<div class="kit" data-sh="${esc(m.id)}"><span class="kc">📖</span><span class="kt"><b class="usr">${esc(m.name)}</b><small><span class="kbadge have">στο ράφι</span>${m.author?`<span class="usr">${esc(m.author)}</span>`:''}</small></span></div>`).join('')
+    +K.map(b=>katRow(b,'')).join(''):'<p class="muted" style="margin:8px 0 0">📱 Δεν το έχεις στο κινητό σου. Πάτα 🔎 για αναζήτηση στο διαδίκτυο.</p>';
+}
+$('#fbQ').addEventListener('input',()=>{fbLocal();if(!$('#fbQ').value.trim()){fbRes=[];$('#fbNet').innerHTML=''}});
+$('#fbQ').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();fbSearch('ol')}});
+$('#fbQ').addEventListener('focus',()=>newSeen('vivlio'),{once:true});
+$('#fbLocal').onclick=async e=>{const s=e.target.closest('[data-sh]');if(s){flushAll();const id=s.dataset.sh,k=isNaN(+id)?id:+id;const f=await getDoc(k).catch(()=>null);if(!f)return toast('Αυτό το έγγραφο σβήστηκε');doc=f;return openReader()}
+  const r=e.target.closest('.kit');if(r){const b=KAT.find(k=>k.id===r.dataset.k);if(b)katDlg(b)}};
+$('#fbGo').onclick=()=>fbSearch('ol');
+// ---- αναζήτηση στο διαδίκτυο ----
+async function getJSON(u){const ac=new AbortController(),to=setTimeout(()=>ac.abort(),15000);
+  try{const r=await fetch(u,{credentials:'omit',referrerPolicy:'no-referrer',cache:'no-store',signal:ac.signal});if(!r.ok)throw new Error(r.status===429?'busy':'http');
+    const t=await r.text();if(t.length>3e6)throw new Error('big');return JSON.parse(t)}finally{clearTimeout(to)}}
+async function fbSearch(src){
+  const q=$('#fbQ').value.trim().slice(0,120);if(q.length<2)return toast('Γράψε τίτλο, συγγραφέα ή ISBN');
+  if(isbnLooks(q)&&!isbnNorm(q))return toast('Το ISBN δεν είναι σωστό — έλεγξε τα ψηφία');
+  if(!navigator.onLine)return toast('Χρειάζεται σύνδεση στο διαδίκτυο');
+  const isb=isbnNorm(q),my=++fbSeq;$('#fbNet').innerHTML=`<p class="muted" style="margin:10px 0">🌐 Ψάχνω στο ${src==='gb'?'Google Βιβλία':'Open Library'}…</p>`;
+  try{let R=[];
+    if(src==='gb'){const j=await getJSON('https://www.googleapis.com/books/v1/volumes?maxResults=20&printType=books&q='+encodeURIComponent(isb?'isbn:'+isb:q));
+      R=(Array.isArray(j.items)?j.items:[]).map(it=>{const v=it.volumeInfo||{},ac=it.accessInfo||{},ids=Array.isArray(v.industryIdentifiers)?v.industryIdentifiers:[];
+        const i13=(ids.find(x=>x.type==='ISBN_13')||ids.find(x=>x.type==='ISBN_10')||{}).identifier;let cu=v.imageLinks&&(v.imageLinks.thumbnail||v.imageLinks.smallThumbnail);if(cu)cu=String(cu).replace(/^http:/,'https:').replace(/&edge=curl/,'');
+        return katClean({t:[v.title,v.subtitle].filter(Boolean).join(' — '),a:(v.authors||[]).slice(0,3).join(', '),y:String(v.publishedDate||'').slice(0,4),pub:v.publisher,pg:v.pageCount,isbn:i13,covU:cu,
+          free:ac.accessViewStatus==='FULL_PUBLIC_DOMAIN'&&(ac.epub&&ac.epub.isAvailable||ac.pdf&&ac.pdf.isAvailable)?String(v.infoLink||'').replace(/^http:/,'https:'):''})}).filter(Boolean)}
+    else{const F='key,title,author_name,first_publish_year,isbn,cover_i,publisher,number_of_pages_median,ebook_access,ia';
+      const j=await getJSON('https://openlibrary.org/search.json?limit=20&fields='+F+'&q='+encodeURIComponent(isb?'isbn:'+isb:q));
+      R=(Array.isArray(j.docs)?j.docs:[]).map(d=>{const L=Array.isArray(d.isbn)?d.isbn.slice(0,200).map(isbnNorm).filter(Boolean):[],is=(isb&&L.includes(isb)?isb:L[0])||'';
+        return katClean({t:d.title,a:(d.author_name||[]).slice(0,3).join(', '),y:d.first_publish_year,pub:Array.isArray(d.publisher)?d.publisher[0]:'',pg:d.number_of_pages_median,isbn:is,ol:d.key,
+          covU:d.cover_i?'https://covers.openlibrary.org/b/id/'+(+d.cover_i)+'-M.jpg':'',
+          free:d.ebook_access==='public'&&Array.isArray(d.ia)&&/^[\w.-]+$/.test(d.ia[0]||'')?'https://archive.org/details/'+d.ia[0]:''})}).filter(Boolean)}
+    if(my!==fbSeq)return;fbRes=R;fbNetDraw(src,isb)}
+  catch(e){if(my!==fbSeq)return;$('#fbNet').innerHTML=`<p class="muted" style="margin:10px 0">${e.message==='busy'?'Η υπηρεσία είναι φορτωμένη — δοκίμασε σε λίγο.':e.name==='AbortError'?'Άργησε πολύ — δοκίμασε ξανά.':'Η αναζήτηση δεν έγινε — έλεγξε τη σύνδεση.'}</p>`+fbMore(src)}
+}
+let fbSrc='ol',fbIsb=null;
+const fbMore=src=>src==='gb'?'':`<button class="sec" id="fbGb" style="width:100%;margin-top:8px">Ψάξε και στο Google Βιβλία</button><p class="muted" style="font-size:12px;margin:4px 0 0">Καλύτερο για ελληνικά βιβλία. Στέλνεται στη Google μόνο το κείμενο της αναζήτησης.</p>`;
+function fbNetDraw(src,isb){if(src){fbSrc=src;fbIsb=isb}if(!$('#fbQ').value.trim())return;
+  const nm=fbSrc==='gb'?'Google Βιβλία':'Open Library';
+  $('#fbNet').innerHTML=`<div class="srch">🌐 Στο διαδίκτυο · ${nm}</div>`+(fbRes.length?fbRes.map((b,i)=>{const h=katFind(b);
+    return katRow(Object.assign({},b,{sh:'',r:0}),`<button data-ff="${i}" class="${h&&h.fav?'on':''}" aria-label="Βάλ' το στα αγαπημένα">${h&&h.fav?'⭐':'☆'}</button><button data-fa="${i}" aria-label="${h?'Το έχεις ήδη στη λίστα σου':'Πρόσθεσέ το στη λίστα σου'}">${h?'✓':'➕'}</button>`)
+      .replace('<small></small>',`<small>${h?'<span class="kbadge have">✓ στη λίστα σου</span>':''}${b.free?'<span class="kbadge">📖 δωρεάν ηλεκτρονικό</span>':''}${b.isbn?'<span class="usr">ISBN '+esc(b.isbn)+'</span>':''}</small>`)}).join('')
+    :`<p class="muted" style="margin:8px 0">Δεν βρέθηκε τίποτα${fbIsb?' με αυτό το ISBN':''} στο ${nm}.</p>`)
+    +fbMore(fbSrc)+`<button class="sec" id="fbMan" style="width:100%;margin-top:8px">✍️ Πρόσθεσέ το με το χέρι</button>`;
+  const g=$('#fbGb');if(g)g.onclick=()=>fbSearch('gb');
+  $('#fbMan').onclick=()=>{const q=$('#fbQ').value.trim(),i=isbnNorm(q);katDlg({t:i?'':q,a:'',isbn:i||'',y:'',pub:'',pg:'',sh:'want',fav:false,r:0,n:''},true)};
+}
+$('#fbNet').onclick=async e=>{const f=e.target.closest('[data-ff]'),a=e.target.closest('[data-fa]');
+  if(f){const b=fbRes[+f.dataset.ff];if(!b)return;const h=katFind(b);if(h){h.fav=!h.fav;await katSave();fbNetDraw();return toast(h.fav?'⭐ Μπήκε στα αγαπημένα':'Βγήκε από τα αγαπημένα')}
+    const c=await katAdd(b,{fav:true});if(c)toast('⭐ Μπήκε στα αγαπημένα');return}
+  if(a){const b=fbRes[+a.dataset.fa];if(!b)return;const h=katFind(b);if(h)return katDlg(h);katDlg(Object.assign({},b,{sh:'want',fav:false,r:0,n:''}),true);return}
+  const r=e.target.closest('.kit');if(r){const i=r.querySelector('[data-fa]');if(i)i.click()}};
+// ---- σάρωση barcode με την κάμερα (μένει όλα στη συσκευή) ----
+let scan=null;
+async function scanStart(){
+  newSeen('vivlio');
+  if(!('BarcodeDetector' in window)||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    dlgOpen('📷 Σάρωση barcode','<p style="margin:0">Αυτό το πρόγραμμα περιήγησης δεν μπορεί να διαβάσει barcode. Γράψε το <b>ISBN</b>: είναι τα ψηφία που υπάρχουν πάνω ή κάτω από το barcode, στο πίσω μέρος του βιβλίου (αρχίζουν συνήθως από 978).</p>',()=>{setTimeout(()=>{const q=$('#fbQ');q.setAttribute('inputmode','numeric');q.focus()},50)},true);return}
+  let det;try{const sup=await BarcodeDetector.getSupportedFormats();const fm=['ean_13','upc_a','ean_8'].filter(x=>sup.includes(x));if(!fm.length)throw 0;det=new BarcodeDetector({formats:fm})}catch(e){return toast('Η συσκευή δεν διαβάζει barcode βιβλίων — γράψε το ISBN')}
+  const box=document.createElement('div');box.id='bcBox';box.innerHTML='<video playsinline muted></video><div class="sfr"><i></i></div><p>Στόχευσε το barcode στο πίσω μέρος του βιβλίου</p><div class="sbt"><button class="sec" id="scTy">✍️ Γράψε το ISBN</button><button id="scX">✕ Κλείσιμο</button></div>';
+  document.body.appendChild(box);
+  let st;try{st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false})}
+  catch(e){box.remove();return toast(e.name==='NotAllowedError'?'Δεν δόθηκε άδεια για την κάμερα — γράψε το ISBN':'Η κάμερα δεν άνοιξε — γράψε το ISBN')}
+  const v=box.querySelector('video');v.srcObject=st;try{await v.play()}catch(e){}
+  scan={st,box,on:true};const stop=()=>scanStop();
+  box.querySelector('#scX').onclick=stop;box.querySelector('#scTy').onclick=()=>{stop();const q=$('#fbQ');q.setAttribute('inputmode','numeric');q.value='';q.focus()};
+  let seen='',n=0;
+  const loop=async()=>{if(!scan||!scan.on)return;
+    try{if(v.readyState>=2){const r=await det.detect(v);for(const c of r){const i=isbnNorm(c.rawValue);if(i){if(i===seen&&++n>=1){scanStop();try{navigator.vibrate&&navigator.vibrate(80)}catch(e){}
+          const q=$('#fbQ');q.removeAttribute('inputmode');q.value=i;fbLocal();toast('📷 Βρέθηκε το ISBN '+i);fbSearch('ol');return}seen=i;n=0}}}}catch(e){}
+    setTimeout(loop,180)};
+  loop();
+}
+function scanStop(){if(!scan)return;scan.on=false;try{scan.st.getTracks().forEach(t=>t.stop())}catch(e){}try{scan.box.remove()}catch(e){}scan=null}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)scanStop()});
+$('#fbScan').onclick=scanStart;
+katLoad();setTimeout(()=>{try{newPaint()}catch(e){}},0);
 async function drawLast(){
   const box=$('#lastBox');let metas=[];try{metas=await docsMeta()}catch(e){}
   mtfPaint(metas.length);drawShelf(metas);
@@ -2549,7 +2759,7 @@ async function printOrig(file){
 }
 $('#mPrint').onclick=()=>{newSeen('print');printAsk()};
 // «καινούργιο»: κίτρινη τελεία μέχρι να το ανοίξεις μία φορά
-const NEW_ITEMS={print:['#mPrint','#sheet details.cat[data-cat="file"] summary','#qGrid [data-k="print"]'],fill:['#mFill','#sheet details.cat[data-cat="bm"] summary','#qGrid [data-k="fill"]']};
+const NEW_ITEMS={vivlio:['#tabs [data-t="vivlia"]','#findBox strong'],print:['#mPrint','#sheet details.cat[data-cat="file"] summary','#qGrid [data-k="print"]'],fill:['#mFill','#sheet details.cat[data-cat="bm"] summary','#qGrid [data-k="fill"]']};
 function newPaint(){let seen=[];try{seen=JSON.parse(localStorage.getItem('glenread-seen')||'[]')}catch(e){}
   for(const k in NEW_ITEMS)NEW_ITEMS[k].forEach(q=>document.querySelectorAll(q).forEach(el=>el.classList.toggle('newdot',!seen.includes(k))))}
 function newSeen(k){let seen=[];try{seen=JSON.parse(localStorage.getItem('glenread-seen')||'[]')}catch(e){}if(!seen.includes(k)){seen.push(k);try{localStorage.setItem('glenread-seen',JSON.stringify(seen))}catch(e){}}newPaint()}
