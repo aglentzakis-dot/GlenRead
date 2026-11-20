@@ -257,6 +257,7 @@ var D={
 "Η αναγνώριση σταμάτησε — συνεχίζει την επόμενη φορά που θα ανοίξεις το έγγραφο": "Recognition stopped — it continues next time you open the document",
 "✓ Βγήκε το κείμενο από τις σκαναρισμένες σελίδες": "✓ Text extracted from the scanned pages",
 "(σκαναρισμένη σελίδα — το κείμενο βγαίνει σε λίγο…)": "(scanned page — text coming shortly…)",
+"(το κείμενο φορτώνει…)": "(text loading…)",
 "Μέγεθος γραμμάτων": "Text size",
 "Μικρά": "Small",
 "Μεσαία": "Medium",

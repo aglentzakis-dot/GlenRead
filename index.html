@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="plaisio.js"></script>
-<meta name="app-version" content="2.64">
+<meta name="app-version" content="2.65">
 <!-- Ασφάλεια: η σελίδα φορτώνει κώδικα μόνο από εδώ και από συγκεκριμένες, κλειδωμένες εκδόσεις βιβλιοθηκών· στέλνει δεδομένα μόνο στο Google Drive του χρήστη· καμία εκτέλεση κειμένου ως κώδικα (eval) -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://cdn.jsdelivr.net/npm/mammoth@1.8.0/ https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/ https://accounts.google.com/gsi/; worker-src 'self' blob:; connect-src 'self' https: data: blob: https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/ https://tessdata.projectnaptha.com https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com/gsi/; img-src 'self' https://aglentzakis-dot.github.io data: blob: https://*.glenapps.gr https://covers.openlibrary.org https://archive.org https://*.archive.org https://books.google.com https://books.googleusercontent.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; font-src 'self' data:; frame-src https://accounts.google.com/gsi/; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -809,12 +809,12 @@ document.documentElement.lang=UI;if(UI==='en')document.write('<script src="lang-
 <script src="lib/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="antigrafa.js"></script>
-<script src="metafora-rythmisi.js?v=2.64"></script>
-<script src="metafora-lipsi.js?v=2.64"></script>
+<script src="metafora-rythmisi.js?v=2.65"></script>
+<script src="metafora-lipsi.js?v=2.65"></script>
 <script src="/efarmoges-mas.js"></script>
 <script>window.EfarmogesMas||document.write('<script src="efarmoges-mas.js"><\/script>')</script>
 <script>
-const VERSION='2.64';
+const VERSION='2.65';
 const LOC=UI==='el'?'el-GR':'en-GB',EN=UI==='en';
 const $=s=>document.querySelector(s);
 $('#ver').textContent='GlenApps · '+VERSION; $('#ver2').textContent=VERSION;
@@ -1239,7 +1239,7 @@ function fixText(t){
 // ---------- PDF ----------
 // κλείνει ένα PDF και τον βοηθό του, για να ελευθερωθεί η μνήμη
 const pdfFree=x=>{try{const t=x&&x.loadingTask?x.loadingTask:x;const r=t&&t.destroy&&t.destroy();r&&r.catch&&r.catch(()=>{})}catch(e){}};
-const SLOW_OPEN=false;
+const SLOW_OPEN=false,fileSaving={};let pvHand=null;
 async function openPdf(file){
   const my=newRun(),gone=()=>my!==runId;show('work');$('#wTitle').textContent=file.name;prog(0,'Άνοιγμα αρχείου…');
   let pdf=null,task=null,part=null;const pages=[];
@@ -1247,36 +1247,15 @@ async function openPdf(file){
     await pdfReady().catch(()=>{});if(!window.pdfjsLib)throw new Error('nolib');
     const buf=await file.arrayBuffer();const orig=buf.slice(0);
     const pid=Date.now();task=pdfLoad(buf,{key:pid,name:file.name});pdf=await task.promise.catch(e=>{throw task.__cancel?new Error('pwcancel'):e});
-    part={id:pid,date:new Date().toISOString(),name:file.name.replace(/\.pdf$/i,''),pages,partial:pdf.numPages};
-    for(let p=1;p<=pdf.numPages;p++){
-      if(cancelled||gone()){if(!gone()){ocrLbl='';ocrRunning(false)}if(pages.length)saveDoc(part);pdfFree(pdf);return gone()?null:goHome()}
-      if(pages.length&&p%25===0)saveDoc(part,true);
-      if(p===1||p%5===0)prog((p-1)/pdf.numPages,`Σελίδα ${p} από ${pdf.numPages}`);
-      const page=await pdf.getPage(p);
-      let text='';
-      if(!$('#forceOcr').checked){
-        const tc=await page.getTextContent();let last=null;
-        for(const it of tc.items){
-          if(last!==null&&Math.abs(it.transform[5]-last)>2&&!text.endsWith('\n'))text+='\n';
-          text+=it.str;if(it.hasEOL)text+='\n';last=it.transform[5];
-        }
-        text=fixText(text);
-      }
-      if(text.replace(/\s/g,'').length>20){pages.push({text,conf:100,ocr:false});try{page.cleanup()}catch(e){}continue}
-      // σκαναρισμένη σελίδα: ΔΕΝ περιμένουμε την αναγνώριση — το έγγραφο ανοίγει αμέσως (σαν εικόνα)
-      // και το κείμενο βγαίνει μετά, στο παρασκήνιο (bgOcr)
-      if(!SLOW_OPEN){pages.push({text:'',conf:0,ocr:true,pend:true});try{page.cleanup()}catch(e){}continue}
-      ocrRunning(true);ocrLbl=`Σελίδα ${p} από ${pdf.numPages} — σκαναρισμένη, αναγνώριση κειμένου`;prog((p-1)/pdf.numPages,ocrLbl+'…');
-      const vp=page.getViewport({scale:1});const sc=Math.min(3,2200/Math.max(vp.width,vp.height));
-      const v2=page.getViewport({scale:sc});const c=document.createElement('canvas');c.width=v2.width;c.height=v2.height;
-      try{await page.render({canvasContext:c.getContext('2d'),viewport:v2}).promise;pages.push(await ocrCanvas(c))}finally{c.width=c.height=0;try{page.cleanup()}catch(e){}}
-    }
-    pdfFree(pdf);ocrLbl='';ocrRunning(false);ocrRecycle();
-    if(gone()){if(pages.length)saveDoc(part);return}
-    // πρώτα το κείμενο (το σημαντικό), μετά το πρωτότυπο αρχείο
-    delete part.partial;if(!await saveDoc(part,true))return failHome();
-    if(!await draftSet('file-'+part.id,{pdf:orig}))toast('⚠️ Το πρωτότυπο PDF δεν χώρεσε στη μνήμη — το κείμενο κρατήθηκε');
-    if(gone())return;finish(part);
+    // Ανοίγει ΑΜΕΣΩΣ: οι σελίδες δείχνονται σαν εικόνα και το κείμενο βγαίνει μετά, στο παρασκήνιο (bgOcr).
+    part={id:pid,date:new Date().toISOString(),name:file.name.replace(/\.pdf$/i,''),pages};
+    for(let p=1;p<=pdf.numPages;p++)pages.push({text:'',conf:0,ocr:false,pend:true});
+    if(gone()){pdfFree(pdf);return}
+    if(!await saveDoc(part,true)){pdfFree(pdf);return failHome()}
+    // το πρωτότυπο γράφεται στη μνήμη χωρίς να περιμένουμε· η προβολή παίρνει έτοιμο το ανοιγμένο PDF
+    fileSaving[pid]=draftSet('file-'+pid,{pdf:orig}).then(ok=>{if(!ok)toast('⚠️ Το πρωτότυπο PDF δεν χώρεσε στη μνήμη');return ok}).finally(()=>delete fileSaving[pid]);
+    pvHand={id:pid,pdf,file:{pdf:orig}};pdf=null;
+    finish(part);
   }catch(e){
     if(e.message!=='cancel')console.error(e);pdfFree(pdf||task);
     if(part&&pages.length)saveDoc(part);
@@ -1834,15 +1813,30 @@ function bgChip(t){let c=$('#bgOcr');if(!t){if(c)c.remove();return}
   if(!c){c=document.createElement('div');c.id='bgOcr';c.setAttribute('role','status');c.innerHTML='<span></span><button aria-label="Σταμάτα την αναγνώριση κειμένου">✕</button>';document.body.appendChild(c);
     c.querySelector('button').onclick=()=>{if(bgRun)bgRun.stop=true;if(ocrStop)try{ocrStop()}catch(e){}bgChip('');toast('Η αναγνώριση σταμάτησε — συνεχίζει την επόμενη φορά που θα ανοίξεις το έγγραφο')}}
   c.querySelector('span').textContent=t}
+function bgShow(d){if(doc===d&&!pv.on&&!$('#read').classList.contains('hidden')&&!editing){const q=$('#q').value.trim();render(q.length>1?q:'')}}
 async function bgOcr(){
   const d=doc;if(!d||bgRun||!d.pages.some(p=>p.pend))return;
   const run=bgRun={id:d.id,stop:false};const my=runId;let pdf=null;
   try{
+    if(fileSaving[d.id])await fileSaving[d.id];
     const file=await draftGet('file-'+d.id);if(!file||!file.pdf)return;
     await pdfReady().catch(()=>{});if(!window.pdfjsLib)return;
     const t=pdfLoad(file.pdf.slice(0),{key:d.id,name:d.name});pdf=await t.promise.catch(()=>null);if(!pdf)return;
-    const todo=d.pages.map((p,i)=>p.pend?i:-1).filter(i=>i>=0),all=todo.length;let n=0;
+    const todo=d.pages.map((p,i)=>p.pend?i:-1).filter(i=>i>=0);
+    // 1ο πέρασμα: το κείμενο που ήδη υπάρχει στο PDF (γρήγορο)· ό,τι μείνει άδειο είναι σκαναρισμένο
+    const scan=[];let ch=0;
     for(const i of todo){
+      if(run.stop||doc!==d||my!==runId)break;
+      let text='';
+      if(!$('#forceOcr').checked){try{const page=await pdf.getPage(i+1);const tc=await page.getTextContent();let last=null;
+        for(const it of tc.items){if(last!==null&&Math.abs(it.transform[5]-last)>2&&!text.endsWith('\n'))text+='\n';text+=it.str;if(it.hasEOL)text+='\n';last=it.transform[5]}
+        text=fixText(text);try{page.cleanup()}catch(e){}}catch(e){}}
+      if(text.replace(/\s/g,'').length>20){d.pages[i]={text,conf:100,ocr:false};ch++}else{d.pages[i].ocr=true;scan.push(i)}
+      if(ch&&ch%40===0){await saveDoc(d,true);bgShow(d)}
+    }
+    if(ch){await saveDoc(d,true);bgShow(d)}
+    const all=scan.length;let n=0;
+    for(const i of scan){
       if(run.stop||doc!==d||my!==runId)break;
       bgChip(`🔍 Κείμενο από σκαναρισμένη σελίδα ${++n} από ${all}…`);
       const page=await pdf.getPage(i+1);const vp=page.getViewport({scale:1});const sc=Math.min(3,2200/Math.max(vp.width,vp.height));
@@ -1850,12 +1844,12 @@ async function bgOcr(){
       let r=null;try{await page.render({canvasContext:c.getContext('2d'),viewport:v2}).promise;ocrRunning(true);r=await ocrCanvas(c)}catch(e){if(run.stop||doc!==d||my!==runId)break;r=null}
       finally{ocrRunning(false);c.width=c.height=0;try{page.cleanup()}catch(e){}}
       if(!r||doc!==d)break;
-      d.pages[i]=r;await saveDoc(d,true);
-      if(!pv.on&&!$('#read').classList.contains('hidden')&&!editing)render($('#q').value.trim().length>1?$('#q').value.trim():'');
+      d.pages[i]=r;await saveDoc(d,true);bgShow(d);
     }
   }catch(e){console.warn(e)}
   finally{pdfFree(pdf);if(bgRun===run)bgRun=null;bgChip('');ocrRecycle()}
-  if(doc===d&&!d.pages.some(p=>p.pend))toast('✓ Βγήκε το κείμενο από τις σκαναρισμένες σελίδες');
+  if(doc===d&&!d.pages.some(p=>p.pend)&&d.pages.some(p=>p.ocr))toast('✓ Βγήκε το κείμενο από τις σκαναρισμένες σελίδες');
+  if(doc===d&&!d.pages.some(p=>p.pend))changed();
 }
 function finish(d){
   doc={id:d.id||Date.now(),date:d.date||new Date().toISOString(),...d};saveDoc(doc);
@@ -1889,7 +1883,7 @@ function openReader(){
 function render(q){
   let n=0;
   $('#reader').innerHTML=doc.pages.map((p,i)=>{
-    const raw=p.text||(p.pend?'(σκαναρισμένη σελίδα — το κείμενο βγαίνει σε λίγο…)':'(κενή σελίδα)');let t;
+    const raw=p.text||(p.pend?(p.ocr?'(σκαναρισμένη σελίδα — το κείμενο βγαίνει σε λίγο…)':'(το κείμενο φορτώνει…)'):'(κενή σελίδα)');let t;
     if(q){const re=new RegExp(norm(q).split('').map(ch=>accentClass(ch)).join(''),'gi');t='';let last=0,m;while((m=re.exec(raw))){if(!m[0].length){re.lastIndex++;continue}t+=esc(raw.slice(last,m.index))+`<mark data-n="${n++}">${esc(m[0])}</mark>`;last=m.index+m[0].length}t+=esc(raw.slice(last))}else t=esc(raw);
     return (doc.pages.length>1?(doc.book?(()=>{const tt=p.title||(EN?'Chapter ':'Κεφάλαιο ')+(i+1),dup=!!p.title&&(p.text||'').trimStart().slice(0,tt.length+2).toLowerCase().startsWith(tt.toLowerCase());return `<div class="pg ch${dup?' dup':''}" data-t="${esc(tt)}">${dup?'':esc(tt)}</div>`})():`<div class="pg">Σελίδα ${i+1}${p.ocr?' · αναγνώριση '+p.conf+'%':''}</div>`):'')+t;
   }).join('');
@@ -2433,13 +2427,20 @@ const WIDTHS={pen:[.0025,.0045,.008],hl:[.018,.028,.04]};
 const SHAPES={line:['╱','Γραμμή'],arrow:['➚','Βέλος'],rect:['⬜','Ορθογώνιο'],oval:['⭕','Κύκλος']};
 const pv={gen:0,on:false,tool:'pan',pen:0,hl:0,pw:1,hw:1,ts:1,shape:'rect',file:null,pdf:null,pages:[],undo:[],redo:[],obs:null,z:1,pinch:null,ptrs:new Map()};
 let gid=1;const newG=()=>Date.now().toString(36)+(gid++);
+async function pvSizes(pdf,tok){
+  for(let i=2;i<=pdf.numPages;i++){if(tok!==pv.gen||pv.pdf!==pdf)return;
+    let vp;try{vp=(await pdf.getPage(i)).getViewport({scale:1})}catch(e){return}
+    const p=pv.pages[i-1];if(!p||(Math.abs(p.w-vp.width)<.5&&Math.abs(p.h-vp.height)<.5))continue;
+    p.w=vp.width;p.h=vp.height;const el=document.querySelector('.pvp[data-i="'+(i-1)+'"]');if(el){el.style.aspectRatio=vp.width+'/'+vp.height;if(el._drawn){pvFree(el);pvDrawPage(el)}}}
+}
 async function pvOpen(o){o=o||{};
   if(editing)toggleEdit();if(tapMode)tapEnd();if(trReset())$('#lowConf').classList.add('hidden');
   if(pv.on)pvClose();const tok=++pv.gen,d=doc,stale=()=>tok!==pv.gen||doc!==d||!pv.on;
   pv.on=true;document.body.classList.add('pv');pgSync();$('#pagesView').classList.remove('hidden');$('#inkBar').classList.remove('hidden');closeFind();
   viewLabels();try{localStorage.setItem('glenread-view','page')}catch(e){}
   const box=$('#pagesView');box.innerHTML='<p class="muted" style="text-align:center;padding:30px">Φόρτωση σελίδων…</p>';
-  const file=await draftGet('file-'+d.id);if(stale())return;pv.file=file;
+  const hand=pvHand&&pvHand.id===d.id?pvHand:null;pvHand=null;
+  const file=hand?hand.file:await draftGet('file-'+d.id);if(stale()){if(hand)pdfFree(hand.pdf);return}pv.file=file;
   // αυτόματο άνοιγμα: αν δεν κρατήθηκε το πρωτότυπο, δείχνουμε απλώς το κείμενο
   if(!file&&o.auto){viewText();return}
   if(!pv.file&&doc.kind){box.innerHTML='<div class="card" style="margin:16px">Για αρχεία «'+esc(doc.kind)+'» υπάρχει μόνο η προβολή κειμένου. Για να γράψεις πάνω σε σελίδες, άνοιξε PDF ή φωτογραφίες.</div>';return}
@@ -2448,10 +2449,12 @@ async function pvOpen(o){o=o||{};
   try{
     if(pv.file.pdf){
       await pdfReady().catch(()=>{});if(!window.pdfjsLib)throw new Error('nolib');
-      const pt=pdfLoad(pv.file.pdf.slice(0),{key:doc.id,name:doc.name});const pdf=await pt.promise.catch(e=>{if(pt.__cancel){viewText();throw new Error('pwcancel')}throw e});
-      if(stale()){pdfFree(pdf);return}pv.pdf=pdf;const sizes=[];
-      for(let i=1;i<=pdf.numPages;i++){const vp=(await pdf.getPage(i)).getViewport({scale:1});if(stale())return;sizes.push({w:vp.width,h:vp.height})}
-      pv.pages=sizes;
+      let pdf=hand&&hand.pdf;
+      if(!pdf){const pt=pdfLoad(pv.file.pdf.slice(0),{key:doc.id,name:doc.name});pdf=await pt.promise.catch(e=>{if(pt.__cancel){viewText();throw new Error('pwcancel')}throw e})}
+      if(stale()){pdfFree(pdf);return}pv.pdf=pdf;
+      // πρώτη σελίδα αμέσως· τα μεγέθη των υπόλοιπων διορθώνονται μετά (pvSizes), για να μην περιμένουμε όλο το έγγραφο
+      const v1=(await pdf.getPage(1)).getViewport({scale:1});if(stale())return;
+      pv.pages=Array.from({length:pdf.numPages},()=>({w:v1.width,h:v1.height}));setTimeout(()=>pvSizes(pdf,tok),0);
       pv.fields=await formFields(pdf);if(stale())return;
       fieldsHide(pdf,pv.fields);
     }else{pv.fields=[];
