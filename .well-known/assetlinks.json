@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "gr.glenapps.glenread",
+      "sha256_cert_fingerprints": ["8E:D2:C3:FF:75:90:B6:57:B6:5F:79:EF:AC:DF:71:1B:4C:A8:A2:5E:20:38:38:A8:05:FC:8C:EE:99:2A:98:5F"]
+    }
+  }
+]
