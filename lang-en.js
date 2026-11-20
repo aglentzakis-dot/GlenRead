@@ -253,6 +253,10 @@ var D={
 "— ούτε την αναζήτηση ούτε τη διεύθυνσή σου.": "— neither the search nor your address.",
 "Όροι χρήσης:": "Terms of use:",
 "τα αποτελέσματα δείχνονται μόνο για να βρεις το βιβλίο σου. Δεν επιτρέπεται να αντιγράφονται μαζικά, να αποθηκεύονται σε βάσεις δεδομένων, να μεταπωλούνται ή να χρησιμοποιούνται για εκπαίδευση τεχνητής νοημοσύνης. Ο τίτλος και ο συγγραφέας μπαίνουν στη λίστα σου μόνο όταν τα επιβεβαιώσεις εσύ. Τα αποτελέσματα είναι πιθανά και μπορεί να έχουν λάθη.": "results are shown only to help you find your book. They may not be bulk-copied, stored in databases, resold or used to train artificial intelligence. The title and author go into your list only when you confirm them. Results are probable and may contain mistakes.",
+"Σταμάτα την αναγνώριση κειμένου": "Stop text recognition",
+"Η αναγνώριση σταμάτησε — συνεχίζει την επόμενη φορά που θα ανοίξεις το έγγραφο": "Recognition stopped — it continues next time you open the document",
+"✓ Βγήκε το κείμενο από τις σκαναρισμένες σελίδες": "✓ Text extracted from the scanned pages",
+"(σκαναρισμένη σελίδα — το κείμενο βγαίνει σε λίγο…)": "(scanned page — text coming shortly…)",
 "Μέγεθος γραμμάτων": "Text size",
 "Μικρά": "Small",
 "Μεσαία": "Medium",
@@ -901,6 +905,7 @@ var D={
 };
 var G=function(s){return D.hasOwnProperty(s)?D[s]:s};
 var P=[
+[/^🔍 Κείμενο από σκαναρισμένη σελίδα (\d+) από (\d+)…$/,'🔍 Text from scanned page $1 of $2…'],
 [/^Βρέθηκε το ISBN (.*)$/,'ISBN found: $1'],[/^Διαβάστηκε το ISBN (.*)$/,'ISBN read: $1'],[/^Διάβασα: «(.*)» — διόρθωσέ το αν χρειάζεται$/,'I read: “$1” — correct it if needed'],
 [/^🌐 Στο διαδίκτυο · (.*)$/,function(m,a){return '🌐 Online · '+G(a)}],[/^🌐 Ψάχνω στο (.*)…$/,function(m,a){return '🌐 Searching '+G(a)+'…'}],[/^Δεν βρέθηκε τίποτα( με αυτό το ISBN)? στο (.*)\.$/,function(m,a,b){return 'Nothing found'+(a?' with this ISBN':'')+' on '+G(b)+'.'}],[/^📷 Βρέθηκε το ISBN (.*)$/,'📷 Found ISBN $1'],[/^Να βγει το «(.*)» από τη λίστα σου;$/,'Remove “$1” from your list?'],[/^(\d) αστέρια$/,'$1 stars'],[/^Η λίστα έφτασε τα (\d+) βιβλία$/,'The list reached $1 books'],
 [/^Η σελίδα (\d+) ως εικόνα — για γρήγορη ματιά στο κινητό$/,'Page $1 as an image — for a quick look on the phone'],[/^(\d+) εικόνες$/,'$1 images'],[/^Φωτογραφία (\d+) από (\d+)$/,'Photo $1 of $2'],[/^Ετοιμάζω (\d+) φωτογραφίες…$/,'Preparing $1 photos…'],
